@@ -198,7 +198,7 @@ CREATE TABLE tour_calendar_unavailable_day (
 CREATE TABLE global_calendar_unavailable_days (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   day date NOT NULL UNIQUE,
-  text NOT NULL CHECK (status IN ('HOLIDAY','BLOCKED')),
+  status text NOT NULL CHECK (status IN ('HOLIDAY','BLOCKED')),
   note text,
   created_at timestamptz NOT NULL DEFAULT now()
 );
@@ -318,7 +318,7 @@ CREATE TABLE accommodations (   -- Cabaña
   capacity integer NOT NULL CHECK (capacity >= 1),
   is_active boolean NOT NULL DEFAULT true,
   status text NOT NULL CHECK (status IN ('AVAILABLE','RESERVED','INACTIVE')) DEFAULT 'AVAILABLE',
-  last_reserved timestamptz NOT NULL DEFAULT now()
+  last_reserved timestamptz
 );
 
 CREATE TABLE accommodation_reservations (   -- Reservar cabaña
@@ -396,7 +396,7 @@ CREATE TABLE checkin_entries (
   participant_name text NOT NULL,
   phone text,
   checked_in_at timestamptz NOT NULL DEFAULT now(),
-  UNIQUE (checkin_session_id, participant_name)
+  UNIQUE (checkin_form_id, participant_name)
 );
 
 -- =========================
