@@ -1,3 +1,5 @@
+Aquí está todo para crear la Base de Datos de Cerro Dragón. Solo crear una base de datos en postgre llamada `toursdb` y correr todo esto.
+
 ```sql
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
