@@ -10,11 +10,27 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  
   --color-verde1: #173626; 
+  --color-verde2: #1A472A ;
+  --color-verde3: #2D5A3C ;
   --color-verde-apagado: #224433;
+  --color-verdetrans: #B5D7BA;
+  --color-verdeinvisible: #E3E7E3;
+
+  --color-amarillo: #D99726 ;
+  --color-amarillotrans: #F5E3C1;
+
+  --color-rojovino: #713434 ;
+  --color-rojotrans: #F3C2BA ;
+
+  --color-azul1: #074776 ;
+  --color-azultrans: #C3CBF2 ;
+
   --color-beige1: #F5F4EF ;
   --color-menta: #CED4D0 ;
-  --color-verde2: #1A472A;
+  
+  --color-borde1: #CCCBC7 ;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -28,4 +44,13 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.cardTour:hover {
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
+}
+
+.cardTour {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }

@@ -1,6 +1,19 @@
+import { Inter } from 'next/font/google';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+
+/* ======================== Interfaces ==========================*/
+
+interface CardTourProps {
+    nombre: string;
+    descripcion: string;
+    precio: number;
+    capacidad: number;
+    duracion: string;
+    etiqueta: string;
+    imagen?: string;
+}
 
 /* ========================= SIDE BARS ========================= */
 
@@ -400,7 +413,119 @@ export function SideBarAdmin() {
 
 /* ========================= CARDS ========================= */
 
-
+export function CardTour({nombre, descripcion, precio, capacidad, duracion, etiqueta, imagen}: CardTourProps) {
+    return (
+    <div className="bg-beige1 block w-[350px] h-92 border border-default border-borde1 rounded-xl cardTour relative flex flex-col">
+        <a href="#" className="block overflow-hidden relative">
+            <div className="absolute top-4 left-4 bg-amarillo text-black text-sm font-semibold px-3 py-1 rounded-md z-20">
+                ${precio}
+            </div>
+            <div className="h-36 overflow-hidden">
+                <Image
+                className="rounded-t-xl w-full h-full object-cover"
+                src={imagen || "/tour1.png"}
+                alt=""
+                width={325}
+                height={100}
+                />
+            </div>
+        </a>
+        <div className="text-left py-2 px-6 flex-1 flex flex-col">
+            <h5 className="mt-3 mb-2 text-xl font-light tracking-tight text-heading text-black min-h-[2.5rem]">
+                {nombre}
+            </h5>
+            <p className="mb-2 text-sm text-body text-verde3 flex-1 min-h-[3rem]">
+                {descripcion}
+            </p>
+            <div className="flex justify-between items-center mb-2">
+                <div className="flex items-center">
+                    <svg 
+                        className="w-4 h-4 mr-1 text-verde3" 
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width={24}
+                        height={24}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                    >
+                        <path 
+                            stroke="currentColor" 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round" 
+                            strokeWidth={2} 
+                            d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" 
+                        />
+                    </svg>
+                    <span className="text-verde3 text-sm">{duracion}</span>
+                </div>
+                <div className="flex items-center">
+                    <svg 
+                        className="w-4 h-4 mr-1 text-verde3" 
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width={24}
+                        height={24}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                    >
+                        <path 
+                            stroke="currentColor" 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round" 
+                            strokeWidth={2} 
+                            d="M16 19h4a1 1 0 0 0 1-1v-1a3 3 0 0 0-3-3h-2m-2.236-4a3 3 0 1 0 0-4M3 18v-1a3 3 0 0 1 3-3h4a3 3 0 0 1 3 3v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Zm8-10a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" 
+                        />
+                    </svg>
+                    <span className="text-verde3 text-sm">{capacidad} personas </span>
+                </div>
+            </div>
+            <hr className="mt-4 mb-1 border-borde1" />
+            <div className="flex justify-between items-center">
+                {etiqueta === 'Moderado' ? (
+                    <span className="inline-flex items-center px-6 py-0.5 text-amarillo text-sm font-bold rounded bg-amarillotrans">
+                        Moderado
+                    </span>
+                ) : etiqueta === 'Experto' ? (
+                    <span className="inline-flex items-center px-6 py-0.5 text-rojovino text-sm font-bold rounded bg-rojotrans">
+                        Experto
+                    </span>
+                ) : etiqueta === 'Fácil' ? (
+                    <span className="inline-flex items-center px-6 py-0.5 text-verde3 text-sm font-bold rounded bg-verdetrans">
+                        Fácil
+                    </span>
+                ) : (
+                    <span className="inline-flex items-center px-6 py-0.5 text-azul1 text-sm font-bold rounded bg-azultrans">
+                        Todos
+                    </span>
+                )}
+                <a
+                href="#"
+                className="inline-flex items-end text-verde3 bg-brand font-medium text-sm py-2.5"
+                >
+                    Ver más
+                <svg
+                    className="w-4 h-4 ms-1.5 rtl:rotate-180 -me-0.5"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width={24}
+                    height={24}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 12H5m14 0-4 4m4-4-4-4"
+                    />
+                </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+    );
+}
 
 
 
@@ -532,3 +657,4 @@ export function HomeBar() {
     </nav>
    );
 }
+
