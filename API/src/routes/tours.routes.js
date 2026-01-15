@@ -6,8 +6,12 @@ const { requirePermission } = require("../middlewares/permission.middleware");
 
 router.get("/test", controller.test);
 
-router.get("/getAll", controller.getAll);
-// router.get("/getAll", auth, requirePermission("MANAGE_TOURS"), controller.getAll); //! Asi es como se pone para que solo el que tenga x permiso pueda acceder
-router.get("/getAllActive", controller.getAllActive);
+router.get("/all", controller.getAll);
+router.get("/allActive", controller.getAllActive);
+
+/*
+TODO    Así es como se pone para que solo el que tenga x permiso pueda acceder al endpoint:
+!       router.get("/all", auth, requirePermission("MANAGE_TOURS"), controller.getAll); 
+*/
 
 module.exports = router;

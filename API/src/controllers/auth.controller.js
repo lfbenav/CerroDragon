@@ -1,29 +1,13 @@
 const pool = require("../config/db");
 const asyncHandler = require("../middlewares/asyncHandler.middleware");
 const AppError = require("../utils/AppError");
+
 const bcrypt = require("bcrypt");
 const { signAccessToken } = require("../utils/jwt");
 
 // Solo para hacer pruebas rápidas de funcionamiento 
 exports.test = asyncHandler(async (req, res) => {
     res.send("API de Auth funcionando");
-});
-
-// Obtener todos los usuarios registrados
-exports.getAll = asyncHandler(async (req, res) => {
-    const { rows } = await pool.query(`
-        SELECT id, email, is_active
-        FROM users
-    `);
-
-    if (!rows.length) {
-        throw new AppError("No hay usuarios disponibles", 404, "USERS_EMPTY");
-    }
-
-    res.status(200).json({
-        success: true,
-        data: rows
-    });
 });
 
 // POST /auth/register/client
