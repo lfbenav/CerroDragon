@@ -27,27 +27,31 @@ export default function Home() {
             Vive la experiencia. Tours guiados, cabañas acogedoras y paisajes imponentes
           </p>
           <div className="flex gap-4">
-            <button className="inline-flex items-center bg-amarillo text-black hover:bg-yellow-700 px-8 py-3 rounded-lg font-semibold transition-colors">
-              Ver Tours
-              <svg
-                className="w-4 h-4 ml-2"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-                    >
-                <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
-                />
-              </svg>
-            </button>
-            <button className="border-2 border-white hover:bg-white hover:text-black px-8 py-3 rounded-lg font-semibold transition-colors">
-              Ver Cabañas
-            </button>
+            <Link href="/cliente/tours">
+              <button className="inline-flex items-center bg-amarillo text-black hover:bg-yellow-700 px-8 py-3 rounded-lg font-semibold transition-colors"            >
+                Ver Tours
+                <svg
+                  className="w-4 h-4 ml-2"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                      >
+                  <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                  />
+                </svg>
+              </button>
+            </Link>
+            <Link href="/cliente/cabanas">
+              <button className="border-2 border-white hover:bg-white hover:text-black px-8 py-3 rounded-lg font-semibold transition-colors">
+                Ver Cabañas
+              </button>
+            </Link>
           </div>
         </div>
         
@@ -86,6 +90,7 @@ export default function Home() {
           </p>
           <div className="mt-6 flex justify-center gap-8 overflow-x-auto pb-4 pt-4">
             <CardTour 
+            id={1}
             nombre="Tour al Amanecer" 
             descripcion="Disfruta de un espectacular amanecer en Cerro Dragón con nuestro tour guiado." 
             precio={85} 
@@ -95,6 +100,7 @@ export default function Home() {
             etiqueta="Todos" 
             />
             <CardTour 
+            id={2}
             nombre="Aventura Nocturna" 
             descripcion="Explora los senderos misteriosos del Cerro bajo la luz de las estrellas." 
             precio={120} 
@@ -104,6 +110,7 @@ export default function Home() {
             etiqueta="Moderado" 
             />
             <CardTour 
+            id={3}
             nombre="Expedición Extrema" 
             descripcion="Desafía tus límites con esta expedición completa a las cumbres más altas." 
             precio={250} 

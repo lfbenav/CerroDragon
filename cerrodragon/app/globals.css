@@ -21,6 +21,7 @@
   --color-amarillo: #D99726 ;
   --color-amarillotrans: #F5E3C1;
 
+  --color-rojo2: #D36D6D;
   --color-rojovino: #713434 ;
   --color-rojotrans: #F3C2BA ;
 
@@ -28,9 +29,12 @@
   --color-azultrans: #C3CBF2 ;
 
   --color-beige1: #F5F4EF ;
+  --color-beige2: #F9F8F6 ;
+
   --color-menta: #CED4D0 ;
   
   --color-borde1: #CCCBC7 ;
+  --color-borde2: #F0EEE8 ;
 }
 
 @media (prefers-color-scheme: dark) {
