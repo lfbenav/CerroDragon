@@ -9,7 +9,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "```bash\r npm init -y\r npm run dev\r ```",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",

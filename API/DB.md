@@ -90,10 +90,25 @@ CREATE TABLE tours (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   title text NOT NULL,
   description text,
+  duration_hours integer NOT NULL CHECK (duration_hours > 0),
+  duration_days integer NOT NULL CHECK (duration_days > 0),
+  max_persons integer NOT NULL CHECK (max_persons > 0),
   base_location text,
   is_active boolean NOT NULL DEFAULT true,
   created_at timestamptz NOT NULL DEFAULT now()
 );
+
+CREATE TABLE TAGS (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text UNIQUE NOT NULL
+);
+
+CREATE TABLE tour_tags (
+  tour_id uuid NOT NULL REFERENCES tours(id) ON DELETE CASCADE,
+  tag_id uuid NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+  PRIMARY KEY (tour_id, tag_id)
+);
+
 
 CREATE TABLE tour_packages (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -121,6 +136,22 @@ CREATE TABLE promotions (
   is_active boolean NOT NULL DEFAULT true,
   created_at timestamptz NOT NULL DEFAULT now()
 );
+
+CREATE TABLE promotions (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  tour_id uuid NOT NULL REFERENCES tours(id) ON DELETE CASCADE,
+  title text NOT NULL,
+  description text,
+  -- only amount discounts for now
+  discount_value numeric(10,2) NOT NULL CHECK (discount_value >= 0),
+  starts_at timestamptz,
+  ends_at timestamptz,
+  is_active boolean NOT NULL DEFAULT true,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- EN VEZ DE TENER PAQUETES SEPARADOS, USAMOS LOS MISMOS QUE EN TOURS Y QUE EL PRECIO DE LA PROMO SEA LA SUMA DE LOS PAQUETES ELEGIDOS
+-- borrar
 
 CREATE TABLE promotion_packages (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -157,6 +188,7 @@ CREATE TABLE tour_meeting_points (
 
 -- =========================
 -- CUPONES (RF19)
+-- BORRAR
 -- =========================
 
 CREATE TABLE coupons (
@@ -212,45 +244,42 @@ CREATE TABLE global_calendar_unavailable_days (
 
 CREATE TABLE reservations (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  customer_id uuid NOT NULL REFERENCES customers(id) ON DELETE RESTRICT,
+  customer_id uuid NOT NULL REFERENCES customers(id),
 
-  -- tour o promo (exactamente uno)
-  tour_id uuid REFERENCES tours(id) ON DELETE RESTRICT,
-  promotion_id uuid REFERENCES promotions(id) ON DELETE RESTRICT,
-  CHECK (
-    (tour_id IS NOT NULL AND promotion_id IS NULL)
-    OR
-    (tour_id IS NULL AND promotion_id IS NOT NULL)
-  ),
+  tour_id uuid NOT NULL REFERENCES tours(id),
+  promotion_id uuid REFERENCES promotions(id),
+
+  tour_package_id uuid REFERENCES tour_packages(id),
 
   tour_date date NOT NULL,
   reserved_at timestamptz NOT NULL DEFAULT now(),
 
-  -- paquete elegido (depende si es tour o promo)
-  tour_package_id uuid REFERENCES tour_packages(id) ON DELETE RESTRICT,
-  promotion_package_id uuid REFERENCES promotion_packages(id) ON DELETE RESTRICT,
-  CHECK (
-    (tour_id IS NOT NULL AND tour_package_id IS NOT NULL AND promotion_package_id IS NULL)
-    OR
-    (promotion_id IS NOT NULL AND promotion_package_id IS NOT NULL AND tour_package_id IS NULL)
-  ),
-
   persons integer NOT NULL CHECK (persons >= 1),
 
-  can_arrive_4x4 boolean,  -- pregunta en P5
-  meeting_point_id uuid REFERENCES meeting_points(id) ON DELETE RESTRICT,
+  can_arrive_4x4 boolean,
+  meeting_point_id uuid REFERENCES meeting_points(id),
 
-  coupon_id uuid REFERENCES coupons(id) ON DELETE SET NULL,
-
-  -- montos (guardá el snapshot final para no depender de cambios futuros)
+  -- snapshot financiero
   subtotal_usd numeric(10,2) NOT NULL CHECK (subtotal_usd >= 0),
-  meeting_extra_usd numeric(10,2) NOT NULL DEFAULT 0 CHECK (meeting_extra_usd >= 0),
   discount_usd numeric(10,2) NOT NULL DEFAULT 0 CHECK (discount_usd >= 0),
+  meeting_extra_usd numeric(10,2) NOT NULL DEFAULT 0 CHECK (meeting_extra_usd >= 0),
   total_usd numeric(10,2) NOT NULL CHECK (total_usd >= 0),
 
-  status text NOT NULL CHECK (status IN ('PENDING','CONFIRMED','CANCELLED','REFUND_REQUESTED','REFUNDED')) DEFAULT 'PENDING',
+  status text NOT NULL CHECK (
+    status IN ('PENDING','CONFIRMED','CANCELLED','REFUND_REQUESTED','REFUNDED')
+  ) DEFAULT 'PENDING',
+
   confirmed_at timestamptz,
   cancelled_at timestamptz
+);
+
+CREATE TABLE reservation_status_history (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  reservation_id uuid NOT NULL REFERENCES reservations(id) ON DELETE CASCADE,
+  old_status text,
+  new_status text NOT NULL,
+  changed_by uuid REFERENCES users(id), -- admin o sistema
+  changed_at timestamptz NOT NULL DEFAULT now()
 );
 
 -- Asignación de guías (RF7)
