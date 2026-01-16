@@ -1,7 +1,6 @@
 "use client";
 import Image from "next/image";
-import { SideBarAdmin, SideBarClient, TopBar, HomeBar, CardTour } from "./components";
-import { useState } from "react";
+import { HomeBar, CardTour } from "./components";
 import Link from "next/link";
 
 
