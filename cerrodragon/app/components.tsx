@@ -1408,7 +1408,7 @@ export function TablaReservas({ reservas }: { reservas: ReservaProps[] }) {
                                     <td className="px-6 py-4 whitespace-nowrap">{getEstadoBadge(reserva.estado)}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm flex  justify-center items-center">
                                         {reserva.estado != 'reembolsada' ? (
-                                            <button className="text-rojovino bg-rojotrans font-bold hover:text-rojo1 flex items-center rounded-md justify-center px-3 py-2 gap-2 hover:[&>svg]:text-rojo1 hover:cursor-pointer">
+                                            <button className="text-rojovino bg-rojotrans font-bold hover:text-rojo1 flex items-center rounded-md justify-center px-3 py-1 gap-2 hover:[&>svg]:text-rojo1 hover:cursor-pointer">
                                                 <svg
                                                     className="w-6 h-6 text-rojovino dark:text-rojovino"
                                                     aria-hidden="true"
@@ -1429,7 +1429,7 @@ export function TablaReservas({ reservas }: { reservas: ReservaProps[] }) {
                                                 Solicitar
                                             </button>
                                         ) : (
-                                            <button disabled className="text-gray-400 bg-gray-200 font-bold flex items-center rounded-md justify-center px-3 py-2 gap-2 cursor-not-allowed">
+                                            <button disabled className="text-gray-400 bg-gray-200 font-bold flex items-center rounded-md justify-center px-3 py-1 gap-2 cursor-not-allowed">
                                                 <svg
                                                     className="w-6 h-6 text-gray-400"
                                                     aria-hidden="true"
@@ -1464,4 +1464,3 @@ export function TablaReservas({ reservas }: { reservas: ReservaProps[] }) {
     );
 }
 
-// ...existing code...
