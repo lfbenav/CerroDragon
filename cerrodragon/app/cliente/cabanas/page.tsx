@@ -1,5 +1,5 @@
 "use client";
-import { SideBarClient, TopBar, CardTour, SearchBar, CardCabana, Cuadro } from "../../components";
+import { SideBarClient, TopBar, CardCabana, Cuadro } from "../../components";
 
 export default function Cabannas() {
 
