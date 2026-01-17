@@ -29,3 +29,37 @@ exports.requirePermission = (permissionCode) =>
 
         next();
     });
+
+exports.requireSelfOrPermission = (permissionCode) =>
+    asyncHandler(async (req, res, next) => {
+        if (!req.user?.id) {
+            throw new AppError("No autorizado", 401, "NO_AUTH_CONTEXT");
+        }
+
+        const targetUserId = req.params.id;
+
+        // Puede acceder a su propio recurso
+        if (req.user.id === targetUserId) {
+            return next();
+        }
+
+        // Si no es su propio recurso validar permiso
+        const { rows } = await pool.query(
+            `
+            SELECT 1
+            FROM permissions p
+            JOIN role_permissions rp ON rp.permission_id = p.id
+            JOIN user_roles ur ON ur.role_id = rp.role_id
+            WHERE ur.user_id = $1
+              AND p.code = $2
+            LIMIT 1
+            `,
+            [req.user.id, permissionCode]
+        );
+
+        if (!rows.length) {
+            throw new AppError("No tiene permisos para esta acción", 403, "FORBIDDEN");
+        }
+
+        next();
+    });

@@ -19,6 +19,7 @@ CREATE TABLE users (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   email text UNIQUE NOT NULL,
   password_hash text NOT NULL,
+  type text NOT NULL DEFAULT 'client' CHECK (type IN ('client','guide','admin')),
   is_active boolean NOT NULL DEFAULT true,
   created_at timestamptz NOT NULL DEFAULT now(),
   last_login_at timestamptz
