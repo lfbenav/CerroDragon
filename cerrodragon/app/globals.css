@@ -40,6 +40,9 @@
   
   --color-borde1: #CCCBC7 ;
   --color-borde2: #F0EEE8 ;
+
+  --color-tabla-header: #F0EEE7 ;
+  --color-tabla-row: #F5F4EF ;
 }
 
 @media (prefers-color-scheme: dark) {

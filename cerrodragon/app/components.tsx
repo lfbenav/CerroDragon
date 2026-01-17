@@ -71,6 +71,17 @@ interface CardIncidenciaProps {
     fecha: string;
 }
 
+interface ReservaProps {
+    id: string;
+    clienteNombre: string;
+    clienteEmail: string;
+    tour: string;
+    monto: number;
+    fecha: string;
+    personas: number;
+    estado: 'confirmada' | 'pendiente' | 'cancelada' | 'reembolsada';
+}
+
 /* ========================= CALENDARIO PROPS ========================= */
 
 interface CalendarDayProps {
@@ -1330,3 +1341,127 @@ export function WhatsAppButton() {
         </Link>
     );
 }
+
+/* ========================= TABLA ========================= */
+
+export function TablaReservas({ reservas }: { reservas: ReservaProps[] }) {
+    const getEstadoBadge = (estado: ReservaProps['estado']) => {
+        switch (estado) {
+            case 'confirmada':
+                return (
+                    <span className="inline-flex items-center px-3 py-1 text-verde3 text-sm font-bold rounded bg-verdetrans">
+                        Confirmada
+                    </span>
+                );
+            case 'pendiente':
+                return (
+                    <span className="inline-flex items-center px-3 py-1 text-amarillo text-sm font-bold rounded bg-amarillotrans">
+                        Pendiente
+                    </span>
+                );
+            case 'cancelada':
+                return (
+                    <span className="inline-flex items-center px-3 py-1 text-rojovino text-sm font-bold rounded bg-rojotrans">
+                        Cancelada
+                    </span>
+                );
+            case 'reembolsada':
+                return (
+                    <span className="inline-flex items-center px-3 py-1 text-azul1 text-sm font-bold rounded bg-azultrans">
+                        Reembolsada
+                    </span>
+                );
+        }
+    };
+
+    return (
+        <div className="flex-1 overflow-y-auto min-h-0">
+            <div className="bg-beige1 rounded-lg shadow-sm border border-borde1 mt-6">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left">
+                        <thead className="bg-tabla-header text-center text-black text-sm font-bold tracking-wider">
+                            <tr>
+                                <th className='px-2 py-3'>ID</th>
+                                <th className='px-2 py-3'>Cliente</th>
+                                <th className='px-4 py-3'>Tour</th>
+                                <th className='px-2 py-3'>Fecha</th>
+                                <th className='px-1 py-3'>Personas</th>
+                                <th className='px-1 py-3'>Monto</th>
+                                <th className='px-2 py-3'>Estado</th>
+                                <th className='px-2 py-3'>Solicitar reembolso</th>
+                                <th className='px-2 py-3'>Comprobante</th>
+
+                            </tr>
+                        </thead>
+                        <tbody className="bg-beige1 divide-y divide-borde1">
+                            {reservas.map((reserva) => (
+                                <tr key={reserva.id} className='bg-tabla-row text-center hover:bg-tabla-header'>
+                                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-black">{reserva.id}</td>
+                                    <td className="px-4 py-4 whitespace-nowrap">
+                                        <div className="text-sm font-bold text-verde1">{reserva.clienteNombre}</div>
+                                        <div className="text-sm text-verde3">{reserva.clienteEmail}</div>
+                                    </td>
+                                    <td className="px-4 py-4 text-sm text-black">{reserva.tour}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-black">{reserva.fecha}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-lg text-rojosuave font-bold">{reserva.personas}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-verde3">₡{reserva.monto.toLocaleString()}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap">{getEstadoBadge(reserva.estado)}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm flex  justify-center items-center">
+                                        {reserva.estado != 'reembolsada' ? (
+                                            <button className="text-rojovino bg-rojotrans font-bold hover:text-rojo1 flex items-center rounded-md justify-center px-3 py-2 gap-2 hover:[&>svg]:text-rojo1 hover:cursor-pointer">
+                                                <svg
+                                                    className="w-6 h-6 text-rojovino dark:text-rojovino"
+                                                    aria-hidden="true"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    width={24}
+                                                    height={24}
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        stroke="currentColor"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="m16 10 3-3m0 0-3-3m3 3H5v3m3 4-3 3m0 0 3 3m-3-3h14v-3"
+                                                    />
+                                                </svg>
+                                                Solicitar
+                                            </button>
+                                        ) : (
+                                            <button disabled className="text-gray-400 bg-gray-200 font-bold flex items-center rounded-md justify-center px-3 py-2 gap-2 cursor-not-allowed">
+                                                <svg
+                                                    className="w-6 h-6 text-gray-400"
+                                                    aria-hidden="true"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    width={24}
+                                                    height={24}
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        stroke="currentColor"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M5 13l4 4L19 7"
+                                                    />
+                                                </svg>
+                                                Reembolsado
+                                            </button>
+                                        )}
+                                    </td>
+                                    <td className="px-6 py-4 text-black hover:underline hover:cursor-pointer">
+                                        Descargar
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// ...existing code...
