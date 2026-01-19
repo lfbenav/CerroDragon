@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from "react";
+import { ReactNode } from "react";
 
 /* ======================== Interfaces ==========================*/
 
@@ -1532,8 +1533,137 @@ export function SearchBar({texto}: SearchBarProps) {
     );
 }
 
-/* ========================= VARIOS ========================= */
+/* ========================= BASE PAGINA ADMIN Y SUS COMPONENTES ========================= */
 
+export function AdminPageShell({
+  title,
+  subtitle,
+  actions,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  actions?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <div className="h-screen bg-gray-50 flex overflow-hidden">
+      <SideBarAdmin />
+      <div className="flex-1 flex flex-col">
+        <TopBar />
+
+        <main className="flex-1 flex flex-col pt-20 px-8 min-h-0">
+          <div className="max-w-7xl mx-auto w-full flex flex-col h-full">
+            <div className="flex-shrink-0">
+              <div className="flex items-start justify-between gap-6">
+                <div>
+                  <h1 className="text-3xl font-bold mb-1 text-black mt-4">
+                    {title}
+                  </h1>
+                  {subtitle ? <p className="text-verde3 mb-4">{subtitle}</p> : null}
+                </div>
+                {actions ? <div className="mt-6">{actions}</div> : null}
+              </div>
+
+              <div className="border-b border-black/20" />
+            </div>
+
+            <div className="flex-1 min-h-0">{children}</div>
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
+
+export function ToggleSwitch({
+  checked,
+  onChange,
+  disabled,
+}: {
+  checked: boolean;
+  onChange: (next: boolean) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={() => onChange(!checked)}
+      className={[
+        "relative inline-flex h-5 w-10 items-center rounded-full transition-colors",
+        checked ? "bg-verde2" : "bg-gray-300",
+        disabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer",
+      ].join(" ")}
+      aria-pressed={checked}
+      aria-label="toggle"
+    >
+      <span
+        className={[
+          "inline-block h-4 w-4 transform rounded-full bg-white transition-transform",
+          checked ? "translate-x-5" : "translate-x-1",
+        ].join(" ")}
+      />
+    </button>
+  );
+}
+
+export type PermKey =
+  | "crear_tours"
+  | "editar_tours"
+  | "gestionar_administradores"
+  | "gestionar_testimonios"
+  | "gestionar_guias"
+  | "gestionar_insumos"
+  | "gestionar_reembolsos"
+  | "bitacora_auditoria";
+
+export const PERMISSIONS: { key: PermKey; label: string }[] = [
+  { key: "crear_tours", label: "Crear Tours" },
+  { key: "editar_tours", label: "Editar Tours" },
+  { key: "gestionar_administradores", label: "Gestionar Administradores" },
+  { key: "gestionar_testimonios", label: "Gestionar Testimonios" },
+  { key: "gestionar_guias", label: "Gestionar Guías" },
+  { key: "gestionar_insumos", label: "Gestionar Insumos" },
+  { key: "gestionar_reembolsos", label: "Gestionar Reembolsos" },
+  { key: "bitacora_auditoria", label: "Insertar en la Bitácora de Auditoría" },
+];
+
+export function PermissionsTable({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: Record<PermKey, boolean>;
+  onChange: (next: Record<PermKey, boolean>) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <div className="bg-beige1 border border-default border-borde1 rounded-xl overflow-hidden">
+      <div className="grid grid-cols-2 px-4 py-2 bg-black/5 text-xs font-semibold text-black">
+        <div>Permiso</div>
+        <div className="text-right">Estado</div>
+      </div>
+
+      <div className="divide-y divide-black/10">
+        {PERMISSIONS.map((p) => (
+          <div key={p.key} className="grid grid-cols-2 px-4 py-2 items-center">
+            <div className="text-sm text-black">{p.label}</div>
+            <div className="flex justify-end">
+              <ToggleSwitch
+                checked={!!value[p.key]}
+                disabled={disabled}
+                onChange={(nextVal) => onChange({ ...value, [p.key]: nextVal })}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ========================= VARIOS ========================= */
 
 export function Cuadro({texto, cantidad}: CuadroProps) {
     return (
