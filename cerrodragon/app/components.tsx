@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from "react";
 
 /* ======================== Interfaces ==========================*/
 
@@ -1033,6 +1034,228 @@ export function CardPolitica({titulo, descripcion}: CardPoliticaProps) {
     );
 
 }
+
+export function CardFAQ({
+  pregunta,
+  respuesta,
+}: {
+  pregunta: string;
+  respuesta: string;
+}) {
+  return (
+    <div className="bg-beige1 w-full border border-default border-borde1 rounded-xl p-4">
+      <h3 className="text-md font-semibold text-black mb-2">{pregunta}</h3>
+
+      <div className="border-b border-borde1 mb-3" />
+
+      <p className="text-sm text-verde3 leading-relaxed">{respuesta}</p>
+    </div>
+  );
+}
+
+export function CardFAQAdmin({
+  id,
+  pregunta,
+  respuesta,
+  isEditing,
+  onStartEdit,
+  onCancelEdit,
+  onSave,
+  onDelete,
+}: {
+  id: string;
+  pregunta: string;
+  respuesta: string;
+  isEditing: boolean;
+  onStartEdit: () => void;
+  onCancelEdit: () => void;
+  onSave: (next: { pregunta: string; respuesta: string }) => void;
+  onDelete: () => void;
+}) {
+  const [q, setQ] = useState(pregunta);
+  const [a, setA] = useState(respuesta);
+
+  // Keep local state synced when not editing
+  useEffect(() => {
+    if (!isEditing) {
+      setQ(pregunta);
+      setA(respuesta);
+    }
+  }, [pregunta, respuesta, isEditing]);
+
+  const isNew = useMemo(() => id.startsWith("new-"), [id]);
+
+  const handleToggleEditOrSave = () => {
+    if (!isEditing) {
+      onStartEdit();
+      return;
+    }
+    onSave({ pregunta: q.trim(), respuesta: a.trim() });
+  };
+
+  const handleCancel = () => {
+    setQ(pregunta);
+    setA(respuesta);
+    onCancelEdit();
+  };
+
+  return (
+    <div
+      className={[
+        "bg-beige1 w-full border border-default border-borde1 rounded-xl p-4 shadow-sm",
+        isEditing ? "ring-2 ring-blue-500" : "",
+      ].join(" ")}
+    >
+      {/* Pregunta */}
+      <div className="mb-2">
+        {isEditing ? (
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            className="w-full bg-transparent text-black font-medium text-sm outline-none border-b border-borde1 pb-1"
+            placeholder="Ingrese la nueva pregunta"
+          />
+        ) : (
+          <h3 className="text-md font-semibold text-black">{pregunta}</h3>
+        )}
+      </div>
+
+      <div className="border-b border-borde1 mb-3" />
+
+      {/* Respuesta */}
+<div className="min-h-[44px]">
+  {isEditing ? (
+    <>
+      <textarea
+        value={a}
+        onChange={(e) => setA(e.target.value)}
+        rows={2}
+        maxLength={150}
+        className="w-full bg-transparent text-verde3 text-sm outline-none resize-none"
+        placeholder="Ingrese la respuesta a la pregunta"
+      />
+      <div className="mt-1 text-xs text-verde3 text-right">
+        {a.length}/150
+      </div>
+    </>
+  ) : (
+    <p className="text-sm text-verde3 leading-relaxed">{respuesta}</p>
+  )}
+</div>
+
+
+      {/* Actions */}
+      <div className="mt-3 flex justify-end items-center gap-2">
+        {/* Edit / Save */}
+        <button
+          type="button"
+          onClick={handleToggleEditOrSave}
+          className="w-8 h-8 inline-flex items-center justify-center rounded-full hover:bg-black/5 text-black"
+        >
+          {isEditing ? <CheckIcon /> : <PencilIcon />}
+        </button>
+
+        {/* Cancel only while editing */}
+        {isEditing && (
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="w-8 h-8 inline-flex items-center justify-center rounded-full hover:bg-black/5 text-black"            title="Cancelar"
+          >
+            <XIcon />
+          </button>
+        )}
+
+        {/* Delete */}
+        {!isEditing && (
+          <button
+            type="button"
+            onClick={onDelete}
+            className="w-8 h-8 inline-flex items-center justify-center rounded-full hover:bg-black/5 text-black"          >
+            <CircleXIcon />
+          </button>
+        )}
+
+        {/* If it's new, allow delete even while editing */}
+        {isEditing && isNew && (
+          <button
+            type="button"
+            onClick={onDelete}
+            className="w-8 h-8 inline-flex items-center justify-center rounded-full hover:bg-black/5 text-black"            title="Eliminar"
+          >
+            <CircleXIcon />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function PencilIcon() {
+  return (
+    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M12 20h9"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5Z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M20 6 9 17l-5-5"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function XIcon() {
+  return (
+    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M18 6 6 18M6 6l12 12"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function CircleXIcon() {
+  return (
+    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+      <path
+        d="M15 9 9 15M9 9l6 6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 /* ========================= CALENDARIO ========================= */
 
 function CalendarDay({ day, ocupacion }: CalendarDayProps) {
