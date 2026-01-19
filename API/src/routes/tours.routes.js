@@ -1,17 +1,24 @@
 const router = require("express").Router();
-const controller = require("../controllers/tours.controller");
+const toursController = require("../controllers/tours.controller");
+const tagsController = require("../controllers/tags.controller");
 
 const auth = require("../middlewares/auth.middleware");
 const { requirePermission } = require("../middlewares/permission.middleware");
 
-router.get("/test", controller.test);
+router.get("/test", toursController.test);
 
-router.get("/all", controller.getAll);
-router.get("/allActive", controller.getAllActive);
+// Tours CRUD
+router.get("/", toursController.getAll);
+router.get("/all", toursController.getAll);
+router.get("/allActive", toursController.getAllActive);
+router.get("/:id", toursController.getById);
+router.post("/", auth, requirePermission("MANAGE_TOURS"), toursController.create);
+router.put("/:id", auth, requirePermission("MANAGE_TOURS"), toursController.update);
+router.delete("/:id", auth, requirePermission("MANAGE_TOURS"), toursController.delete);
 
-/*
-TODO    Así es como se pone para que solo el que tenga x permiso pueda acceder al endpoint:
-!       router.get("/all", auth, requirePermission("MANAGE_TOURS"), controller.getAll); 
-*/
+// Tour Tags
+router.get("/:id/tags", tagsController.getByTour);
+router.post("/:id/tags", auth, requirePermission("MANAGE_TOURS"), tagsController.addToTour);
+router.delete("/:id/tags/:tag_id", auth, requirePermission("MANAGE_TOURS"), tagsController.removeFromTour);
 
 module.exports = router;

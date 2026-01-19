@@ -32,6 +32,49 @@ CREATE TABLE guides (
 -- put /tour-packages/:id
 -- delete /tour-packages/:id
 
+-- get /tour-package-items
+-- post /tour-package-items
+-- delete /tour-package-items/:id
+
+-- get /reservations
+-- post /reservations
+-- get /reservations/:id
+-- put /reservations/:id
+-- delete /reservations/:id
+
+-- put /reservations/:id/status
+-- GET /reservations/:id/status-history
+
+
+
+-- get /asign-guide
+-- put /asign-guide/:reservation_id/:guide_id
+-- post /asign-guide/:reservation_id/:guide_id
+-- delete /asign-guide/:reservation_id/:guide_id
+
+-- get /promotions
+-- get /promotions/:id
+-- post /promotions
+-- put /promotions/:id
+-- delete /promotions/:id
+
+-- get /my-reservations
+-- ASK FOR A REFUND
+-- post /reservations/:id/request-refund
+
+
+-- Filtros administrativos (dashboard)
+-- (Ojo: puede ser una sola ruta con query params)
+-- GET /reservations?status=PENDING
+-- GET /reservations?date=2026-01-10
+-- GET /reservations?tour_id=...
+
+-- GET  /reservations/:id/documents
+-- POST /reservations/:id/documents
+-- GET  /documents/:id
+
+
+
 
 CREATE TABLE tours (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

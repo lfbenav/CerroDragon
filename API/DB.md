@@ -130,15 +130,6 @@ CREATE TABLE tour_package_items (
 
 CREATE TABLE promotions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  tour_id uuid NOT NULL REFERENCES tours(id) ON DELETE RESTRICT,
-  title text NOT NULL,
-  description text,
-  is_active boolean NOT NULL DEFAULT true,
-  created_at timestamptz NOT NULL DEFAULT now()
-);
-
-CREATE TABLE promotions (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   tour_id uuid NOT NULL REFERENCES tours(id) ON DELETE CASCADE,
   title text NOT NULL,
   description text,
