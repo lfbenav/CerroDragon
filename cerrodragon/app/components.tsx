@@ -84,6 +84,12 @@ interface ReservaProps {
     estado: 'confirmada' | 'pendiente' | 'cancelada' | 'reembolsada';
 }
 
+interface CardPaqueteProps {
+    nombre: string;
+    descripcion: string;
+    precio: number;
+}
+
 /* ========================= CALENDARIO PROPS ========================= */
 
 interface CalendarDayProps {
@@ -520,7 +526,7 @@ export function SideBarAdmin() {
 export function CardTour({id, nombre, descripcion, precio, capacidad, duracion, etiqueta, imagen}: CardTourProps) {
     return (
     <div className="bg-beige1 block w-[350px] h-92 border border-default border-borde1 rounded-xl cardTour relative flex flex-col">
-        <a href={"/"+id} className="block overflow-hidden relative">
+        <a href={`/cliente/tours/info?id=${id}`} className="block overflow-hidden relative">
             <div className="absolute top-4 left-4 bg-amarillo text-black text-sm font-semibold px-3 py-1 rounded-md z-20">
                 ${precio}
             </div>
@@ -603,7 +609,7 @@ export function CardTour({id, nombre, descripcion, precio, capacidad, duracion, 
                     </span>
                 )}
                 <a
-                href="#"
+                href={`/cliente/tours/info?id=${id}`}
                 className="inline-flex items-end text-verde3 bg-brand font-medium text-sm py-2.5"
                 >
                     Ver más
@@ -1036,6 +1042,28 @@ export function CardPolitica({titulo, descripcion}: CardPoliticaProps) {
 
 }
 
+export function CardPaquete({nombre, descripcion, precio}: CardPaqueteProps) {
+    return (
+        <div className="bg-beige1 w-50 h-auto border border-borde1 rounded-xl p-3 flex flex-col shadow-md justify-center items-center text-center relative min-h-[180px]">
+            <div className="absolute top-3 left-3 bg-amarillo text-black text-sm font-semibold px-2 py-1 rounded-md z-20">
+                ${precio}
+            </div>
+            <div className="flex justify-center mb-3 mt-2">
+            <Image 
+                src="/paquete.png"
+                alt="Ícono de paquete"
+                width={70}
+                height={70}
+            />
+            </div>
+            <h3 className="text-md font-semibold text-black mb-2 mx-2">{nombre}</h3>
+            <p className="text-xs text-verde3 leading-relaxed mx-2 mb-2 text-center">
+                {descripcion}
+            </p>
+        </div>
+    );
+}
+
 export function CardFAQ({
   pregunta,
   respuesta,
@@ -1191,6 +1219,9 @@ export function CardFAQAdmin({
     </div>
   );
 }
+
+/* ========================= ICONS ========================= */
+
 
 function PencilIcon() {
   return (
