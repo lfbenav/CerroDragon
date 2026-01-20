@@ -1,25 +1,21 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
-import { CardPaquete, SideBarClient, TopBar } from "@/app/components";
+import { CardPaquetePromo, SideBarClient, TopBar } from "@/app/components";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
 
-
-export default function TourInfoPage() {
+export default function InfoPromocion() {
     const searchParams = useSearchParams();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const id = searchParams.get('id');
     const [nombreTour] = useState('Sendero Dragón');
     const [descripcionTour] = useState('Recorrido completo del sendero principal, se proporciona comida ');
     const [duracionTour] = useState('3 horas');
     const [capacidadTour] = useState(10);
+    const [descuentoPromo] = useState(20);
     const [etiquetaTour] = useState('Moderado');
-    const [paquetes] = useState([
-        { nombre: 'Paquete 1', descripcion: 'Incluye: Almuerzo, Guía y Poliza INS', precio: 50 },
-        { nombre: 'Paquete 2', descripcion: 'Incluye: Almuerzo, autoguiado y sin poliza INS', precio: 30 }
-    ]);
+    const [paquetePromo] = useState({ nombre: 'Paquete 1', descripcion: 'Incluye: Almuerzo, Guía y Poliza INS', precio: 50, precioAntes: 70 });
     const [imagenTour] = useState('/tour1.png');
-
     return (
         <div className="h-screen bg-gray-50 flex overflow-hidden">
             <SideBarClient />
@@ -31,9 +27,9 @@ export default function TourInfoPage() {
                         <div className="flex-shrink-0">
                             <div className="flex justify-between items-center">
                                 <div>
-                                    <h1 className="text-3xl font-bold mb-1 text-black mt-4">Información del Tour</h1>
+                                    <h1 className="text-3xl font-bold mb-1 text-black mt-4">Información sobre la Promoción</h1>
                                     <p className="mb-4 text-verde3">
-                                        Información actual sobre el tour
+                                        Aproveche ahora! Reserve con nosotros
                                     </p>
                                 </div>
                                 <div className="flex justify-end">
@@ -95,32 +91,33 @@ export default function TourInfoPage() {
                             </div>
                                 
                             <div className="flex-shrink-0">
-                                <Image
-                                    src={imagenTour}
-                                    alt={`Imagen del tour ${nombreTour}`}
-                                    width={400}
-                                    height={300}
-                                    className="rounded-xl mt-2 mr-8"
-                                />
+                                <div className="relative">
+                                    <div className="absolute top-6 left-4 bg-rojo2 text-black text-sm font-bold px-2 py-1 rounded-md z-20 transform -rotate-12">
+                                        PROMOCIÓN -{descuentoPromo}%
+                                    </div>
+                                    <Image
+                                        src={imagenTour}
+                                        alt={`Imagen del tour ${nombreTour}`}
+                                        width={400}
+                                        height={300}
+                                        className="rounded-xl mt-2 mr-8"
+                                    />
+                                </div>
                             </div>
+
                         </div>
                         
 
                         <div className="ml-12 mb-12">
-                            <h3 className="text-2xl font-semibold mb-4 text-verde3">Paquetes Disponibles</h3>
-                            <div className="overflow-x-scroll pb-4 max-w-full" style={{scrollbarWidth: 'thin'}}>
-                                <div className="flex gap-3 min-w-max pb-2">
-                                    {paquetes.map((paquete, index) => (
-                                        <div key={index} className="flex-shrink-0 w-60">
-                                            <CardPaquete nombre={paquete.nombre} descripcion={paquete.descripcion} precio={paquete.precio} />
-                                        </div>
-                                    ))}
-                                </div>
+                            <h3 className="text-2xl font-semibold mb-4 text-verde3">Paquete en Promoción</h3>
+                            <div className="flex-shrink-0 w-60">
+                                <CardPaquetePromo nombre={paquetePromo.nombre} descripcion={paquetePromo.descripcion} precioAntes={paquetePromo.precioAntes} precioAhora={paquetePromo.precio}/>
                             </div>
                         </div>
                     </div>
                 </main>
             </div>
         </div>
+
     );
 }
