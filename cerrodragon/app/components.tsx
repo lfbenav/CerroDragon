@@ -53,6 +53,8 @@ interface CardPuntoProps {
 
 interface SearchBarProps {
     texto: string;
+    value?: string;
+    onChange?: (value: string) => void;
 }
 
 interface CardTestimonioProps {
@@ -1492,46 +1494,51 @@ export function HomeBar() {
 
 /* ========================= SEARCH ========================== */
 
-export function SearchBar({texto}: SearchBarProps) {
-    return (
-        <div className="bg-beige1 p-4 rounded-lg shadow-sm border border-borde1 mb-6">
-            <form className="w-full">
-                <label
-                    htmlFor="search"
-                    className="block mb-2.5 text-sm font-medium sr-only text-verde3"
-                >
-                    Buscar
-                </label>
-                <div className="relative">
-                    <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                        <svg
-                            className="w-4 h-4 text-verde3"
-                            aria-hidden="true"
-                            xmlns="http://www.w3.org/2000/svg"
-                            width={24}
-                            height={24}
-                            fill="none"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                            stroke="currentColor"
-                            strokeLinecap="round"
-                            strokeWidth={2}
-                            d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
-                            />
-                        </svg>
-                    </div>
-                    <input
-                        type="search"
-                        id="search"
-                        className="block w-full py-2 px-3 ps-9 bg-beige2 border border-borde2 text-verde3 placeholder-verde3 text-sm rounded-md focus:ring-verde2 focus:border-verde2"
-                        placeholder={texto}
-                    />
-                </div>
-            </form>
+export function SearchBar({ texto, value, onChange }: SearchBarProps) {
+  return (
+    <div className="bg-beige1 p-4 rounded-lg shadow-sm border border-borde1 mb-6 w-full">
+      <form className="w-full" onSubmit={(e) => e.preventDefault()}>
+        <label
+          htmlFor="search"
+          className="block mb-2.5 text-sm font-medium sr-only text-verde3"
+        >
+          Buscar
+        </label>
+
+        <div className="relative">
+          <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+            <svg
+              className="w-4 h-4 text-verde3"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              width={24}
+              height={24}
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeWidth={2}
+                d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
+              />
+            </svg>
+          </div>
+
+          <input
+            type="search"
+            id="search"
+            value={value}
+            onChange={(e) => onChange?.(e.target.value)}
+            className="block w-full py-2 px-3 ps-9 bg-beige2 border border-borde2 text-verde3 placeholder-verde3 text-sm rounded-md focus:ring-verde2 focus:border-verde2"
+            placeholder={texto}
+          />
         </div>
-    );
+      </form>
+    </div>
+  );
 }
+
 
 /* ========================= BASE PAGINA ADMIN Y SUS COMPONENTES ========================= */
 
@@ -1638,15 +1645,24 @@ export function PermissionsTable({
   onChange: (next: Record<PermKey, boolean>) => void;
   disabled?: boolean;
 }) {
+  const PAGE_SIZE = 6; // change to 4/5/6 as you prefer
+  const [page, setPage] = useState(1);
+
+  const totalPages = Math.max(1, Math.ceil(PERMISSIONS.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+
+  const start = (safePage - 1) * PAGE_SIZE;
+  const pageItems = PERMISSIONS.slice(start, start + PAGE_SIZE);
+
   return (
-    <div className="bg-beige1 border border-default border-borde1 rounded-xl overflow-hidden">
+    <div className="bg-beige1 border border-default border-borde1 rounded-xl overflow-hidden w-full">
       <div className="grid grid-cols-2 px-4 py-2 bg-black/5 text-xs font-semibold text-black">
         <div>Permiso</div>
         <div className="text-right">Estado</div>
       </div>
 
       <div className="divide-y divide-black/10">
-        {PERMISSIONS.map((p) => (
+        {pageItems.map((p) => (
           <div key={p.key} className="grid grid-cols-2 px-4 py-2 items-center">
             <div className="text-sm text-black">{p.label}</div>
             <div className="flex justify-end">
@@ -1659,6 +1675,68 @@ export function PermissionsTable({
           </div>
         ))}
       </div>
+
+      <PaginationControls
+        page={safePage}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        showCounter={false}
+      />
+    </div>
+  );
+}
+
+
+/* ========================= PAGINACIÓN ========================= */
+
+export function PaginationControls({
+  page,
+  totalPages,
+  onPageChange,
+  showCounter = true,
+}: {
+  page: number;
+  totalPages: number;
+  onPageChange: (nextPage: number) => void;
+  showCounter?: boolean;
+}) {
+  const safeTotal = Math.max(1, totalPages);
+  const safePage = Math.min(Math.max(1, page), safeTotal);
+
+  const canPrev = safePage > 1;
+  const canNext = safePage < safeTotal;
+
+  return (
+    <div className="flex items-center justify-center gap-4 py-2 text-black/60">
+      <button
+        type="button"
+        onClick={() => canPrev && onPageChange(safePage - 1)}
+        disabled={!canPrev}
+        className={`px-2 py-1 rounded ${
+          canPrev ? "hover:bg-black/5" : "opacity-40 cursor-not-allowed"
+        }`}
+        aria-label="Anterior"
+      >
+        ◀
+      </button>
+
+      {showCounter && (
+        <span className="text-xs">
+          {safePage} / {safeTotal}
+        </span>
+      )}
+
+      <button
+        type="button"
+        onClick={() => canNext && onPageChange(safePage + 1)}
+        disabled={!canNext}
+        className={`px-2 py-1 rounded ${
+          canNext ? "hover:bg-black/5" : "opacity-40 cursor-not-allowed"
+        }`}
+        aria-label="Siguiente"
+      >
+        ▶
+      </button>
     </div>
   );
 }
@@ -1672,6 +1750,68 @@ export function Cuadro({texto, cantidad}: CuadroProps) {
             <p className="text-2xl font-semibold text-black pl-4">{cantidad}</p>
         </div>
     );
+}
+
+export function ConfirmModal({
+  open,
+  title,
+  message,
+  confirmText = "Confirmar",
+  cancelText = "Cancelar",
+  confirmVariant = "danger",
+  onConfirm,
+  onCancel,
+}: {
+  open: boolean;
+  title: string;
+  message: string;
+  confirmText?: string;
+  cancelText?: string;
+  confirmVariant?: "danger" | "primary";
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  if (!open) return null;
+
+  const confirmClasses =
+    confirmVariant === "danger"
+      ? "bg-red-500 text-white hover:opacity-95"
+      : "bg-verde2 text-white hover:opacity-95";
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+      {/* overlay */}
+      <div
+        className="absolute inset-0 bg-black/40"
+        onClick={onCancel}
+        aria-hidden="true"
+      />
+
+      {/* modal */}
+      <div className="relative w-full max-w-md rounded-xl bg-beige1 border border-borde1 shadow-lg p-5">
+        <h3 className="text-lg font-semibold text-black">{title}</h3>
+        <p className="mt-2 text-sm text-verde3 whitespace-pre-line">{message}</p>
+
+        <div className="mt-5 flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-4 py-2 rounded-md bg-black/10 text-black text-sm font-medium hover:bg-black/15"
+          >
+            {cancelText}
+          </button>
+
+          <button
+            type="button"
+            onClick={onConfirm}
+            className={`px-4 py-2 rounded-md text-sm font-medium ${confirmClasses}`}
+          >
+            {confirmText}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 
