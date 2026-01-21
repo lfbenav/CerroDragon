@@ -55,6 +55,8 @@ interface CardPuntoProps {
 
 interface SearchBarProps {
     texto: string;
+    value?: string;
+    onChange?: (value: string) => void;
 }
 
 interface CardTestimonioProps {
@@ -1497,6 +1499,279 @@ function CircleXIcon() {
   );
 }
 
+/* ========================= ADMIN - INCIDENCIAS/CLIMA ========================= */
+
+type IncTipo = "leve" | "moderado" | "grave" | "critico";
+
+export function CardIncidenciaAdmin({
+  id,
+  titulo,
+  descripcion,
+  fecha,
+  tipo,
+  isEditing,
+  onStartEdit,
+  onCancelEdit,
+  onSave,
+  onDelete,
+}: {
+  id: string;
+  titulo: string;
+  descripcion: string;
+  fecha: string;
+  tipo: IncTipo;
+  isEditing: boolean;
+  onStartEdit: () => void;
+  onCancelEdit: () => void;
+  onSave: (next: { titulo: string; descripcion: string; fecha: string; tipo: IncTipo }) => void;
+  onDelete: () => void;
+}) {
+  const [t, setT] = useState(titulo);
+  const [d, setD] = useState(descripcion);
+  const [f, setF] = useState(fecha);
+  const [tp, setTp] = useState<IncTipo>(tipo);
+
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isEditing) {
+      setT(titulo);
+      setD(descripcion);
+      setF(fecha);
+      setTp(tipo);
+    }
+  }, [titulo, descripcion, fecha, tipo, isEditing]);
+
+  const getAlertStyles = () => {
+    switch (tp) {
+      case "leve":
+        return "border-verde3 bg-verdetrans";
+      case "moderado":
+        return "border-amarillo bg-amarillotrans";
+      case "grave":
+        return "border-rojosuave bg-red-100";
+      case "critico":
+        return "border-rojovino bg-rojotrans";
+      default:
+        return "border-borde1 bg-beige1";
+    }
+  };
+
+  const getAlertIcon = () => {
+    switch (tp) {
+      case "leve":
+        return (
+          <svg className="w-5 h-5 text-verde3" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fillRule="evenodd"
+              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+              clipRule="evenodd"
+            />
+          </svg>
+        );
+      case "moderado":
+        return (
+          <svg className="w-5 h-5 text-amarillo" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fillRule="evenodd"
+              d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+              clipRule="evenodd"
+            />
+          </svg>
+        );
+      case "grave":
+        return (
+          <svg className="w-5 h-5 text-rojoalerta" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fillRule="evenodd"
+              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+              clipRule="evenodd"
+            />
+          </svg>
+        );
+      case "critico":
+        return (
+          <svg className="w-5 h-5 text-rojovino" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fillRule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+              clipRule="evenodd"
+            />
+          </svg>
+        );
+    }
+  };
+
+  const getAlertText = () => {
+    switch (tp) {
+      case "leve":
+        return "Información";
+      case "moderado":
+        return "Precaución";
+      case "grave":
+        return "Alerta";
+      case "critico":
+        return "Crítico";
+    }
+  };
+
+  const handleEditOrSave = () => {
+    if (!isEditing) return onStartEdit();
+    onSave({ titulo: t.trim(), descripcion: d.trim(), fecha: f.trim(), tipo: tp });
+  };
+
+  const handleCancel = () => {
+    setT(titulo);
+    setD(descripcion);
+    setF(fecha);
+    setTp(tipo);
+    onCancelEdit();
+  };
+
+  const requestDelete = () => setConfirmOpen(true);
+  const cancelDelete = () => setConfirmOpen(false);
+  const confirmDelete = () => {
+    setConfirmOpen(false);
+    onDelete();
+  };
+
+  return (
+    <div className={`w-full h-auto border-2 rounded-xl p-4 flex flex-col shadow-sm ${getAlertStyles()}`}>
+      {/* Badge row + actions */}
+      <div className="flex items-center mb-2 mx-4">
+        {getAlertIcon()}
+        <span className="ml-2 text-sm font-bold text-black">{getAlertText()}</span>
+
+        {/* acciones admin (derecha) */}
+        <div className="ml-auto flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleEditOrSave}
+            className="w-8 h-8 inline-flex items-center justify-center rounded-full hover:bg-black/5 text-black"
+            aria-label={isEditing ? "Guardar" : "Editar"}
+            title={isEditing ? "Guardar" : "Editar"}
+          >
+            {isEditing ? <CheckIcon /> : <PencilIcon />}
+          </button>
+
+          {isEditing ? (
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="w-8 h-8 inline-flex items-center justify-center rounded-full hover:bg-black/5 text-black"
+              aria-label="Cancelar"
+              title="Cancelar"
+            >
+              <XIcon />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={requestDelete}
+              className="w-8 h-8 inline-flex items-center justify-center rounded-full hover:bg-black/5 text-black"
+              aria-label="Eliminar"
+              title="Eliminar"
+            >
+              <CircleXIcon />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Tipo selector solo cuando edita */}
+      {isEditing && (
+        <div className="mx-4 mb-2">
+          <label className="text-xs font-medium text-black">Tipo</label>
+            <select
+            value={tp}
+            onChange={(e) => setTp(e.target.value as IncTipo)}
+            className="ml-3 text-sm bg-beige2 text-black border border-borde2 rounded-md px-2 py-1 outline-none focus:ring-2 focus:ring-verde2"
+            style={{ color: "black" }}
+            >
+            <option value="leve">Información</option>
+            <option value="moderado">Precaución</option>
+            <option value="grave">Alerta</option>
+            <option value="critico">Crítico</option>
+          </select>
+        </div>
+      )}
+
+        {/* Title */}
+        {isEditing ? (
+        <>
+            <input
+            value={t}
+            onChange={(e) => setT(e.target.value)}
+            className="text-lg font-semibold text-black mb-1 mx-4 bg-transparent outline-none border-b border-black/30 pb-1"
+            placeholder="Título"
+            maxLength={60}
+            />
+            <div className="mx-4 mb-2 text-right text-xs text-verde3">
+            {t.length}/60
+            </div>
+        </>
+        ) : (
+        <h3 className="text-lg font-semibold text-black mb-2 mx-4">{titulo}</h3>
+        )}
+        <hr className="border-black mb-2 mx-4 border-1" />
+
+        {/* Description */}
+        {isEditing ? (
+        <>
+            <textarea
+            value={d}
+            onChange={(e) => setD(e.target.value)}
+            rows={3}
+            className="text-sm text-verde3 leading-relaxed mx-4 mb-1 bg-transparent outline-none resize-none"
+            placeholder="Descripción"
+            maxLength={250}
+            />
+            <div className="mx-4 mb-2 text-right text-xs text-verde3">
+            {d.length}/250
+            </div>
+        </>
+        ) : (
+        <p className="text-sm text-verde3 leading-relaxed mx-4 mb-2">
+            {descripcion}
+        </p>
+        )}
+
+        {/* Fecha */}
+        <div className="flex justify-end items-center gap-2">
+        {isEditing ? (
+            <>
+            <input
+                value={f}
+                onChange={(e) => setF(e.target.value)}
+                className="text-sm text-verde3 italic bg-transparent outline-none border-b border-black/20 pb-1"
+                placeholder="Fecha (ej: 25 de noviembre de 2025)"
+                maxLength={30}
+            />
+            <span className="text-xs text-verde3 italic mr-4">
+                {f.length}/30
+            </span>
+            </>
+        ) : (
+            <span className="text-sm text-verde3 italic mr-4">{fecha}</span>
+        )}
+        </div>
+
+      {/* Confirm delete */}
+      <ConfirmModal
+        open={confirmOpen}
+        title="Eliminar alerta"
+        message={`¿Está seguro de que desea eliminar la alerta "${titulo}"?\n\nEsta acción no se puede deshacer.`}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        confirmVariant="danger"
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+      />
+    </div>
+  );
+}
+
+
 /* ========================= CALENDARIO ========================= */
 
 function CalendarDay({ day, ocupacion }: CalendarDayProps) {
@@ -1930,127 +2205,51 @@ export function HomeBar() {
 
 /* ========================= SEARCH ========================== */
 
-export function SearchBar({texto}: SearchBarProps) {
-    return (
-        <div className="bg-beige1 p-4 rounded-lg shadow-sm border border-borde1 mb-6">
-            <form className="w-full">
-                <label
-                    htmlFor="search"
-                    className="block mb-2.5 text-sm font-medium sr-only text-verde3"
-                >
-                    Buscar
-                </label>
-                <div className="relative">
-                    <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                        <svg
-                            className="w-4 h-4 text-verde3"
-                            aria-hidden="true"
-                            xmlns="http://www.w3.org/2000/svg"
-                            width={24}
-                            height={24}
-                            fill="none"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                            stroke="currentColor"
-                            strokeLinecap="round"
-                            strokeWidth={2}
-                            d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
-                            />
-                        </svg>
-                    </div>
-                    <input
-                        type="search"
-                        id="search"
-                        className="block w-full py-2 px-3 ps-9 bg-beige2 border border-borde2 text-verde3 placeholder-verde3 text-sm rounded-md focus:ring-verde2 focus:border-verde2"
-                        placeholder={texto}
-                    />
-                </div>
-            </form>
+export function SearchBar({ texto, value, onChange }: SearchBarProps) {
+  return (
+    <div className="bg-beige1 p-4 rounded-lg shadow-sm border border-borde1 mb-6 w-full">
+      <form className="w-full" onSubmit={(e) => e.preventDefault()}>
+        <label
+          htmlFor="search"
+          className="block mb-2.5 text-sm font-medium sr-only text-verde3"
+        >
+          Buscar
+        </label>
+
+        <div className="relative">
+          <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+            <svg
+              className="w-4 h-4 text-verde3"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              width={24}
+              height={24}
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeWidth={2}
+                d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
+              />
+            </svg>
+          </div>
+
+          <input
+            type="search"
+            id="search"
+            value={value}
+            onChange={(e) => onChange?.(e.target.value)}
+            className="block w-full py-2 px-3 ps-9 bg-beige2 border border-borde2 text-verde3 placeholder-verde3 text-sm rounded-md focus:ring-verde2 focus:border-verde2"
+            placeholder={texto}
+          />
         </div>
-    );
+      </form>
+    </div>
+  );
 }
 
-export function SearchBarwFilters({texto, filters, selectedFilter, onFilterChange}: {
-    texto: string, 
-    filters: string[], 
-    selectedFilter?: string,
-    onFilterChange?: (filter: string) => void
-}) {
-    const [currentFilter, setCurrentFilter] = useState(selectedFilter || filters[0] || 'todos');
-
-    const handleFilterSelect = (filter: string) => {
-        setCurrentFilter(filter);
-        if (onFilterChange) {
-            onFilterChange(filter);
-        }
-    };
-
-    const getFilterDisplayName = (filter: string) => {
-        switch (filter) {
-            case 'todos':
-                return 'Todos';
-            case 'completos':
-                return 'Completos';
-            case 'incompletos':
-                return 'Incompletos';
-            default:
-                return filter;
-        }
-    };
-
-    return (
-        <div className="bg-beige1 p-4 rounded-lg shadow-sm border border-borde1 mb-6">
-            <div className="flex items-center gap-4">
-                {/* Search Bar */}
-                <div className="relative flex-1">
-                    <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                        <svg
-                            className="w-4 h-4 text-verde3"
-                            aria-hidden="true"
-                            xmlns="http://www.w3.org/2000/svg"
-                            width={24}
-                            height={24}
-                            fill="none"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke="currentColor"
-                                strokeLinecap="round"
-                                strokeWidth={2}
-                                d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
-                        />
-                        </svg>
-                    </div>
-                    <input
-                        type="search"
-                        id="search"
-                        className="block w-full py-2 px-3 ps-9 bg-beige2 border border-borde2 text-verde3 placeholder-verde3 text-sm rounded-base focus:ring-verde2 focus:border-verde2"
-                        placeholder={texto}
-                    />
-                </div>
-                
-                {/* Filter Buttons */}
-                <div className="flex gap-2">
-                    {filters.map((filter) => (
-                        <button
-                            key={filter}
-                            type="button"
-                            onClick={() => handleFilterSelect(filter)}
-                            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                                currentFilter === filter
-                                    ? 'bg-verde3 text-white'
-                                    : 'bg-beige2 text-verde1 border border-borde1 hover:bg-tabla-header'
-                            }`}
-                        >
-                            {getFilterDisplayName(filter)}
-                        </button>
-                    ))}
-                </div>
-            </div>
-        </div>
-    );
-}
 
 /* ========================= BASE PAGINA ADMIN Y SUS COMPONENTES ========================= */
 
@@ -2157,15 +2356,24 @@ export function PermissionsTable({
   onChange: (next: Record<PermKey, boolean>) => void;
   disabled?: boolean;
 }) {
+  const PAGE_SIZE = 6; // change to 4/5/6 as you prefer
+  const [page, setPage] = useState(1);
+
+  const totalPages = Math.max(1, Math.ceil(PERMISSIONS.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+
+  const start = (safePage - 1) * PAGE_SIZE;
+  const pageItems = PERMISSIONS.slice(start, start + PAGE_SIZE);
+
   return (
-    <div className="bg-beige1 border border-default border-borde1 rounded-xl overflow-hidden">
+    <div className="bg-beige1 border border-default border-borde1 rounded-xl overflow-hidden w-full">
       <div className="grid grid-cols-2 px-4 py-2 bg-black/5 text-xs font-semibold text-black">
         <div>Permiso</div>
         <div className="text-right">Estado</div>
       </div>
 
       <div className="divide-y divide-black/10">
-        {PERMISSIONS.map((p) => (
+        {pageItems.map((p) => (
           <div key={p.key} className="grid grid-cols-2 px-4 py-2 items-center">
             <div className="text-sm text-black">{p.label}</div>
             <div className="flex justify-end">
@@ -2178,6 +2386,68 @@ export function PermissionsTable({
           </div>
         ))}
       </div>
+
+      <PaginationControls
+        page={safePage}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        showCounter={false}
+      />
+    </div>
+  );
+}
+
+
+/* ========================= PAGINACIÓN ========================= */
+
+export function PaginationControls({
+  page,
+  totalPages,
+  onPageChange,
+  showCounter = true,
+}: {
+  page: number;
+  totalPages: number;
+  onPageChange: (nextPage: number) => void;
+  showCounter?: boolean;
+}) {
+  const safeTotal = Math.max(1, totalPages);
+  const safePage = Math.min(Math.max(1, page), safeTotal);
+
+  const canPrev = safePage > 1;
+  const canNext = safePage < safeTotal;
+
+  return (
+    <div className="flex items-center justify-center gap-4 py-2 text-black/60">
+      <button
+        type="button"
+        onClick={() => canPrev && onPageChange(safePage - 1)}
+        disabled={!canPrev}
+        className={`px-2 py-1 rounded ${
+          canPrev ? "hover:bg-black/5" : "opacity-40 cursor-not-allowed"
+        }`}
+        aria-label="Anterior"
+      >
+        ◀
+      </button>
+
+      {showCounter && (
+        <span className="text-xs">
+          {safePage} / {safeTotal}
+        </span>
+      )}
+
+      <button
+        type="button"
+        onClick={() => canNext && onPageChange(safePage + 1)}
+        disabled={!canNext}
+        className={`px-2 py-1 rounded ${
+          canNext ? "hover:bg-black/5" : "opacity-40 cursor-not-allowed"
+        }`}
+        aria-label="Siguiente"
+      >
+        ▶
+      </button>
     </div>
   );
 }
@@ -2191,6 +2461,68 @@ export function Cuadro({texto, cantidad}: CuadroProps) {
             <p className="text-2xl font-semibold text-black pl-4">{cantidad}</p>
         </div>
     );
+}
+
+export function ConfirmModal({
+  open,
+  title,
+  message,
+  confirmText = "Confirmar",
+  cancelText = "Cancelar",
+  confirmVariant = "danger",
+  onConfirm,
+  onCancel,
+}: {
+  open: boolean;
+  title: string;
+  message: string;
+  confirmText?: string;
+  cancelText?: string;
+  confirmVariant?: "danger" | "primary";
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  if (!open) return null;
+
+  const confirmClasses =
+    confirmVariant === "danger"
+      ? "bg-red-500 text-white hover:opacity-95"
+      : "bg-verde2 text-white hover:opacity-95";
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+      {/* overlay */}
+      <div
+        className="absolute inset-0 bg-black/40"
+        onClick={onCancel}
+        aria-hidden="true"
+      />
+
+      {/* modal */}
+      <div className="relative w-full max-w-md rounded-xl bg-beige1 border border-borde1 shadow-lg p-5">
+        <h3 className="text-lg font-semibold text-black">{title}</h3>
+        <p className="mt-2 text-sm text-verde3 whitespace-pre-line">{message}</p>
+
+        <div className="mt-5 flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-4 py-2 rounded-md bg-black/10 text-black text-sm font-medium hover:bg-black/15"
+          >
+            {cancelText}
+          </button>
+
+          <button
+            type="button"
+            onClick={onConfirm}
+            className={`px-4 py-2 rounded-md text-sm font-medium ${confirmClasses}`}
+          >
+            {confirmText}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 
