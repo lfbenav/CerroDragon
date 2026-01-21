@@ -1,8 +1,7 @@
 'use client';
 import { SideBarClient, TopBar } from "@/app/components";
 
-
-export default function CheckInPage() {
+export default function NuevoTestimonioPage() {
     return (
         <div className="h-screen bg-gray-50 flex overflow-hidden">
             <SideBarClient />
@@ -12,31 +11,32 @@ export default function CheckInPage() {
                     <div className="max-w-7xl mx-auto w-full flex flex-col">
                         {/* Fixed header section */}
                         <div className="flex-shrink-0">
-                            <h1 className="text-3xl font-bold mb-1 text-black mt-4">Registro de Caminante</h1>
+                            <h1 className="text-3xl font-bold mb-1 text-black mt-4">Nuevo Testimonio</h1>
                             <p className="mb-8 text-verde3">
-                                Introduzca su nombre para conocerle!
+                                Escribanos su experiencia y su opinion será muy valiosa para nosotros!
                             </p>
                         </div>
                         
                         {/* Form */}
                         <div className="flex-1 flex justify-start">
-                            <form className="min-w-full space-y-4">
+                            <form className="min-w-full space-y-4">                                
                                 <div>
                                     <label
-                                    htmlFor="visitors"
+                                    htmlFor="testimonio"
                                     className="block mb-2.5 text-md font-medium text-black"
                                     >
-                                        Ingrese su nombre completo:
+                                        Escriba su testimonio:
                                     </label>
-                                    <input
-                                    type="text"
-                                    id="visitors"
+                                    <textarea
+                                    id="testimonio"
+                                    rows={6}
                                     className="bg-tabla-header border border-borde1 text-verde1 text-sm 
                                     rounded-xl focus:ring-borde2 focus:border-borde2 block w-full px-3 py-2.5 
-                                    shadow-xs placeholder:text-verde2 placeholder:font-medium placeholder:opacity-50"
-                                    placeholder="Joe Doe"
+                                    shadow-xs placeholder:text-verde2 placeholder:font-medium placeholder:opacity-50 resize-y"
+                                    placeholder="Comparta su experiencia con nosotros..."
                                     />
                                 </div>
+                                
                                 <div className="flex justify-end space-x-4">
                                     <button
                                     type="submit"

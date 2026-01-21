@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -86,6 +87,70 @@ interface ReservaProps {
     estado: 'confirmada' | 'pendiente' | 'cancelada' | 'reembolsada';
 }
 
+interface GestionReservaProps {
+    id: string;
+    clienteNombre: string;
+    clienteEmail: string;
+    tour: string;
+    monto: number;
+    fecha: string;
+    personas: number;
+    guiaAsignado: string;
+    estado: 'confirmada' | 'pendiente' | 'cancelada' | 'reembolsada';
+}
+
+interface Comidas1Props {
+    id: string;
+    clienteNombre: string;
+    clienteEmail: string;
+    tour: string;
+    registros: number;
+    reservaAsociada: string;
+    fecha: string;
+}
+
+interface Comidas2Props {
+    id: string;
+    nombreComida: string;
+    mostrar: boolean;
+}
+
+interface CardPaqueteProps {
+    nombre: string;
+    descripcion: string;
+    precio: number;
+}
+
+interface CardPaquetePromoProps {
+    nombre: string;
+    descripcion: string;
+    precioAntes: number;
+    precioAhora: number;
+}
+
+interface GuiaProps {
+    id: string;
+    nombre: string;
+}
+
+interface ConsultaProps {
+    id: string;
+    clienteNombre: string;
+    telefono: string;
+    consulta: string;
+    fecha: string;
+    estado: 'pendiente' | 'resuelta';
+}
+
+interface CuponProps {
+    id: string;
+    codigoAsociado: string;
+    descuento: number;
+    canjeados: number;
+    limite: number;
+    fechaCreacion: string;
+}
+
 /* ========================= CALENDARIO PROPS ========================= */
 
 interface CalendarDayProps {
@@ -93,7 +158,12 @@ interface CalendarDayProps {
     ocupacion: NivelOcupacion;
 }
 
-type NivelOcupacion = 'desocupado' | 'no-disponible' | 'poco-ocupado' | 'medio-ocupado' | 'muy-ocupado';
+interface AdminCalendarDayProps {
+    day: number;
+    ocupacion: NivelOcupacion;
+    onClick: (day: number) => void;
+    isSelected?: boolean;
+}
 
 interface CalendarGridProps {
     ocupacionData?: { [key: number]: NivelOcupacion };
@@ -102,6 +172,24 @@ interface CalendarGridProps {
     daysInMonth?: number;
     firstDayOfWeek?: number;
 }
+
+interface AdminCalendarGridProps {
+    ocupacionData?: { [key: number]: NivelOcupacion };
+    mes?: string;
+    año?: number;
+    daysInMonth?: number;
+    firstDayOfWeek?: number;
+    onDayUpdate?: (day: number, newOcupacion: NivelOcupacion) => void;
+}
+
+interface CalendarUpdateData {
+    día: number;
+    ocupacion: NivelOcupacion;
+    mes: number;
+    año: number;
+}
+
+type NivelOcupacion = 'desocupado' | 'no-disponible' | 'poco-ocupado' | 'medio-ocupado' | 'muy-ocupado';
 
 /* ========================= SIDE BARS ========================= */
 
@@ -298,7 +386,7 @@ export function SideBarAdmin() {
     >
         <div className="border-b-4 border-verde-apagado pb-4 flex items-center">
             <a
-            href="https://flowbite.com/"
+            href="#"
             className="flex items-center space-x-2 rtl:space-x-reverse"
             >
             <Image
@@ -398,7 +486,7 @@ export function SideBarAdmin() {
             </li>
             <li>
                 <a
-                href="#"
+                href="/admin/politicas"
                 className="flex items-center px-2 py-1.5 text-white rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group"
                 >
                 <div className="w-5 h-5 mr-3"></div>
@@ -407,7 +495,7 @@ export function SideBarAdmin() {
             </li>
             <li>
                 <a
-                href="#"
+                href="/admin/reembolsos"
                 className="flex items-center px-2 py-1.5 text-white rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group"
                 >
                 <div className="w-5 h-5 mr-3"></div>
@@ -416,7 +504,7 @@ export function SideBarAdmin() {
             </li>
             <li>
                 <a
-                href="#"
+                href="/admin/puntos"
                 className="flex items-center px-2 py-1.5 text-white rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group"
                 >
                 <div className="w-5 h-5 mr-3"></div>
@@ -425,7 +513,7 @@ export function SideBarAdmin() {
             </li>
             <li>
                 <a
-                href="#"
+                href="/admin/cabanas"
                 className="flex items-center px-2 py-1.5 text-white rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group"
                 >
                 <div className="w-5 h-5 mr-3"></div>
@@ -434,7 +522,7 @@ export function SideBarAdmin() {
             </li>
             <li>
                 <a
-                href="#"
+                href="/admin/alojamientos"
                 className="flex items-center px-2 py-1.5 text-white rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group"
                 >
                 <div className="w-5 h-5 mr-3"></div>
@@ -443,7 +531,7 @@ export function SideBarAdmin() {
             </li>
             <li>
                 <a
-                href="#"
+                href="/admin/comidas"
                 className="flex items-center px-2 py-1.5 text-white rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group"
                 >
                 <div className="w-5 h-5 mr-3"></div>
@@ -452,7 +540,7 @@ export function SideBarAdmin() {
             </li>
             <li>
                 <a
-                href="#"
+                href="/admin/insumos"
                 className="flex items-center px-2 py-1.5 text-white rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group"
                 >
                 <div className="w-5 h-5 mr-3"></div>
@@ -461,7 +549,7 @@ export function SideBarAdmin() {
             </li>
             <li>
                 <a
-                href="#"
+                href="/admin/clima"
                 className="flex items-center px-2 py-1.5 text-white rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group"
                 >
                 <div className="w-5 h-5 mr-3"></div>
@@ -470,7 +558,7 @@ export function SideBarAdmin() {
             </li>
             <li>
                 <a
-                href="#"
+                href="/admin/testimonios"
                 className="flex items-center px-2 py-1.5 text-white rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group"
                 >
                 <div className="w-5 h-5 mr-3"></div>
@@ -479,7 +567,7 @@ export function SideBarAdmin() {
             </li>
             <li>
                 <a
-                href="#"
+                href="/admin/auditoria"
                 className="flex items-center px-2 py-1.5 text-white rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group"
                 >
                 <div className="w-5 h-5 mr-3"></div>
@@ -522,7 +610,7 @@ export function SideBarAdmin() {
 export function CardTour({id, nombre, descripcion, precio, capacidad, duracion, etiqueta, imagen}: CardTourProps) {
     return (
     <div className="bg-beige1 block w-[350px] h-92 border border-default border-borde1 rounded-xl cardTour relative flex flex-col">
-        <a href={"/"+id} className="block overflow-hidden relative">
+        <a href={`/cliente/tours/info?id=${id}`} className="block overflow-hidden relative">
             <div className="absolute top-4 left-4 bg-amarillo text-black text-sm font-semibold px-3 py-1 rounded-md z-20">
                 ${precio}
             </div>
@@ -605,7 +693,7 @@ export function CardTour({id, nombre, descripcion, precio, capacidad, duracion, 
                     </span>
                 )}
                 <a
-                href="#"
+                href={`/cliente/tours/info?id=${id}`}
                 className="inline-flex items-end text-verde3 bg-brand font-medium text-sm py-2.5"
                 >
                     Ver más
@@ -752,7 +840,7 @@ export function CardCabana({id, nombre, descripcion, capacidad, etiqueta, imagen
 export function CardPromocion({id, nombre, descripcion, precioAhora, precioAntes, descuento, capacidad, duracion, etiqueta, imagen}: CardPromoProps) {
     return (
     <div className="bg-beige1 block w-[350px] h-92 border border-default border-borde1 rounded-xl cardTour relative flex flex-col">
-        <a href={"/"+id} className="block overflow-hidden relative">
+        <a href={`/cliente/promociones/info?id=${id}`} className="block overflow-hidden relative">
             <div className="absolute top-6 left-4 bg-rojo2 text-black text-sm font-bold px-2 py-1 rounded-md z-20 transform -rotate-12">
                 PROMOCIÓN -{descuento}%
             </div>
@@ -839,7 +927,7 @@ export function CardPromocion({id, nombre, descripcion, precioAhora, precioAntes
                     </span>
                 )}
                 <a
-                href="#"
+                href={`/cliente/promociones/info?id=${id}`}
                 className="inline-flex items-end text-verde3 bg-brand font-medium text-sm py-2.5"
                 >
                     Ver más
@@ -1038,6 +1126,50 @@ export function CardPolitica({titulo, descripcion}: CardPoliticaProps) {
 
 }
 
+export function CardPaquete({nombre, descripcion, precio}: CardPaqueteProps) {
+    return (
+        <div className="bg-beige1 w-50 h-auto border border-borde1 rounded-xl p-3 flex flex-col shadow-md justify-center items-center text-center relative min-h-[180px]">
+            <div className="absolute top-3 left-3 bg-amarillo text-black text-sm font-semibold px-2 py-1 rounded-md z-20">
+                ${precio}
+            </div>
+            <div className="flex justify-center mb-3 mt-2">
+            <Image 
+                src="/paquete.png"
+                alt="Ícono de paquete"
+                width={70}
+                height={70}
+            />
+            </div>
+            <h3 className="text-md font-semibold text-black mb-2 mx-2">{nombre}</h3>
+            <p className="text-xs text-verde3 leading-relaxed mx-2 mb-2 text-center">
+                {descripcion}
+            </p>
+        </div>
+    );
+}
+
+export function CardPaquetePromo({nombre, descripcion, precioAntes, precioAhora}: CardPaquetePromoProps) {
+    return (
+        <div className="bg-beige1 w-50 h-auto border border-borde1 rounded-xl p-3 flex flex-col shadow-md justify-center items-center text-center relative min-h-[180px]">
+            <div className="absolute top-3 left-3 bg-amarillo text-black text-sm font-semibold px-2 py-1 rounded-md z-20">
+                ${precioAhora} <span className='text-xs font-normal'> <br />Antes: <span className="line-through">${precioAntes}</span> </span>
+            </div>
+            <div className="flex justify-center mb-3 mt-2">
+                <Image 
+                    src="/paquete.png"
+                    alt="Ícono de paquete"
+                    width={70}
+                    height={70}
+                />
+            </div>
+            <h3 className="text-md font-semibold text-black mb-2 mx-2">{nombre}</h3>
+            <p className="text-xs text-verde3 leading-relaxed mx-2 mb-2 text-center">
+                {descripcion}
+            </p>
+        </div>
+    );
+}
+
 export function CardFAQ({
   pregunta,
   respuesta,
@@ -1081,6 +1213,7 @@ export function CardFAQAdmin({
   // Keep local state synced when not editing
   useEffect(() => {
     if (!isEditing) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setQ(pregunta);
       setA(respuesta);
     }
@@ -1193,6 +1326,9 @@ export function CardFAQAdmin({
     </div>
   );
 }
+
+/* ========================= ICONS ========================= */
+
 
 function PencilIcon() {
   return (
@@ -1559,6 +1695,36 @@ function CalendarDay({ day, ocupacion }: CalendarDayProps) {
   );
 }
 
+function AdminCalendarDay({ day, ocupacion, onClick, isSelected }: AdminCalendarDayProps) {
+  const getColorClasses = () => {
+    switch (ocupacion) {
+      case 'no-disponible':
+        return 'bg-celeste text-black';
+      case 'poco-ocupado':
+        return 'bg-verde4 text-black';
+      case 'medio-ocupado':
+        return 'bg-amarillo text-black';
+      case 'muy-ocupado':
+        return 'bg-rojosuave text-black';
+      default:
+        return 'bg-transparent text-black border-2 border-gray-300';
+    }
+  };
+
+  const selectedClass = isSelected ? 'ring-4 ring-verde2' : '';
+
+  return (
+    <div className="flex justify-center items-center h-16">
+      <button
+        onClick={() => onClick(day)}
+        className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-medium hover:scale-110 transition-all cursor-pointer ${getColorClasses()} ${selectedClass}`}
+      >
+        {day}
+      </button>
+    </div>
+  );
+}
+
 export function CalendarGrid({ ocupacionData = {}, mes = "ENERO", año = 2025, daysInMonth = 31, firstDayOfWeek = 3}: CalendarGridProps) {
   const weekDays = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
   
@@ -1607,7 +1773,175 @@ export function CalendarGrid({ ocupacionData = {}, mes = "ENERO", año = 2025, d
       </div>
 
       {/* Clave de colores */}
-      <div className="mt-8 pt-6 border-t border-borde1">
+        <div className="mt-8 pt-6 border-t border-borde1">
+            <h3 className="text-lg font-semibold text-black mb-4 text-center">Disponibilidad</h3>
+            <div className="flex flex-wrap justify-center gap-6">
+                <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full border-2 border-gray-300 bg-transparent"></div>
+                    <span className="text-sm text-verde3">Desocupado</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full bg-celeste"></div>
+                    <span className="text-sm text-verde3">No disponible</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full bg-verde4"></div>
+                    <span className="text-sm text-verde3">Poco ocupado</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full bg-amarillo"></div>
+                    <span className="text-sm text-verde3">Medio ocupado</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full bg-rojosuave"></div>
+                    <span className="text-sm text-verde3">Muy ocupado</span>
+                </div>
+            </div>
+        </div>
+    </div>
+  );
+}
+
+export function AdminCalendarGrid({ 
+  ocupacionData = {}, 
+  mes = "ENERO", 
+  año = 2025, 
+  daysInMonth = 31, 
+  firstDayOfWeek = 3,
+  onDayUpdate
+}: AdminCalendarGridProps) {
+  const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  const [currentOcupacionData, setCurrentOcupacionData] = useState(ocupacionData);
+
+  const weekDays = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
+  
+  // Crear array con días vacíos al inicio + días del mes
+  const calendarDays = [];
+  
+  // Días vacíos al inicio
+  for (let i = 0; i < firstDayOfWeek; i++) {
+    calendarDays.push(null);
+  }
+  
+  // Días del mes
+  for (let day = 1; day <= daysInMonth; day++) {
+    const ocupacion = (currentOcupacionData[day] as NivelOcupacion) || 'desocupado';
+    calendarDays.push({ day, ocupacion });
+  }
+
+  const handleDayClick = (day: number) => {
+    setSelectedDay(day);
+  };
+
+  const handleOcupacionChange = (newOcupacion: NivelOcupacion) => {
+    if (selectedDay) {
+      const updatedData = { ...currentOcupacionData, [selectedDay]: newOcupacion };
+      setCurrentOcupacionData(updatedData);
+      
+      // Preparado para backend: enviar actualización
+      if (onDayUpdate) {
+        onDayUpdate(selectedDay, newOcupacion);
+      }
+      
+      // TODO: Aquí se enviará la actualización al backend
+      // const updateData: CalendarUpdateData = {
+      //   día: selectedDay,
+      //   ocupacion: newOcupacion,
+      //   mes: getMesNumber(mes),
+      //   año: año
+      // };
+      // await updateCalendarDay(updateData);
+      
+      setSelectedDay(null);
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-lg shadow-sm border border-borde1 p-6 max-w-5xl mx-auto">
+      {/* Título del mes */}
+      <div className="text-center mb-6">
+        <h2 className="text-4xl font-bold text-black mb-2">{mes}</h2>
+        <p className="text-verde3">{año}</p>
+      </div>
+
+      {/* Encabezados de días de la semana */}
+      <div className="grid grid-cols-7 gap-4 mb-4">
+        {weekDays.map((day, index) => (
+          <div key={index} className="text-center font-bold text-xl text-black">
+            {index === 0 ? <span className="text-rojosuave">{day}</span> : day}
+          </div>
+        ))}
+      </div>
+
+      {/* Calendario */}
+      <div className="grid grid-cols-7 gap-4 mb-6">
+        {calendarDays.map((dayData, index) => (
+          <div key={index} className="text-center">
+            {dayData ? (
+              <AdminCalendarDay 
+                day={dayData.day} 
+                ocupacion={dayData.ocupacion}
+                onClick={handleDayClick}
+                isSelected={selectedDay === dayData.day}
+              />
+            ) : (
+              <div className="h-16"></div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Controles de ocupación */}
+      {selectedDay && (
+        <div className="bg-beige1 border border-borde1 rounded-xl p-4 mb-6">
+          <h3 className="text-lg font-semibold text-black mb-3 text-center">
+            Configurar día {selectedDay}
+          </h3>
+          <div className="flex flex-wrap justify-center gap-3">
+            <button
+              onClick={() => handleOcupacionChange('desocupado')}
+              className="px-4 py-2 border-2 border-gray-300 bg-transparent text-black rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              Desocupado
+            </button>
+            <button
+              onClick={() => handleOcupacionChange('no-disponible')}
+              className="px-4 py-2 bg-celeste text-black rounded-lg hover:opacity-80 transition-opacity"
+            >
+              No disponible
+            </button>
+            <button
+              onClick={() => handleOcupacionChange('poco-ocupado')}
+              className="px-4 py-2 bg-verde4 text-black rounded-lg hover:opacity-80 transition-opacity"
+            >
+              Poco ocupado
+            </button>
+            <button
+              onClick={() => handleOcupacionChange('medio-ocupado')}
+              className="px-4 py-2 bg-amarillo text-black rounded-lg hover:opacity-80 transition-opacity"
+            >
+              Medio ocupado
+            </button>
+            <button
+              onClick={() => handleOcupacionChange('muy-ocupado')}
+              className="px-4 py-2 bg-rojosuave text-black rounded-lg hover:opacity-80 transition-opacity"
+            >
+              Muy ocupado
+            </button>
+          </div>
+          <div className="text-center mt-3">
+            <button
+              onClick={() => setSelectedDay(null)}
+              className="px-4 py-2 bg-gray-300 text-black rounded-lg hover:bg-gray-400 transition-colors"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Clave de colores */}
+      <div className="pt-6 border-t border-borde1">
         <h3 className="text-lg font-semibold text-black mb-4 text-center">Disponibilidad</h3>
         <div className="flex flex-wrap justify-center gap-6">
           <div className="flex items-center gap-2">
@@ -1698,7 +2032,7 @@ export function HomeBar() {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M20 12H8m12 0-4 4m4-4-4-4M9 4H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h2"
+                        d="M20 12H8m12 0-4 4m4-4-4-4M9 4H7a3  3 0 0 0-3 3v10a3 3 0 0 0 3 3h2"
                     />
                 </svg>
                 Login
@@ -2189,7 +2523,7 @@ export function TablaReservas({ reservas }: { reservas: ReservaProps[] }) {
                                                         strokeLinecap="round"
                                                         strokeLinejoin="round"
                                                         strokeWidth={2}
-                                                        d="m16 10 3-3m0 0-3-3m3 3H5v3m3 4-3 3m0 0 3 3m-3-3h14v-3"
+                                                        d="M16 10 19 7l3 3-3 3-3-3ZM5 13l4 4L19 7"
                                                     />
                                                 </svg>
                                                 Solicitar
@@ -2230,3 +2564,668 @@ export function TablaReservas({ reservas }: { reservas: ReservaProps[] }) {
     );
 }
 
+export function TablaFormsComidas({ comidas, checkin }: { comidas: Comidas1Props[], checkin?: boolean }) {
+    return (
+        <div className="flex-1 overflow-y-auto min-h-0 mb-6">
+            <div className="bg-beige1 rounded-lg shadow-sm border border-borde1 mt-6">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left">
+                        <thead className="bg-tabla-header text-center text-black text-sm font-bold tracking-wider">
+                            <tr>
+                                <th className='px-2 py-3'>Código</th>
+                                <th className='px-2 py-3'>Cliente</th>
+                                <th className='px-4 py-3'>Tour</th>
+                                <th className='px-2 py-3'>Registros</th>
+                                <th className='px-1 py-3'>Reserva Asociada</th>
+                                <th className='px-1 py-3'>Fecha</th>
+                                <th className='px-2 py-3'>Respuestas</th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-beige1 divide-y divide-borde1">
+                            {comidas.map((comida) => (
+                                <tr key={comida.id} className='bg-tabla-row text-center hover:bg-tabla-header'>
+                                    <td className="px-4 py-4 whitespace-nowrap text-sm font-bold text-black">{comida.id}</td>
+                                    <td className="px-4 py-4 whitespace-nowrap">
+                                        <div className="text-sm font-bold text-verde1">{comida.clienteNombre}</div>
+                                        <div className="text-sm text-verde3">{comida.clienteEmail}</div>
+                                    </td>
+                                    <td className="px-4 py-4 text-sm text-black">{comida.tour}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-lg text-rojosuave font-bold">{comida.registros}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-black">{comida.reservaAsociada}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-black">{comida.fecha}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm flex justify-center items-center">
+                                        <Link href={checkin? `/admin/checkin/respuestas?id=${comida.id}` : `/admin/comidas/respuestas?id=${comida.id}`}>
+                                            <button className="flex bg-amarillotrans font-bold items-center rounded-lg justify-center px-3 py-1 gap-2 text-amarillo hover:text-amarillo2 hover:[&>svg]:text-amarillo2 hover:cursor-pointer">
+                                                <svg
+                                                    className="w-6 h-6 text-amarillo dark:text-amarillo"
+                                                    aria-hidden="true"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    width={24}
+                                                    height={24}
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        stroke="currentColor"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M4.07141 14v6h5.99999v-6H4.07141Zm4.5-4h6.99999l-3.5-6-3.49999 6Zm7.99999 10c1.933 0 3.5-1.567 3.5-3.5s-1.567-3.5-3.5-3.5-3.5 1.567-3.5 3.5 1.567 3.5 3.5 3.5Z"
+                                                    />
+                                                </svg>
+                                                Respuestas
+                                            </button>
+                                        </Link>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export function TablaComidas({ comidas, onToggleMostrar, onEliminar }: { 
+    comidas: Comidas2Props[]; 
+    onToggleMostrar?: (id: string, nuevoEstado: boolean) => void;
+    onEliminar?: (id: string) => void;
+}) {
+    const [localComidas, setLocalComidas] = useState(comidas);
+
+    // Sincronizar el estado local cuando cambie el prop
+    useEffect(() => {
+        setLocalComidas(comidas);
+    }, [comidas]);
+    
+    const handleToggleMostrar = async (id: string, estadoActual: boolean) => {
+        const nuevoEstado = !estadoActual;
+        
+        // Actualizar el estado local inmediatamente para reflejar el cambio en la UI
+        setLocalComidas(prev => 
+            prev.map(comida => 
+                comida.id === id 
+                    ? { ...comida, mostrar: nuevoEstado }
+                    : comida
+            )
+        );
+
+        // Llamar callback para actualizar el estado padre
+        if (onToggleMostrar) {
+            onToggleMostrar(id, nuevoEstado);
+        }
+        
+        // TODO: Implementar llamada al backend cuando esté disponible
+        // try {
+        //   const response = await fetch(`/api/comidas/${id}/toggle`, {
+        //     method: 'PATCH',
+        //     headers: {
+        //       'Content-Type': 'application/json',
+        //     },
+        //     body: JSON.stringify({
+        //       mostrar: nuevoEstado
+        //     })
+        //   });
+        //   
+        //   if (!response.ok) {
+        //     throw new Error('Error al actualizar la visibilidad');
+        //   }
+        //   
+        //   console.log('Visibilidad actualizada exitosamente');
+        // } catch (error) {
+        //   console.error('Error:', error);
+        //   // Revertir el cambio local en caso de error
+        //   setLocalComidas(prev => 
+        //     prev.map(comida => 
+        //       comida.id === id 
+        //         ? { ...comida, mostrar: estadoActual }
+        //         : comida
+        //     )
+        //   );
+        //   if (onToggleMostrar) {
+        //     onToggleMostrar(id, estadoActual);
+        //   }
+        // }
+    };
+
+    const handleEliminar = async (id: string) => {
+        // Actualizar el estado local inmediatamente removiendo el elemento
+        setLocalComidas(prev => prev.filter(comida => comida.id !== id));
+
+        if (onEliminar) {
+            onEliminar(id);
+        }
+        
+        // TODO: Implementar llamada al backend cuando esté disponible
+        // try {
+        //   const response = await fetch(`/api/comidas/${id}`, {
+        //     method: 'DELETE',
+        //   });
+        //   
+        //   if (!response.ok) {
+        //     throw new Error('Error al eliminar la comida');
+        //   }
+        //   
+        //   console.log('Comida eliminada exitosamente');
+        // } catch (error) {
+        //   console.error('Error:', error);
+        //   // Revertir el cambio local en caso de error
+        //   setLocalComidas(comidas);
+        // }
+    };
+
+    return (
+        <div className="flex-1 overflow-y-auto min-h-0 mb-6">
+            <div className="bg-beige1 rounded-lg shadow-sm border border-borde1 mt-6">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left">
+                        <thead className="bg-tabla-header text-center text-black text-sm font-bold tracking-wider">
+                            <tr>
+                                <th className='px-12 py-3 text-start'>Comida</th>
+                                <th className='px-4 py-3'>Visibilidad</th>
+                                <th className='px-4 py-3'>Eliminar</th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-beige1 divide-y divide-borde1">
+                            {localComidas.map((comida) => (
+                                <tr key={comida.id} className='bg-tabla-row text-center hover:bg-tabla-header'>
+                                    <td className="px-12 py-4 text-sm font-medium text-start text-black">{comida.nombreComida}</td>
+                                    
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm flex justify-center items-center">
+                                        {comida.mostrar ? (
+                                            <button 
+                                                onClick={() => handleToggleMostrar(comida.id, comida.mostrar)}
+                                                className="flex bg-verdetrans font-bold items-center rounded-lg justify-center px-3 py-1 gap-2 text-verde3 hover:text-verde2 hover:[&>svg]:text-verde2 hover:cursor-pointer"
+                                            >
+                                                <svg
+                                                    className="w-5 h-5 text-verde3"
+                                                    aria-hidden="true"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    width={24}
+                                                    height={24}
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        stroke="currentColor"
+                                                        strokeWidth={2}
+                                                        d="M21 12c0 1.2-4.03 6-9 6s-9-4.8-9-6c0-1.2 4.03-6 9-6s9 4.8 9 6Z"
+                                                    />
+                                                    <path
+                                                        stroke="currentColor"
+                                                        strokeWidth={2}
+                                                        d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                                                    />
+                                                </svg>
+                                                Visible
+                                            </button>
+                                        ) : (
+                                            <button 
+                                                onClick={() => handleToggleMostrar(comida.id, comida.mostrar)}
+                                                className="flex bg-gristrans font-bold items-center rounded-lg justify-center px-3 py-1 gap-2 text-gris1 hover:text-rojo1 hover:[&>svg]:text-rojo1 hover:cursor-pointer"
+                                            >
+                                                <svg
+                                                    className="w-5 h-5 text-rojovino"
+                                                    aria-hidden="true"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    width={24}
+                                                    height={24}
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        stroke="currentColor"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M3.933 13.909A4.357 4.357 0 0 1 3 12c0-1 4-6 9-6m7.6 3.8A5.068 5.068 0 0 1 21 12c0 1-3 6-9 6-.314 0-.62-.014-.918-.04M5 19 19 5m-4 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                                                    />
+                                                </svg>
+                                                Oculto
+                                            </button>
+                                        )}
+                                    </td>
+                                    
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                        <div className="flex justify-center">
+                                            <button 
+                                                onClick={() => handleEliminar(comida.id)}
+                                                className="flex bg-rojotrans font-bold items-center rounded-lg justify-center px-3 py-1 gap-2 text-rojovino hover:text-rojo1 hover:[&>svg]:text-rojo1 hover:cursor-pointer"
+                                                title="Eliminar comida"
+                                            >
+                                                <svg
+                                                    className="w-5 h-5 text-rojovino"
+                                                    aria-hidden="true"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    width={24}
+                                                    height={24}
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        stroke="currentColor"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a2 2 0 0 1-2-2V7Z"
+                                                    />
+                                                </svg>
+                                                Eliminar
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export function TablaConsultas({ consultas, onMarcarResuelta }: { 
+    consultas: ConsultaProps[]; 
+    onMarcarResuelta?: (id: string) => void;
+}) {
+    const [localConsultas, setLocalConsultas] = useState(consultas);
+
+    // Sincronizar el estado local cuando cambie el prop
+    useEffect(() => {
+        setLocalConsultas(consultas);
+    }, [consultas]);
+    
+    const handleMarcarResuelta = async (id: string) => {
+        // Actualizar el estado local inmediatamente removiendo el elemento
+        setLocalConsultas(prev => prev.filter(consulta => consulta.id !== id));
+
+        if (onMarcarResuelta) {
+            onMarcarResuelta(id);
+        }
+        
+        // TODO: Implementar llamada al backend cuando esté disponible
+        // try {
+        //   const response = await fetch(`/api/consultas/${id}/resolver`, {
+        //     method: 'PATCH',
+        //     headers: {
+        //       'Content-Type': 'application/json',
+        //     },
+        //     body: JSON.stringify({
+        //       estado: 'resuelta'
+        //     })
+        //   });
+        //   
+        //   if (!response.ok) {
+        //     throw new Error('Error al marcar consulta como resuelta');
+        //   }
+        //   
+        //   console.log('Consulta marcada como resuelta exitosamente');
+        // } catch (error) {
+        //   console.error('Error:', error);
+        //   // Revertir el cambio local en caso de error
+        //   setLocalConsultas(consultas);
+        // }
+    };
+
+    const abrirWhatsApp = (telefono: string, consulta: string) => {
+        const mensaje = `Hola, nos contactamos desde Cerro Dragón Tours para atender su consulta: "${consulta}"`;
+        const url = `https://wa.me/506${telefono.replace(/\D/g, '')}?text=${encodeURIComponent(mensaje)}`;
+        window.open(url, '_blank');
+    };
+
+    // Filtrar solo consultas pendientes
+    const consultasPendientes = localConsultas.filter(consulta => consulta.estado === 'pendiente');
+
+    if (consultasPendientes.length === 0) {
+        return (
+            <div className="flex-1 flex items-center justify-center">
+                <div className="text-center">
+                    <svg 
+                        className="w-16 h-16 text-verde3 mx-auto mb-4" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                    >
+                        <path 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round" 
+                            strokeWidth={2} 
+                            d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" 
+                        />
+                    </svg>
+                    <h3 className="text-lg font-medium text-black mb-2">¡Todas las consultas están atendidas!</h3>
+                    <p className="text-verde3">No hay consultas pendientes por revisar.</p>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="flex-1 overflow-y-auto min-h-0 mb-6">
+            <div className="bg-beige1 rounded-lg shadow-sm border border-borde1 mt-6">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left">
+                        <thead className="bg-tabla-header text-center text-black text-sm font-bold tracking-wider">
+                            <tr>
+                                <th className='px-4 py-3'>Cliente</th>
+                                <th className='px-4 py-3'>Teléfono</th>
+                                <th className='px-6 py-3'>Consulta</th>
+                                <th className='px-3 py-3'>Fecha</th>
+                                <th className='px-4 py-3'>Contactar WhatsApp</th>
+                                <th className='px-4 py-3'>Marcar como Resuelta</th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-beige1 divide-y divide-borde1">
+                            {consultasPendientes.map((consulta) => (
+                                <tr key={consulta.id} className='bg-tabla-row text-center hover:bg-tabla-header'>
+                                    <td className="px-4 py-4 whitespace-nowrap text-sm font-bold text-verde1">{consulta.clienteNombre}</td>
+                                    <td className="px-4 py-4 whitespace-nowrap text-sm text-black font-medium">{consulta.telefono}</td>
+                                    <td className="px-6 py-4 text-sm text-black max-w-xs">
+                                        <div className="truncate" title={consulta.consulta}>
+                                            {consulta.consulta}
+                                        </div>
+                                    </td>
+                                    <td className="px-3 py-4 whitespace-nowrap text-sm text-black">{consulta.fecha}</td>
+                                    <td className="px-4 py-4 whitespace-nowrap text-sm">
+                                        <div className="flex justify-center">
+                                            <button 
+                                                onClick={() => abrirWhatsApp(consulta.telefono, consulta.consulta)}
+                                                className="flex bg-verdetrans font-bold items-center rounded-lg justify-center px-3 py-1 gap-2 text-verde3 hover:text-verde2 hover:[&>svg]:text-verde2 hover:cursor-pointer"
+                                            >
+                                                <svg
+                                                    className="w-5 h-5 text-verde3"
+                                                    fill="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884h-.004Z"/>
+                                                </svg>
+                                                WhatsApp
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td className="px-4 py-4 whitespace-nowrap text-sm">
+                                        <div className="flex justify-center">
+                                            <button 
+                                                onClick={() => handleMarcarResuelta(consulta.id)}
+                                                className="flex bg-azultrans font-bold items-center rounded-lg justify-center px-3 py-1 gap-2 text-azul1 hover:text-azul2 hover:[&>svg]:text-azul2 hover:cursor-pointer"
+                                            >
+                                                <svg
+                                                    className="w-5 h-5 text-azul1"
+                                                    aria-hidden="true"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    width={24}
+                                                    height={24}
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        stroke="currentColor"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M5 11.917 9.724 16.5 19 7.5"
+                                                    />
+                                                </svg>
+                                                Resuelta
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export function TablaGestionReservas({ reservas, guias }: { reservas: GestionReservaProps[] ; guias: GuiaProps[] }) {
+    const [localReservas, setLocalReservas] = useState(reservas);
+
+    // Sincronizar el estado local cuando cambie el prop
+    useEffect(() => {
+        setLocalReservas(reservas);
+    }, [reservas]);
+
+    const handleGuiaChange = async (reservaId: string, nuevoGuia: string) => {
+        // Actualizar el estado local inmediatamente para reflejar el cambio en la UI
+        setLocalReservas(prev => 
+            prev.map(reserva => 
+                reserva.id === reservaId 
+                    ? { ...reserva, guiaAsignado: nuevoGuia }
+                    : reserva
+            )
+        );
+
+        // TODO: Implementar llamada al backend cuando esté disponible
+        // try {
+        //   const response = await fetch(`/api/reservas/${reservaId}/asignar-guia`, {
+        //     method: 'PATCH',
+        //     headers: {
+        //       'Content-Type': 'application/json',
+        //     },
+        //     body: JSON.stringify({
+        //       guiaAsignado: nuevoGuia
+        //     })
+        //   });
+        //   
+        //   if (!response.ok) {
+        //     throw new Error('Error al asignar guía');
+        //   }
+        //   
+        //   console.log('Guía asignado exitosamente');
+        // } catch (error) {
+        //   console.error('Error:', error);
+        //   // Revertir el cambio local en caso de error
+        //   setLocalReservas(reservas);
+        // }
+        console.log(`Asignar guía ${nuevoGuia} a reserva ${reservaId}`);
+    };
+
+    const getEstadoBadge = (estado: ReservaProps['estado']) => {
+        switch (estado) {
+            case 'confirmada':
+                return (
+                    <span className="inline-flex items-center px-3 py-1 text-verde3 text-sm font-bold rounded bg-verdetrans">
+                        Confirmada
+                    </span>
+                );
+            case 'pendiente':
+                return (
+                    <span className="inline-flex items-center px-3 py-1 text-amarillo text-sm font-bold rounded bg-amarillotrans">
+                        Pendiente
+                    </span>
+                );
+            case 'cancelada':
+                return (
+                    <span className="inline-flex items-center px-3 py-1 text-rojovino text-sm font-bold rounded bg-rojotrans">
+                        Cancelada
+                    </span>
+                );
+            case 'reembolsada':
+                return (
+                    <span className="inline-flex items-center px-3 py-1 text-azul1 text-sm font-bold rounded bg-azultrans">
+                        Reembolsada
+                    </span>
+                );
+        }
+    };
+
+    return (
+        <div className="flex-1 overflow-y-auto min-h-0">
+            <div className="bg-beige1 rounded-lg shadow-sm border border-borde1 mt-6">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left">
+                        <thead className="bg-tabla-header text-center text-black text-sm font-bold tracking-wider">
+                            <tr>
+                                <th className='px-2 py-3'>ID</th>
+                                <th className='px-2 py-3'>Cliente</th>
+                                <th className='px-4 py-3'>Tour</th>
+                                <th className='px-2 py-3'>Fecha</th>
+                                <th className='px-1 py-3'>Personas</th>
+                                <th className='px-1 py-3'>Monto</th>
+                                <th className='px-8 py-3'>Guia Asignado</th>
+                                <th className='px-2 py-3'>Estado</th>
+                                <th className='px-2 py-3'></th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-beige1 divide-y divide-borde1">
+                            {localReservas.map((reserva) => (
+                                <tr key={reserva.id} className='bg-tabla-row text-center hover:bg-tabla-header'>
+                                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-black">{reserva.id}</td>
+                                    <td className="px-4 py-4 whitespace-nowrap">
+                                        <div className="text-sm font-bold text-verde1">{reserva.clienteNombre}</div>
+                                        <div className="text-sm text-verde3">{reserva.clienteEmail}</div>
+                                    </td>
+                                    <td className="px-4 py-4 text-sm text-black">{reserva.tour}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-black">{reserva.fecha}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-lg text-rojosuave font-bold">{reserva.personas}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-verde3">₡{reserva.monto.toLocaleString()}</td>
+                                    <td className="px-8 py-4 whitespace-nowrap text-sm flex justify-center items-center">
+                                        <select
+                                            id={`guiaAsignado-${reserva.id}`}
+                                            value={reserva.guiaAsignado || ""}
+                                            onChange={(e) => handleGuiaChange(reserva.id, e.target.value)}
+                                            className="block w-60 px-3 py-2.5 bg-beigeclaro placeholder:opacity-50 border border-verde3 text-verde1 text-sm rounded-lg focus:ring-verde3 focus:border-verde3 shadow-sm placeholder:text-verde3"
+                                        >
+                                            <option value="">
+                                                Seleccione guía...
+                                            </option>
+                                            {guias.map((guia) => (
+                                                <option key={guia.id} value={guia.nombre}>
+                                                    {guia.nombre}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">{getEstadoBadge(reserva.estado)}</td>
+                                    <td className="px-2 py-4 whitespace-nowrap text-sm">
+                                        <Link href={`/admin/reservas/editar?id=${reserva.id}`}>
+                                            <svg
+                                                className="w-6 h-6 text-verde1 dark:text-verde1"
+                                                aria-hidden="true"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                width={24}
+                                                height={24}
+                                                fill="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    fillRule="evenodd"
+                                                    d="M14 4.182A4.136 4.136 0 0 1 16.9 3c1.087 0 2.13.425 2.899 1.182A4.01 4.01 0 0 1 21 7.037c0 1.068-.43 2.092-1.194 2.849L18.5 11.214l-5.8-5.71 1.287-1.31.012-.012Zm-2.717 2.763L6.186 12.13l2.175 2.141 5.063-5.218-2.141-2.108Zm-6.25 6.886-1.98 5.849a.992.992 0 0 0 .245 1.026 1.03 1.03 0 0 0 1.043.242L10.282 19l-5.25-5.168Zm6.954 4.01 5.096-5.186-2.218-2.183-5.063 5.218 2.185 2.15Z"
+                                                    clipRule="evenodd"
+                                                />
+                                            </svg>
+                                        </Link>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export function TablaCupones({ cupones, onEliminar }: {
+    cupones: CuponProps[];
+    onEliminar?: (id: string) => void;
+}) {
+    const [localCupones, setLocalCupones] = useState(cupones);
+
+    // Sincronizar el estado local cuando cambie el prop
+    useEffect(() => {
+        setLocalCupones(cupones);
+    }, [cupones]);
+
+    const handleEliminar = async (id: string) => {
+        // Actualizar el estado local inmediatamente removiendo el elemento
+        setLocalCupones(prev => prev.filter(cupon => cupon.id !== id));
+
+        if (onEliminar) {
+            onEliminar(id);
+        }
+        
+        // TODO: Implementar llamada al backend cuando esté disponible
+        // try {
+        //   const response = await fetch(`/api/cupones/${id}`, {
+        //     method: 'DELETE',
+        //   });
+        //   
+        //   if (!response.ok) {
+        //     throw new Error('Error al eliminar el cupón');
+        //   }
+        //   
+        //   console.log('Cupón eliminado exitosamente');
+        // } catch (error) {
+        //   console.error('Error:', error);
+        //   // Revertir el cambio local en caso de error
+        //   setLocalCupones(cupones);
+        // }
+        console.log(`Eliminando cupón ${id}`);
+    };
+
+    return (
+        <div className="flex-1 overflow-y-auto min-h-0">
+            <div className="bg-beige1 rounded-lg shadow-sm border border-borde1 mt-6">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left">
+                        <thead className="bg-tabla-header text-center text-black text-sm font-bold tracking-wider">
+                            <tr>
+                                <th className='px-2 py-3'>ID</th>
+                                <th className='px-2 py-3'>Código Asociado</th>
+                                <th className='px-4 py-3'>Descuento</th>
+                                <th className='px-2 py-3'>Canjeados</th>
+                                <th className='px-1 py-3'>Límite de canje</th>
+                                <th className='px-1 py-3'>Fecha de creación</th>
+                                <th className='px-2 py-3'>Eliminar</th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-beige1 divide-y divide-borde1">
+                            {localCupones.map((cupon) => (
+                                <tr key={cupon.id} className='bg-tabla-row text-center hover:bg-tabla-header'>
+                                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-black">{cupon.id}</td>
+                                    <td className="px-4 py-4 text-sm text-black">{cupon.codigoAsociado}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-black font-bold">{cupon.descuento}%</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-lg text-rojosuave font-bold">{cupon.canjeados}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-lg font-bold text-verde4">{cupon.limite}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-black">{cupon.fechaCreacion}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                        <div className="flex justify-center">
+                                            <button 
+                                                onClick={() => handleEliminar(cupon.id)}
+                                                className="flex bg-rojotrans font-bold items-center rounded-lg justify-center px-3 py-1 gap-2 text-rojovino hover:text-rojo1 hover:[&>svg]:text-rojo1 hover:cursor-pointer"
+                                                title="Eliminar cupón"
+                                            >
+                                                <svg
+                                                    className="w-5 h-5 text-rojovino"
+                                                    aria-hidden="true"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    width={24}
+                                                    height={24}
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        stroke="currentColor"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a2 2 0 0 1-2-2V7Z"
+                                                    />
+                                                </svg>
+                                                Eliminar
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    );
+}
