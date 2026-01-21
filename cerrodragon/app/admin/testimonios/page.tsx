@@ -14,7 +14,6 @@ interface Testimonio {
 export default function TestimoniosAdmin() {
     const [currentFilter, setCurrentFilter] = useState('todos');
     const [testimonios, setTestimonios] = useState<Testimonio[]>([]);
-    const [loading, setLoading] = useState(true);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [error, setError] = useState<string | null>(null); //Esto está por si quieren manejar errores de carga, si no se lo pueden quitar
 
@@ -88,7 +87,6 @@ export default function TestimoniosAdmin() {
     // TODO: HACER llamada a la API para obtener testimonios
     const fetchTestimonios = async () => {
         try {
-            setLoading(true);
             setError(null);
             
             // TODO: Llamada a la API para obtener los testimonios
@@ -103,8 +101,6 @@ export default function TestimoniosAdmin() {
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Error loading testimonios');
             console.error('Error fetching testimonios:', err);
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -171,23 +167,6 @@ export default function TestimoniosAdmin() {
             setError('Error al rechazar el testimonio');
         }
     };
-
-    if (loading) {
-        return (
-            <div className="h-screen bg-gray-50 flex overflow-hidden">
-                <SideBarAdmin />
-                <div className="flex-1 flex flex-col">
-                    <TopBar />
-                    <main className="flex-1 flex items-center justify-center">
-                        <div className="text-center">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-verde3 mx-auto"></div>
-                            <p className="mt-4 text-verde3">Cargando testimonios...</p>
-                        </div>
-                    </main>
-                </div>
-            </div>
-        );
-    }
     
     return (
         <div className="h-screen bg-gray-50 flex overflow-hidden">

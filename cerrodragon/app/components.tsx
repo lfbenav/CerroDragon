@@ -1535,6 +1535,7 @@ export function CardIncidenciaAdmin({
 
   useEffect(() => {
     if (!isEditing) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setT(titulo);
       setD(descripcion);
       setF(fecha);
@@ -2249,7 +2250,6 @@ export function SearchBar({ texto, value, onChange }: SearchBarProps) {
     </div>
   );
 }
-
 
 /* ========================= BASE PAGINA ADMIN Y SUS COMPONENTES ========================= */
 
@@ -3333,3 +3333,4 @@ export function TablaCupones({ cupones, onEliminar }: {
         </div>
     );
 }
+
