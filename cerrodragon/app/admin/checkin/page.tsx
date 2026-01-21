@@ -1,9 +1,9 @@
 "use client";
-import { TopBar, TablaFormsComidas, SideBarAdmin } from "@/app/components";
+import { TopBar, SideBarAdmin, TablaFormsComidas } from "@/app/components";
 import Link from "next/link";
 
 // Datos de ejemplo para las reservas
-const comidasData = [
+const checkData = [
     {
         id: "XV-502",
         clienteNombre: "Carlos Alvarado",
@@ -44,12 +44,12 @@ export default function ComidasAdmin() {
                         <div className="flex-shrink-0 mb-6">
                             <div className="flex justify-between items-center mb-4">
                                 <div>
-                                    <h1 className="text-3xl font-bold mb-1 text-black">Comidas</h1>
+                                    <h1 className="text-3xl font-bold mb-1 text-black">Check In</h1>
                                     <p className="text-verde3">
-                                        Respuestas al formulario de comidas para tours
+                                        Respuestas al formulario de Check In
                                     </p>
                                 </div>
-                                <Link href={"/admin/comidas/newform"}>
+                                <Link href={"/admin/checkin/newform"}>
                                     <button className="rounded-lg flex items-center justify-center gap-2 mt-1 py-2 px-4 text-white bg-verde3 hover:bg-verde2">
                                         <svg
                                             className="w-6 h-6 text-gray-800 dark:text-white"
@@ -75,30 +75,7 @@ export default function ComidasAdmin() {
                             <hr className="border-1 border-borde1 w-full" />
                         </div>
                         
-                        <TablaFormsComidas comidas={comidasData} />
-                        <div className="flex justify-end">
-                            <Link href="/admin/comidas/gestion">
-                                <button className=" flex rounded-lg items-center justify-center gap-2 mt-1 py-2 px-4 text-white bg-verde3 hover:bg-verde2 mb-6">
-                                    <svg
-                                        className="w-6 h-6 text-gray-800 dark:text-white"
-                                        aria-hidden="true"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width={24}
-                                        height={24}
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke="currentColor"
-                                            strokeLinecap="round"
-                                            strokeWidth={2}
-                                            d="M6 4v10m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v2m6-16v2m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v10m6-16v10m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v2"
-                                        />
-                                    </svg>
-                                    Gestionar comidas
-                                </button>
-                            </Link>
-                        </div>
+                        <TablaFormsComidas comidas={checkData} checkin={true}/>
                     </div>
                     
                 </main>

@@ -1,5 +1,5 @@
 "use client";
-import { SideBarClient, TopBar, TablaComidas } from "@/app/components";
+import { TopBar, TablaComidas, SideBarAdmin } from "@/app/components";
 import Link from "next/link";
 
 // Datos de ejemplo para las reservas
@@ -29,7 +29,7 @@ const comidasData = [
 export default function ComidasAdmin() {
     return (
         <div className="h-screen bg-gray-50 flex overflow-hidden">
-            <SideBarClient />
+            <SideBarAdmin />
             <div className="flex-1 flex flex-col">
                 <TopBar />
                 <main className="flex-1 flex flex-col pt-20 px-8 min-h-0"> 

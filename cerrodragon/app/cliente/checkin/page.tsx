@@ -31,7 +31,7 @@ export default function CheckInPage() {
                                     <input
                                     type="text"
                                     id="visitors"
-                                    className="bg-tabla-header border border-borde1 text-heading text-sm 
+                                    className="bg-tabla-header border border-borde1 text-verde1 text-sm 
                                     rounded-xl focus:ring-borde2 focus:border-borde2 block w-full px-3 py-2.5 
                                     shadow-xs placeholder:text-verde2 placeholder:font-medium placeholder:opacity-50"
                                     placeholder="Joe Doe"

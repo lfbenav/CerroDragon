@@ -2,7 +2,7 @@
 import { SideBarClient, TopBar } from "@/app/components";
 
 
-export default function CheckInPage() {
+export default function ComidaCliente() {
     return (
         <div className="h-screen bg-gray-50 flex overflow-hidden">
             <SideBarClient />
@@ -39,7 +39,7 @@ export default function CheckInPage() {
                                     htmlFor="visitors"
                                     className="block mb-2.5 text-md font-medium text-black"
                                 >
-                                    Código de recervación:
+                                    Código de reservación:
                                 </label>
                                 <input
                                     type="text"

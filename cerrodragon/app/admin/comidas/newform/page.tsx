@@ -1,19 +1,53 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { SideBarAdmin, TopBar } from "@/app/components";
 
-export default function NuevoComidaFormPage() {
-    const [nombre, setNombre] = useState('');
+interface Reserva {
+    id: string;
+    codigo: string;
+}
+
+export default function NuevoComidaForm() {
+    const [reservaSeleccionada, setReservaSeleccionada] = useState('');
+    const [reservas, setReservas] = useState<Reserva[]>([]);
+    const [isLoadingReservas, setIsLoadingReservas] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const router = useRouter();
 
+    useEffect(() => {
+        const loadReservas = async () => {
+            try {
+                // TODO: Replace with actual API call when backend is ready
+                // const response = await fetch('/api/reservas');
+                // const data = await response.json();
+                // setReservas(data);
+                
+                // mock data TEMPORAL - quitar cuando ya se conecte al backend
+                setTimeout(() => {
+                    setReservas([
+                        { id: '01', codigo: 'RV-500' },
+                        { id: '02', codigo: 'RV-501' },
+                        { id: '03', codigo: 'RV-502' }
+                    ]);
+                    setIsLoadingReservas(false);
+                }, 1000);
+            } catch (error) {
+                console.error('Error loading reservas:', error);
+                setError('Error al cargar las reservas');
+                setIsLoadingReservas(false);
+            }
+        };
+
+        loadReservas();
+    }, []);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         
-        if (!nombre.trim()) {
-            setError('El nombre de la comida es requerido');
+        if (!reservaSeleccionada) {
+            setError('Debe seleccionar una reserva');
             return;
         }
 
@@ -21,23 +55,23 @@ export default function NuevoComidaFormPage() {
         setError('');
 
         try {
-            // TODO: Implementar la lógica para guardar la nueva comida
-            // const response = await fetch('/api/comidas', {
+            // TODO: Implementar la lógica para generar código de alimentación
+            // const response = await fetch('/api/formularios-alimentacion', {
             //     method: 'POST',
             //     headers: {
             //         'Content-Type': 'application/json',
             //     },
-            //     body: JSON.stringify({ nombre: nombre.trim() }),
+            //     body: JSON.stringify({ reservaId: reservaSeleccionada }),
             // });
 
             // if (!response.ok) {
-            //     throw new Error('Error al crear la comida');
+            //     throw new Error('Error al generar código de alimentación');
             // }
 
             // Navigate back to management screen
-            router.push('/admin/comidas/gestion');
+            router.push('/admin/comidas');
         } catch (error) {
-            setError('Error al guardar la comida. Por favor, intente nuevamente.');
+            setError('Error al generar el código. Por favor, intente nuevamente.');
             console.error('Error:', error);
         } finally {
             setIsLoading(false);
@@ -53,9 +87,9 @@ export default function NuevoComidaFormPage() {
                     <div className="max-w-7xl mx-auto w-full flex flex-col">
                         {/* Fixed header section */}
                         <div className="flex-shrink-0">
-                            <h1 className="text-3xl font-bold mb-1 text-black mt-4">Nueva Comida</h1>
+                            <h1 className="text-3xl font-bold mb-1 text-black mt-4">Nuevo Formulario de Alimentación</h1>
                             <p className="mb-8 text-verde3">
-                                Introduzca el nombre de la nueva comida
+                                Complete la Información
                             </p>
                         </div>
                         
@@ -64,22 +98,27 @@ export default function NuevoComidaFormPage() {
                             <form onSubmit={handleSubmit} className="min-w-full space-y-4">
                                 <div>
                                     <label
-                                    htmlFor="nombre"
-                                    className="block mb-2.5 text-md font-medium text-black"
+                                        htmlFor="reserva"
+                                        className="block mb-2.5 text-md font-medium text-black"
                                     >
-                                        Nombre de la comida:
+                                        Seleccione la reserva asociada
                                     </label>
-                                    <input
-                                    type="text"
-                                    id="nombre"
-                                    value={nombre}
-                                    onChange={(e) => setNombre(e.target.value)}
-                                    className="bg-tabla-header border border-borde1 text-verde1 text-sm 
-                                    rounded-xl focus:ring-borde2 focus:border-borde2 block w-full px-3 py-2.5 
-                                    shadow-xs placeholder:text-verde2 placeholder:font-medium placeholder:opacity-50"
-                                    placeholder="Arroz con camarones"
-                                    disabled={isLoading}
-                                    />
+                                    <select
+                                        id="reserva"
+                                        value={reservaSeleccionada}
+                                        onChange={(e) => setReservaSeleccionada(e.target.value)}
+                                        className="block w-90 px-3 py-2.5 bg-tabla-header placeholder:opacity-50 border border-verde1 text-verde1 text-sm rounded-base focus:ring-verde1 focus:border-verde1 shadow-xs placeholder:text-verde3"
+                                        disabled={isLoadingReservas || isLoading}
+                                    >
+                                        <option value="">
+                                            {isLoadingReservas ? 'Cargando reservas...' : 'Seleccione la reserva...'}
+                                        </option>
+                                        {reservas.map((reserva) => (
+                                            <option key={reserva.id} value={reserva.id}>
+                                                {reserva.codigo}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
                                 
                                 {error && (
@@ -90,19 +129,19 @@ export default function NuevoComidaFormPage() {
                                 
                                 <div className="flex justify-end space-x-4">
                                     <button
-                                    type="button"
-                                    onClick={() => router.push('/admin/comidas')}
-                                    className="mt-1 text-verde3 bg-white hover:bg-gray-50 font-medium rounded-xl 
-                                    text-md px-5 py-2.5 text-center border border-verde3"
-                                    disabled={isLoading}
+                                        type="button"
+                                        onClick={() => router.push('/admin/comidas')}
+                                        className="mt-1 text-verde3 bg-white hover:bg-gray-50 font-medium rounded-xl 
+                                        text-md px-5 py-2.5 text-center border border-verde3"
+                                        disabled={isLoading}
                                     >
                                         Cancelar
                                     </button>
                                     <button
-                                    type="submit"
-                                    disabled={isLoading}
-                                    className="mt-1 text-white bg-verde3 hover:bg-verde2 font-medium rounded-xl 
-                                    text-md px-5 py-2.5 text-center flex items-center justify-center gap-2 disabled:opacity-50"
+                                        type="submit"
+                                        disabled={isLoading}
+                                        className="mt-1 text-white bg-verde3 hover:bg-verde2 font-medium rounded-xl 
+                                        text-md px-5 py-2.5 text-center flex items-center justify-center gap-2 disabled:opacity-50"
                                     >
                                         {isLoading ? (
                                             <>
@@ -131,7 +170,7 @@ export default function NuevoComidaFormPage() {
                                                         d="M12 7.757v8.486M7.757 12h8.486M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
                                                     />
                                                 </svg>
-                                                Agregar
+                                                Generar código de alimentación
                                             </>
                                         )}
                                     </button>
