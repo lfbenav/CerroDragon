@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { on } from 'events';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -147,6 +148,16 @@ interface CuponProps {
     canjeados: number;
     limite: number;
     fechaCreacion: string;
+}
+
+interface CardTestimonioAdminProps {
+    id: number;
+    nombre: string;
+    comentario: string;
+    fecha: string;
+    estado: 'pendiente' | 'aprobado' | 'rechazado';
+    onApprove?: (id: number) => void; 
+    onReject?: (id: number) => void;
 }
 
 /* ========================= CALENDARIO PROPS ========================= */
@@ -1030,6 +1041,99 @@ export function CardTestimonio({nombre, comentario, fecha, likes}: CardTestimoni
                     </svg>
                     <span className="text-sm text-verde3 font-medium">{likes}</span>
                 </div>
+            </div>
+        </div>
+    );
+}
+
+export function CardTestimonioAdmin({id, nombre, comentario, fecha, estado, onApprove, onReject}: CardTestimonioAdminProps) {
+    return (
+        <div className="bg-beige1 w-full h-auto border border-borde1 rounded-xl p-4 flex flex-col shadow-sm inline-block mb-6" style={{breakInside: 'avoid', pageBreakInside: 'avoid'}}>
+            <div className="flex flex-col items-start text-left mb-4">
+                <h3 className="text-lg font-semibold text-black mb-2">{nombre}</h3>
+                <p className="text-sm text-verde3 leading-relaxed italic">
+                    &quot;{comentario}&quot;
+                </p>
+            </div>
+            <div className="flex items-center mb-6">
+                <svg 
+                    className="w-4 h-4 mr-2 text-verde3" 
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width={24}
+                    height={24}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                >
+                    <path 
+                        stroke="currentColor" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        strokeWidth={2} 
+                        d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" 
+                    />
+                </svg>
+                <span className="text-sm text-verde3">{fecha}</span>
+            </div>
+            <hr className="border-borde1 mb-3" />
+            
+            <div className="flex justify-center items-center">
+                {estado === 'aprobado' ? (
+                    <span className="inline-flex items-center justify-center px-4 py-1 text-verde3 text-base font-bold rounded w-fit">
+                        Aprobado
+                    </span>
+                ) : estado === 'rechazado' ? (
+                    <span className="inline-flex items-center justify-center px-4 py-1 text-verde3 text-base font-bold rounded w-fit">
+                        Rechazado
+                    </span>
+                ) : (
+                    <div className="flex justify-between gap-15">
+                        <button className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-verde2 text-white text-base font-normal rounded w-fit"
+                            onClick={() => onApprove?.(id)}
+                        >
+                            <svg
+                                className="w-6 h-6 text-white dark:text-white"
+                                aria-hidden="true"
+                                xmlns="http://www.w3.org/2000/svg"
+                                width={24}
+                                height={24}
+                                fill="none"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke="currentColor"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M5 11.917 9.724 16.5 19 7.5"
+                                />
+                            </svg>
+                            Aprobar
+                        </button>
+                        <button className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-rojosuave text-black text-base font-normal rounded w-fit"
+                            onClick={() => onReject?.(id)}
+                        >
+                            <svg
+                                className="w-6 h-6 text-black dark:text-black"
+                                aria-hidden="true"
+                                xmlns="http://www.w3.org/2000/svg"
+                                width={24}
+                                height={24}
+                                fill="none"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke="currentColor"
+                                    strokeLinecap="round"
+                                    strokeWidth={2}
+                                    d="m6 6 12 12m3-6a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                                />
+                            </svg>
+
+                            Rechazar
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );
