@@ -82,18 +82,18 @@ export default function Cupones() {
                                 <Link href="/admin/cupones/nuevo">
                                     <button className="bg-verde3 text-white px-4 py-2 rounded-lg hover:bg-verde2 transition justify-between items-center flex">
                                         <svg
-                                            className="w-4 h-4 mr-2"
+                                            className="w-6 h-6 text-white dark:text-white"
                                             aria-hidden="true"
                                             xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
+                                            width={24}
+                                            height={24}
+                                            fill="currentColor"
                                             viewBox="0 0 24 24"
-                                            strokeWidth={2}
-                                            stroke="currentColor"
                                         >
                                             <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                d="M12 4.5v15m7.5-7.5h-15"
+                                                fillRule="evenodd"
+                                                d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4.243a1 1 0 1 0-2 0V11H7.757a1 1 0 1 0 0 2H11v3.243a1 1 0 1 0 2 0V13h3.243a1 1 0 1 0 0-2H13V7.757Z"
+                                                clipRule="evenodd"
                                             />
                                         </svg>
                                         Nuevo Cupón

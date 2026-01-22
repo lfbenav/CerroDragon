@@ -62,14 +62,14 @@ export default function PerfilClientePage() {
                   </button>
 
                   <Link
-                    href="/client/alojamientos"
+                    href="/cliente/alojamientos"
                     className="px-5 py-2 rounded-md bg-verde2 text-white text-sm font-medium hover:opacity-95"
                   >
                     Alojamientos
                   </Link>
 
                   <Link
-                    href="/client/reservas"
+                    href="/cliente/reservas"
                     className="px-5 py-2 rounded-md bg-verde2 text-white text-sm font-medium hover:opacity-95"
                   >
                     Reservas

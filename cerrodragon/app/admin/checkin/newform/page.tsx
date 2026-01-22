@@ -8,7 +8,7 @@ interface Reserva {
     codigo: string;
 }
 
-export default function NuevoComidaForm() {
+export default function NuevoCheckinForm() {
     const [reservaSeleccionada, setReservaSeleccionada] = useState('');
     const [reservas, setReservas] = useState<Reserva[]>([]);
     const [isLoadingReservas, setIsLoadingReservas] = useState(true);

@@ -172,6 +172,19 @@ interface ImageUploadProps {
     accept?: string;
 }
 
+interface AlojamientoProps {
+    id: string;
+    clienteNombre: string;
+    clienteEmail: string;
+    cabana: string;
+    fechaReserva: string;
+    fechaLlegada: string;
+    fechaFinal: string;
+    personas: number;
+    estado: 'confirmada' | 'pendiente' | 'cancelada' | 'reembolsada';
+}
+
+
 /* ========================= CALENDARIO PROPS ========================= */
 
 interface CalendarDayProps {
@@ -858,7 +871,7 @@ export function CardTourAdmin({id, nombre, descripcion, precio, capacidad, durac
 
 export function CardGuide({nombre, activo, imagen}: {nombre: string, activo: string, imagen?: string}) {
     return (
-        <div className="bg-beige1 block w-60 h-80 border border-default border-borde1 rounded-xl relative flex flex-col">
+        <div className="bg-beige1 block w-60 h-80 border border-default border-borde1 rounded-xl relative flex flex-col shadow-md">
             <div className="h-48 overflow-hidden m-4 rounded-lg">
                 <Image
                     className="rounded-lg w-full h-full object-cover"
@@ -1171,6 +1184,118 @@ export function CardPromocion({id, nombre, descripcion, precioAhora, precioAntes
                     />
                 </svg>
                 </a>
+            </div>
+        </div>
+    </div>
+    );
+}
+
+export function CardPromocionAdmin({id, nombre, descripcion, precioAhora, precioAntes, descuento, capacidad, duracion, etiqueta, imagen, onDelete}: CardPromoProps & {onDelete: () => void}) {
+    return (
+    <div className="bg-beige1 block w-[350px] h-92 border border-default border-borde1 rounded-xl cardTour relative flex flex-col">
+        <a href={`/admin/promociones/info?id=${id}`} className="block overflow-hidden relative">
+            <div className="absolute top-6 left-4 bg-rojo2 text-black text-sm font-bold px-2 py-1 rounded-md z-20 transform -rotate-12">
+                PROMOCIÓN -{descuento}%
+            </div>
+            <div className="absolute top-4 right-4 bg-amarillo text-black text-sm font-semibold px-3 py-1 rounded-md z-20">
+                Ahora ${precioAhora} 
+                <span className='text-xs font-normal'> <br />Antes: <span className="line-through">${precioAntes}</span> </span>
+            </div>
+            <div className="h-48 overflow-hidden">
+                <Image
+                className="rounded-t-xl w-full h-full object-cover"
+                src={imagen || "/tour1.png"}
+                alt=""
+                width={325}
+                height={192}
+                />
+            </div>
+        </a>
+        <div className="text-left py-2 px-6 flex-1 flex flex-col">
+            <h5 className="mt-3 text-xl font-light tracking-tight text-heading text-black min-h-[2.5rem]">
+                {nombre}
+            </h5>
+            <p className="mb-2 text-sm text-body text-verde3 flex-1">
+                {descripcion}
+            </p>
+            <div className="flex justify-between items-center mb-2">
+                <div className="flex items-center">
+                    <svg 
+                        className="w-4 h-4 mr-1 text-verde3" 
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width={24}
+                        height={24}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                    >
+                        <path 
+                            stroke="currentColor" 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round" 
+                            strokeWidth={2} 
+                            d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" 
+                        />
+                    </svg>
+                    <span className="text-verde3 text-sm">{duracion}</span>
+                </div>
+                <div className="flex items-center">
+                    <svg 
+                        className="w-4 h-4 mr-1 text-verde3" 
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width={24}
+                        height={24}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                    >
+                        <path 
+                            stroke="currentColor" 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round" 
+                            strokeWidth={2} 
+                            d="M16 19h4a1 1 0 0 0 1-1v-1a3 3 0 0 0-3-3h-2m-2.236-4a3 3 0 1 0 0-4M3 18v-1a3 3 0 0 1 3-3h4a3 3 0 0 1 3 3v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Zm8-10a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" 
+                        />
+                    </svg>
+                    <span className="text-verde3 text-sm">{capacidad} personas </span>
+                </div>
+            </div>
+            <hr className="mt-4 mb-1 border-borde1" />
+            <div className="flex justify-between items-center">
+                {etiqueta === 'Moderado' ? (
+                    <span className="inline-flex items-center px-6 py-0.5 text-amarillo text-sm font-bold rounded bg-amarillotrans">
+                        Moderado
+                    </span>
+                ) : etiqueta === 'Experto' ? (
+                    <span className="inline-flex items-center px-6 py-0.5 text-rojovino text-sm font-bold rounded bg-rojotrans">
+                        Experto
+                    </span>
+                ) : etiqueta === 'Fácil' ? (
+                    <span className="inline-flex items-center px-6 py-0.5 text-verde3 text-sm font-bold rounded bg-verdetrans">
+                        Fácil
+                    </span>
+                ) : (
+                    <span className="inline-flex items-center px-6 py-0.5 text-azul1 text-sm font-bold rounded bg-azultrans">
+                        Todos
+                    </span>
+                )}
+                <button className='my-2 hover:cursor-pointer' onClick={onDelete}>
+                    <svg
+                        className="w-6 h-6 text-verde1 dark:text-verde1"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width={24}
+                        height={24}
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            fillRule="evenodd"
+                            d="M8.586 2.586A2 2 0 0 1 10 2h4a2 2 0 0 1 2 2v2h3a1 1 0 1 1 0 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a1 1 0 0 1 0-2h3V4a2 2 0 0 1 .586-1.414ZM10 6h4V4h-4v2Zm1 4a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Zm4 0a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Z"
+                            clipRule="evenodd"
+                        />
+                    </svg>
+                </button>
             </div>
         </div>
     </div>
@@ -2768,6 +2893,51 @@ export function SearchBarwFilters({texto, filters, selectedFilter, onFilterChang
     );
 }
 
+export function SearchBarAdmin({ texto, value, onChange }: SearchBarProps) {
+  return (
+    <div className="bg-beige1 p-4 rounded-lg shadow-sm border border-borde1 mb-6 w-full">
+      <form className="w-full" onSubmit={(e) => e.preventDefault()}>
+        <label
+          htmlFor="search"
+          className="block mb-2.5 text-sm font-medium sr-only text-verde3"
+        >
+          Buscar
+        </label>
+
+        <div className="relative">
+          <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+            <svg
+              className="w-4 h-4 text-verde3"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              width={24}
+              height={24}
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeWidth={2}
+                d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
+              />
+            </svg>
+          </div>
+
+          <input
+            type="search"
+            id="search"
+            value={value}
+            onChange={(e) => onChange?.(e.target.value)}
+            className="block w-full py-2 px-3 ps-9 bg-beige2 border border-borde2 text-verde3 placeholder-verde3 text-sm rounded-md focus:ring-verde2 focus:border-verde2"
+            placeholder={texto}
+          />
+        </div>
+      </form>
+    </div>
+  );
+}
+
 /* ========================= BASE PAGINA ADMIN Y SUS COMPONENTES ========================= */
 
 export function AdminPageShell({
@@ -3859,6 +4029,128 @@ export function TablaCupones({ cupones, onEliminar }: {
     );
 }
 
+export function TablaMisAlojamientos({ reservas }: { reservas: AlojamientoProps[] }) {
+    const getEstadoBadge = (estado: ReservaProps['estado']) => {
+        switch (estado) {
+            case 'confirmada':
+                return (
+                    <span className="inline-flex items-center px-3 py-1 text-verde3 text-sm font-bold rounded bg-verdetrans">
+                        Confirmada
+                    </span>
+                );
+            case 'pendiente':
+                return (
+                    <span className="inline-flex items-center px-3 py-1 text-amarillo text-sm font-bold rounded bg-amarillotrans">
+                        Pendiente
+                    </span>
+                );
+            case 'cancelada':
+                return (
+                    <span className="inline-flex items-center px-3 py-1 text-rojovino text-sm font-bold rounded bg-rojotrans">
+                        Cancelada
+                    </span>
+                );
+            case 'reembolsada':
+                return (
+                    <span className="inline-flex items-center px-3 py-1 text-azul1 text-sm font-bold rounded bg-azultrans">
+                        Reembolsada
+                    </span>
+                );
+        }
+    };
+
+    return (
+        <div className="flex-1 overflow-y-auto min-h-0">
+            <div className="bg-beige1 rounded-lg shadow-sm border border-borde1 mt-6">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left">
+                        <thead className="bg-tabla-header text-center text-black text-sm font-bold tracking-wider">
+                            <tr>
+                                <th className='px-1 py-3'>ID</th>
+                                <th className='px-2 py-3'>Cliente</th>
+                                <th className='px-1 py-3'>Personas</th>
+                                <th className='px-1 py-3'>Fecha de Reserva</th>
+                                <th className='px-1 py-3'>Fecha de Llegada</th>
+                                <th className='px-1 py-3'>Fecha Final</th>
+                                <th className='px-2 py-3'>Cabaña</th>
+                                <th className='px-1 py-3'>Estado</th>
+                                <th className='px-1 py-3'>Solicitar reembolso</th>
+                                <th className='px-2 py-3'>Comprobante</th>
+
+                            </tr>
+                        </thead>
+                        <tbody className="bg-beige1 divide-y divide-borde1">
+                            {reservas.map((reserva) => (
+                                <tr key={reserva.id} className='bg-tabla-row text-center hover:bg-tabla-header'>
+                                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-black">{reserva.id}</td>
+                                    <td className="px-4 py-4 whitespace-nowrap">
+                                        <div className="text-sm font-bold text-verde1">{reserva.clienteNombre}</div>
+                                        <div className="text-sm text-verde3">{reserva.clienteEmail}</div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-lg text-rojosuave font-bold">{reserva.personas}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-black">{reserva.fechaReserva}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-black">{reserva.fechaLlegada}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-black">{reserva.fechaFinal}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-black">{reserva.cabana}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap">{getEstadoBadge(reserva.estado)}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm flex  justify-center items-center">
+                                        {reserva.estado != 'reembolsada' ? (
+                                            <button className="text-rojovino bg-rojotrans font-bold hover:text-rojo1 flex items-center rounded-md justify-center px-3 py-1 gap-2 hover:[&>svg]:text-rojo1 hover:cursor-pointer">
+                                                <svg
+                                                className="w-6 h-6 text-rojovino dark:text-rojovino"
+                                                aria-hidden="true"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                width={24}
+                                                height={24}
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        stroke="currentColor"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="m16 10 3-3m0 0-3-3m3 3H5v3m3 4-3 3m0 0 3 3m-3-3h14v-3"
+                                                    />
+                                                </svg>
+                                                Solicitar
+                                            </button>
+                                        ) : (
+                                            <button disabled className="text-gray-400 bg-gray-200 font-bold flex items-center rounded-md justify-center px-3 py-1 gap-2 cursor-not-allowed">
+                                                <svg
+                                                    className="w-6 h-6 text-gray-400"
+                                                    aria-hidden="true"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    width={24}
+                                                    height={24}
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        stroke="currentColor"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M5 13l4 4L19 7"
+                                                    />
+                                                </svg>
+                                                Reembolsado
+                                            </button>
+                                        )}
+                                    </td>
+                                    <td className="px-6 py-4 text-black hover:underline hover:cursor-pointer">
+                                        Descargar
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 /*============================== Image Upload Component ==============================*/
 
 export function ImageUpload({
@@ -3943,52 +4235,4 @@ export function ImageUpload({
             </div>
         </div>
     );
-}
-
-
-/*============================== Admin Search Bar Component ==============================*/
-
-export function SearchBarAdmin({ texto, value, onChange }: SearchBarProps) {
-  return (
-    <div className="bg-beige1 p-4 rounded-lg shadow-sm border border-borde1 mb-6 w-full">
-      <form className="w-full" onSubmit={(e) => e.preventDefault()}>
-        <label
-          htmlFor="search"
-          className="block mb-2.5 text-sm font-medium sr-only text-verde3"
-        >
-          Buscar
-        </label>
-
-        <div className="relative">
-          <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-            <svg
-              className="w-4 h-4 text-verde3"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              width={24}
-              height={24}
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeWidth={2}
-                d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
-              />
-            </svg>
-          </div>
-
-          <input
-            type="search"
-            id="search"
-            value={value}
-            onChange={(e) => onChange?.(e.target.value)}
-            className="block w-full py-2 px-3 ps-9 bg-beige2 border border-borde2 text-verde3 placeholder-verde3 text-sm rounded-md focus:ring-verde2 focus:border-verde2"
-            placeholder={texto}
-          />
-        </div>
-      </form>
-    </div>
-  );
 }

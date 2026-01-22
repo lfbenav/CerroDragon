@@ -1,13 +1,14 @@
 'use client';
-import { CardPaquetePromo, SideBarClient, TopBar } from "@/app/components";
+import { CardPaquetePromo, SideBarAdmin, TopBar } from "@/app/components";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
 
-export default function InfoPromocion() {
+export default function InfoPromocionAdmin() {
     const searchParams = useSearchParams();
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const id = searchParams.get('id');
+    const id = searchParams.get('id'); // ! Este parámetro se usará para obtener la info de la promoción específica viene de la URL 
+    //! ya esta listo para usarse nada mas falta la llamada a la api con este id
     const [nombreTour] = useState('Sendero Dragón');
     const [descripcionTour] = useState('Recorrido completo del sendero principal, se proporciona comida ');
     const [duracionTour] = useState('3 horas');
@@ -18,7 +19,7 @@ export default function InfoPromocion() {
     const [imagenTour] = useState('/tour1.png');
     return (
         <div className="h-screen bg-gray-50 flex overflow-hidden">
-            <SideBarClient />
+            <SideBarAdmin />
             <div className="flex-1 flex flex-col">
                 <TopBar />
                 <main className="flex-1 flex flex-col ml-72  pt-20 px-8 min-h-0">
