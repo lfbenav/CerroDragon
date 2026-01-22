@@ -3,10 +3,21 @@ const controller = require("../controllers/auth.controller");
 
 router.get("/test", controller.test);
 
+// Registro
 router.post("/register/client", controller.registerClient);
 router.post("/register/admin", controller.registerAdmin);
 router.post("/register/guide", controller.registerGuide);
 
+// Auth
 router.post("/login", controller.login);
+router.post("/logout", controller.logout);
+
+// Usuario autenticado
+router.get("/me", controller.me);
+router.post("/refresh-token", controller.refreshToken);
+
+// Recuperación de contraseña
+router.post("/forgot-password", controller.forgotPassword);
+router.post("/reset-password", controller.resetPassword);
 
 module.exports = router;

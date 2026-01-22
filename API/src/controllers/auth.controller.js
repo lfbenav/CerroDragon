@@ -3,6 +3,8 @@ const asyncHandler = require("../middlewares/asyncHandler.middleware");
 const AppError = require("../utils/AppError");
 
 const bcrypt = require("bcrypt");
+const crypto = require("crypto");
+const sendEmail = require("../utils/sendEmail");
 const { signAccessToken } = require("../utils/jwt");
 
 // Solo para hacer pruebas rápidas de funcionamiento 
@@ -287,4 +289,156 @@ exports.login = asyncHandler(async (req, res) => {
             type: user.type,
         },
     });
+});
+
+// POST /auth/logout
+exports.logout = asyncHandler(async (req, res) => {
+    // JWT stateless → el frontend elimina el token
+    res.status(200).json({
+        success: true,
+        message: "Sesión cerrada correctamente"
+    });
+});
+
+// GET /auth/me
+exports.me = asyncHandler(async (req, res) => {
+    const userId = req.user?.userId;
+
+    if (!userId) {
+        throw new AppError("No autenticado", 401, "UNAUTHENTICATED");
+    }
+
+    const { rows } = await pool.query(`
+        SELECT id, email, type, is_active, last_login_at
+        FROM users
+        WHERE id = $1
+    `, [userId]);
+
+    if (!rows.length) {
+        throw new AppError("Usuario no encontrado", 404, "USER_NOT_FOUND");
+    }
+
+    res.status(200).json({
+        success: true,
+        user: rows[0]
+    });
+});
+
+// POST /auth/refresh-token
+exports.refreshToken = asyncHandler(async (req, res) => {
+    const userId = req.user?.userId;
+    const type = req.user?.type;
+
+    if (!userId) {
+        throw new AppError("Token inválido", 401, "INVALID_TOKEN");
+    }
+
+    const token = signAccessToken({ userId, type });
+
+    res.status(200).json({
+        success: true,
+        token
+    });
+});
+
+// POST /auth/forgot-password
+exports.forgotPassword = asyncHandler(async (req, res) => {
+    const { email } = req.body || {};
+
+    if (!email) {
+        throw new AppError("email es requerido", 400, "MISSING_EMAIL");
+    }
+
+    const { rows } = await pool.query(`
+        SELECT id FROM users WHERE email = $1
+    `, [email]);
+
+    if (!rows.length) {
+        return res.status(200).json({
+            success: true,
+            message: "Si el correo existe, se enviará un código"
+        });
+    }
+
+    const userId = rows[0].id;
+
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
+
+    await pool.query(`
+        INSERT INTO password_reset_tokens (user_id, token_hash, expires_at)
+        VALUES ($1, $2, now() + interval '15 minutes')
+    `, [userId, tokenHash]);
+
+    await sendEmail({
+        to: email,
+        subject: "Recuperación de contraseña Cerro Dragón Tours",
+        html: `
+            <p>Solicitaste restablecer tu contraseña de Cerro Dragón Tours.</p>
+            <p>Tu código de recuperación es:</p>
+            <h2>${rawToken}</h2>
+            <p>Este código expira en 15 minutos.</p>
+        `
+    });
+
+    res.status(200).json({
+        success: true,
+        message: "Código de recuperación enviado"
+    });
+});
+
+// POST /auth/reset-password
+exports.resetPassword = asyncHandler(async (req, res) => {
+    const { token, new_password } = req.body || {};
+
+    if (!token || !new_password) {
+        throw new AppError("token y new_password son requeridos", 400, "MISSING_FIELDS");
+    }
+
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+
+    const { rows } = await pool.query(`
+        SELECT id, user_id
+        FROM password_reset_tokens
+        WHERE token_hash = $1
+          AND used_at IS NULL
+          AND expires_at > now()
+    `, [tokenHash]);
+
+    if (!rows.length) {
+        throw new AppError("Token inválido o expirado", 400, "INVALID_TOKEN");
+    }
+
+    const resetToken = rows[0];
+    const password_hash = await bcrypt.hash(new_password, 12);
+
+    const client = await pool.connect();
+    try {
+        await client.query("BEGIN");
+
+        await client.query(`
+            UPDATE users
+            SET password_hash = $1
+            WHERE id = $2
+        `, [password_hash, resetToken.user_id]);
+
+        await client.query(`
+            UPDATE password_reset_tokens
+            SET used_at = now()
+            WHERE id = $1
+        `, [resetToken.id]);
+
+        await client.query("COMMIT");
+
+        res.status(200).json({
+            success: true,
+            message: "Contraseña actualizada correctamente"
+        });
+
+    } catch (e) {
+        await client.query("ROLLBACK");
+        throw e;
+    } finally {
+        client.release();
+    }
 });
