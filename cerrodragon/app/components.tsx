@@ -848,6 +848,94 @@ export function CardCabana({id, nombre, descripcion, capacidad, etiqueta, imagen
     );
 }
 
+ 
+export function CardCabanaAdmin({id, nombre, descripcion, capacidad, etiqueta, imagen}: CardCabanaProps) {
+    return (
+        <div className="bg-beige1 block w-[350px] h-80 border border-default border-borde1 rounded-xl cardTour relative flex flex-col">
+        <a href={"/"+id} className="block overflow-hidden relative">
+            <div className="h-48 overflow-hidden">
+                <Image
+                className="rounded-t-xl w-full h-full object-cover"
+                src={imagen || "/tour1.png"}
+                alt=""
+                width={350}
+                height={192}
+                />
+            </div>
+        </a>
+        <div className="text-left py-3 px-6 flex-1 flex flex-col">
+            <h5 className="mb-2 text-lg font-light tracking-tight text-heading text-black">
+                {nombre}
+            </h5>
+            <p className="mb-3 text-sm text-body text-verde3 flex-1">
+                {descripcion}
+            </p>
+            <div className="flex justify-between items-center mb-3">
+                <div className="flex items-center">
+                    <svg 
+                        className="w-4 h-4 mr-1 text-verde3" 
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width={24}
+                        height={24}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                    >
+                        <path 
+                            stroke="currentColor" 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round" 
+                            strokeWidth={2} 
+                            d="M16 19h4a1 1 0 0 0 1-1v-1a3 3 0 0 0-3-3h-2m-2.236-4a3 3 0 1 0 0-4M3 18v-1a3 3 0 0 1 3-3h4a3 3 0 0 1 3 3v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Zm8-10a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" 
+                        />
+                    </svg>
+                    <span className="text-verde3 text-sm">{capacidad} personas </span>
+                </div>
+            </div>
+            <hr className="mb-2 border-borde1" />
+            <div className="flex justify-between items-center">
+                {etiqueta === 'Disponible' ? (
+                    <span className="inline-flex items-center px-4 py-0.5 text-verde3 text-sm font-bold rounded bg-verdetrans">
+                        Disponible
+                    </span>
+                ) : etiqueta === 'Ocupado' ? (
+                    <span className="inline-flex items-center px-4 py-0.5 text-rojovino text-sm font-bold rounded bg-rojotrans">
+                        Ocupado
+                    </span>
+                ) : (
+                    <span className="inline-flex items-center px-4 py-0.5 text-azul1 text-sm font-bold rounded bg-azultrans">
+                        Desactivada
+                    </span>
+                )}
+                <a
+                href="/admin/cabanas/[id]"
+                className="inline-flex items-end text-verde3 bg-brand font-medium text-sm py-2"
+                >
+                    Editar
+                <svg
+                    className="w-4 h-4 ms-1.5 rtl:rotate-180 -me-0.5"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width={24}
+                    height={24}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 12H5m14 0-4 4m4-4-4-4"
+                    />
+                </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+    );
+}
+
 export function CardPromocion({id, nombre, descripcion, precioAhora, precioAntes, descuento, capacidad, duracion, etiqueta, imagen}: CardPromoProps) {
     return (
     <div className="bg-beige1 block w-[350px] h-92 border border-default border-borde1 rounded-xl cardTour relative flex flex-col">
