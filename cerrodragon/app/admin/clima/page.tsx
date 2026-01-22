@@ -98,10 +98,10 @@ export default function AdminIncidenciasClimaPage() {
             <div className="flex-shrink-0">
               <div className="flex items-start justify-between gap-6">
                 <div>
-                  <h1 className="text-3xl font-bold mb-1 text-black mt-4">
+                  <h3 className="text-3xl font-bold mb-1 text-black mt-4">
                     Alertas de Clima e Incidencias
-                  </h1>
-                  <p className="text-verde3 mb-4 text-lg">
+                  </h3>
+                  <p className="text-verde3 mb-4 text-md">
                     Edite las alertas o agregue nuevas alertas de clima e
                     incidencias que puedan afectar las actividades en Cerro
                     Dragón.
