@@ -39,7 +39,7 @@ export default function ComidasAdmin() {
             <SideBarAdmin />
             <div className="flex-1 flex flex-col">
                 <TopBar />
-                <main className="flex-1 flex flex-col pt-20 px-8 min-h-0"> 
+                <main className="flex-1 flex flex-col ml-72  pt-20 px-8 min-h-0"> 
                     <div className="max-w-7xl mx-auto w-full flex flex-col h-full">
                         <div className="flex-shrink-0 mb-6">
                             <div className="flex justify-between items-center mb-4">

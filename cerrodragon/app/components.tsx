@@ -2595,7 +2595,7 @@ export function AdminPageShell({
       <div className="flex-1 flex flex-col">
         <TopBar />
 
-        <main className="flex-1 flex flex-col pt-20 px-8 min-h-0">
+        <main className="flex-1 flex flex-col ml-72  pt-20 px-8 min-h-0">
           <div className="max-w-7xl mx-auto w-full flex flex-col h-full">
             <div className="flex-shrink-0">
               <div className="flex items-start justify-between gap-6">
@@ -3753,3 +3753,50 @@ export function ImageUpload({
     );
 }
 
+
+/*============================== Admin Search Bar Component ==============================*/
+
+export function SearchBarAdmin({ texto, value, onChange }: SearchBarProps) {
+  return (
+    <div className="bg-beige1 p-4 rounded-lg shadow-sm border border-borde1 mb-6 w-full">
+      <form className="w-full" onSubmit={(e) => e.preventDefault()}>
+        <label
+          htmlFor="search"
+          className="block mb-2.5 text-sm font-medium sr-only text-verde3"
+        >
+          Buscar
+        </label>
+
+        <div className="relative">
+          <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+            <svg
+              className="w-4 h-4 text-verde3"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              width={24}
+              height={24}
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeWidth={2}
+                d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
+              />
+            </svg>
+          </div>
+
+          <input
+            type="search"
+            id="search"
+            value={value}
+            onChange={(e) => onChange?.(e.target.value)}
+            className="block w-full py-2 px-3 ps-9 bg-beige2 border border-borde2 text-verde3 placeholder-verde3 text-sm rounded-md focus:ring-verde2 focus:border-verde2"
+            placeholder={texto}
+          />
+        </div>
+      </form>
+    </div>
+  );
+}
