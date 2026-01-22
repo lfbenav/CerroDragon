@@ -533,13 +533,13 @@ export function SideBarAdmin() {
                 </a>
             </li>
             <li>
-                <a
-                href="/admin/cabanas"
-                className="flex items-center px-2 py-1.5 text-white rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group"
+                <Link
+                    href="/admin/cabanas"
+                    className="flex items-center px-2 py-1.5 text-white rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group"
                 >
                 <div className="w-5 h-5 mr-3"></div>
                 <span className="flex-1 whitespace-nowrap">Cabañas</span>
-                </a>
+                </Link>
             </li>
             <li>
                 <a
@@ -971,7 +971,6 @@ export function CardCabana({id, nombre, descripcion, capacidad, etiqueta, imagen
     </div>
     );
 }
-
  
 export function CardCabanaAdmin({id, nombre, descripcion, capacidad, etiqueta, imagen}: CardCabanaProps) {
     return (
@@ -1031,29 +1030,29 @@ export function CardCabanaAdmin({id, nombre, descripcion, capacidad, etiqueta, i
                         Desactivada
                     </span>
                 )}
-                <a
+                <Link
                 href="/admin/cabanas/[id]"
                 className="inline-flex items-end text-verde3 bg-brand font-medium text-sm py-2"
                 >
                     Editar
-                <svg
-                    className="w-4 h-4 ms-1.5 rtl:rotate-180 -me-0.5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    width={24}
-                    height={24}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 12H5m14 0-4 4m4-4-4-4"
-                    />
-                </svg>
-                </a>
+                    <svg
+                        className="w-4 h-4 ms-1.5 rtl:rotate-180 -me-0.5"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width={24}
+                        height={24}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 12H5m14 0-4 4m4-4-4-4"
+                        />
+                    </svg>
+                </Link>
             </div>
         </div>
     </div>
@@ -1689,93 +1688,6 @@ export function CardPuntoAdmin({nombre, ubicacion, direccion, imagen}: CardPunto
     );
 }
 
-
-/* ========================= ICONS ========================= */
-
-
-export function PlusIcon() {
-  return (
-    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
-      <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-export function FilterIcon() {
-  return (
-    <svg className="w-3.5 h-3.5 text-black/70" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M4 6h16M7 12h10M10 18h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-export function PencilIcon() {
-  return (
-    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
-      <path
-        d="M12 20h9"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <path
-        d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5Z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-export function CheckIcon() {
-  return (
-    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
-      <path
-        d="M20 6 9 17l-5-5"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-export function XIcon() {
-  return (
-    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
-      <path
-        d="M18 6 6 18M6 6l12 12"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-export function CircleXIcon() {
-  return (
-    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
-      <path
-        d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z"
-        stroke="currentColor"
-        strokeWidth="2"
-      />
-      <path
-        d="M15 9 9 15M9 9l6 6"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-/* ========================= ADMIN - INCIDENCIAS/CLIMA ========================= */
-
 type IncTipo = "leve" | "moderado" | "grave" | "critico";
 
 export function CardIncidenciaAdmin({
@@ -2207,6 +2119,91 @@ export function CardPoliticaAdmin({
         onCancel={cancelDelete}
       />
     </div>
+  );
+}
+
+
+/* ========================= ICONS ========================= */
+
+
+export function PlusIcon() {
+  return (
+    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+      <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function FilterIcon() {
+  return (
+    <svg className="w-3.5 h-3.5 text-black/70" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M4 6h16M7 12h10M10 18h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function PencilIcon() {
+  return (
+    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M12 20h9"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5Z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function CheckIcon() {
+  return (
+    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M20 6 9 17l-5-5"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function XIcon() {
+  return (
+    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M18 6 6 18M6 6l12 12"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+export function CircleXIcon() {
+  return (
+    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+      <path
+        d="M15 9 9 15M9 9l6 6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }
 
@@ -2688,6 +2685,87 @@ export function SearchBar({ texto, value, onChange }: SearchBarProps) {
       </form>
     </div>
   );
+}
+
+export function SearchBarwFilters({texto, filters, selectedFilter, onFilterChange}: {
+    texto: string, 
+    filters: string[], 
+    selectedFilter?: string,
+    onFilterChange?: (filter: string) => void
+}) {
+    const [currentFilter, setCurrentFilter] = useState(selectedFilter || filters[0] || 'todos');
+
+    const handleFilterSelect = (filter: string) => {
+        setCurrentFilter(filter);
+        if (onFilterChange) {
+            onFilterChange(filter);
+        }
+    };
+
+    const getFilterDisplayName = (filter: string) => {
+        switch (filter) {
+            case 'todos':
+                return 'Todos';
+            case 'completos':
+                return 'Completos';
+            case 'incompletos':
+                return 'Incompletos';
+            default:
+                return filter;
+        }
+    };
+
+    return (
+        <div className="bg-beige1 p-4 rounded-lg shadow-sm border border-borde1 mb-6">
+            <div className="flex items-center gap-4">
+                {/* Search Bar */}
+                <div className="relative flex-1">
+                    <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                        <svg
+                            className="w-4 h-4 text-verde3"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width={24}
+                            height={24}
+                            fill="none"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke="currentColor"
+                                strokeLinecap="round"
+                                strokeWidth={2}
+                                d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
+                        />
+                        </svg>
+                    </div>
+                    <input
+                        type="search"
+                        id="search"
+                        className="block w-full py-2 px-3 ps-9 bg-beige2 border border-borde2 text-verde3 placeholder-verde3 text-sm rounded-base focus:ring-verde2 focus:border-verde2"
+                        placeholder={texto}
+                    />
+                </div>
+                
+                {/* Filter Buttons */}
+                <div className="flex gap-2">
+                    {filters.map((filter) => (
+                        <button
+                            key={filter}
+                            type="button"
+                            onClick={() => handleFilterSelect(filter)}
+                            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                                currentFilter === filter
+                                    ? 'bg-verde3 text-white'
+                                    : 'bg-beige2 text-verde1 border border-borde1 hover:bg-tabla-header'
+                            }`}
+                        >
+                            {getFilterDisplayName(filter)}
+                        </button>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
 }
 
 /* ========================= BASE PAGINA ADMIN Y SUS COMPONENTES ========================= */
