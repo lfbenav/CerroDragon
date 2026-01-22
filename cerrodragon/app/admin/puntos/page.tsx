@@ -1,5 +1,6 @@
 "use client";
-import { CardPunto, SideBarClient, TopBar, WhatsAppButton } from "@/app/components";
+import { CardPuntoAdmin, SideBarAdmin, TopBar } from "@/app/components";
+import Link from "next/link";
 import { useState, useEffect } from "react";
 
 interface Punto {
@@ -10,7 +11,7 @@ interface Punto {
     activo: boolean;
 }
 
-export default function Puntos() {
+export default function PuntosAdmin() {
     const [puntos, setPuntos] = useState<Punto[]>([]);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [error, setError] = useState<string | null>(null);
@@ -65,9 +66,8 @@ export default function Puntos() {
             // const data = await response.json();
             // setPuntos(data);
             
-            // Por ahora usamos datos mockeados
-            await new Promise(resolve => setTimeout(resolve, 1000)); // Simular delay de API
-            setPuntos(mockPuntos.filter(punto => punto.activo)); // Solo puntos activos
+            // Por ahora usamos datos mock
+            setPuntos(mockPuntos); 
             
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Error cargando puntos');
@@ -82,7 +82,7 @@ export default function Puntos() {
 
     return (
         <div className="h-screen bg-gray-50 flex overflow-hidden">
-            <SideBarClient />
+            <SideBarAdmin />
             <div className="flex-1 flex flex-col">
                 <TopBar />
                 <main className="flex-1 flex flex-col pt-20 px-8 min-h-0">
@@ -91,14 +91,33 @@ export default function Puntos() {
                             <div className="">
                                 <h1 className="text-3xl font-bold mb-1 text-black mt-4">Puntos de encuentro</h1>
                                 <p className="mb-4 text-verde3">
-                                    Le ofrecemos transporte desde estos puntos estratégicos.
+                                    Coloque los puntos destinados a encuentro
                                 </p>
-                                <hr className="border-1 border-borde1 my-4" />
                             </div>
-                            <div className="flex justify-end mb-4">
-                                <WhatsAppButton />
+                            <div className="flex justify-end my-2">
+                                <Link href="/admin/puntos/new">
+                                    <button className="flex justify-center items-center bg-verde2 text-white px-4 py-2 rounded-lg gap-4">
+                                        <svg
+                                            className="w-6 h-6 text-white dark:text-white"
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            width={24}
+                                            height={24}
+                                            fill="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                fillRule="evenodd"
+                                                d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4.243a1 1 0 1 0-2 0V11H7.757a1 1 0 1 0 0 2H11v3.243a1 1 0 1 0 2 0V13h3.243a1 1 0 1 0 0-2H13V7.757Z"
+                                                clipRule="evenodd"
+                                            />
+                                        </svg>
+                                        Nuevo Punto
+                                    </button>
+                                </Link>
                             </div>
                         </div>
+                        <hr className="border-1 border-borde1 w-full mt-1 mb-4" />
                         
                         {/* Scrollable puntos */}
                         <div className="overflow-x-auto mb-6">
@@ -109,7 +128,7 @@ export default function Puntos() {
                                     </div>
                                 ) : (
                                     puntos.map((punto) => (
-                                        <CardPunto
+                                        <CardPuntoAdmin
                                             key={punto.id}
                                             nombre={punto.nombre}
                                             ubicacion={punto.ubicacion}
@@ -118,26 +137,6 @@ export default function Puntos() {
                                     ))
                                 )}
                             </div>
-                        </div>
-                        <div className="">
-                            <p className="text-md text-verde3 mb-6 font-medium">
-                                Si desea solicitar un servicio de trasbordo en alguno de los puntos de encuentro debe enviar un mensaje de whatsapp con la siguiente información: 
-                                <span className="font-bold text-black"> 
-                                    <br/>
-                                    <br/> Nombre del Cliente
-                                    <br/>Identificador de Reserva
-                                    <br/>Solicita transporte desde
-                                </span>
-                            </p>
-                            <h2 className="text-2xl font-bold mb-2 text-black mt-4">Ejemplo</h2>
-                            <hr className="border-1 border-borde1" />
-                            <p className="text-md text-verde3 mb-1 font-medium">
-                                <span className="font-bold text-black"> 
-                                    <br/> Nombre del Cliente: <span className="text-amarillo">Juan Pérez</span>
-                                    <br/>Identificador de Reserva: <span className="text-amarillo">RV-2345</span>
-                                    <br/>Solicita transporte desde: <span className="text-amarillo">Uruca</span>
-                                </span>
-                            </p>
                         </div>
                     </div>
                 </main>

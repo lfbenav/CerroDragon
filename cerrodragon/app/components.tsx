@@ -162,6 +162,16 @@ interface CardTestimonioAdminProps {
     onReject?: (id: number) => void;
 }
 
+interface ImageUploadProps {
+    imagen: File | null;
+    onImageChange: (file: File | null) => void;
+    disabled?: boolean;
+    label?: string;
+    height?: string;
+    placeholder?: string;
+    accept?: string;
+}
+
 /* ========================= CALENDARIO PROPS ========================= */
 
 interface CalendarDayProps {
@@ -371,7 +381,7 @@ export function SideBarClient() {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M20 12H8m12 0-4 4m4-4-4-4M9 4H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h2"
+                        d="M20 12H8m12 0-4 4m4-4-4-4M9 4H7a3  3 0 0 0-3 3v10a3 3 0 0 0 3 3h2"
                     />
                 </svg>
                 <span className="px-4 whitespace-nowrap">Volver</span>
@@ -606,7 +616,7 @@ export function SideBarAdmin() {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M20 12H8m12 0-4 4m4-4-4-4M9 4H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h2"
+                        d="M20 12H8m12 0-4 4m4-4-4-4M9 4H7a3  3 0 0 0-3 3v10a3 3 0 0 0 3 3h2"
                     />
                 </svg>
                 <span className="px-4 whitespace-nowrap">Volver</span>
@@ -1288,7 +1298,7 @@ export function CardIncidencia({titulo, descripcion, fecha, tipo}: CardIncidenci
     };
 
     return (
-        <div className={`w-full h-auto border-2 rounded-xl p-4 flex flex-col shadow-sm inline-block mb-6 ${getAlertStyles()}`}>
+        <div className={`w-full h-auto border-2 rounded-xl p-4 flex flex-col shadow-sm ${getAlertStyles()}`}>
             <div className="flex items-center mb-2 mx-4">
                 {getAlertIcon()}
                 <span className="ml-2 text-sm font-bold text-black">{getAlertText()}</span>
@@ -1451,25 +1461,25 @@ export function CardFAQAdmin({
       <div className="border-b border-borde1 mb-3" />
 
       {/* Respuesta */}
-<div className="min-h-[44px]">
-  {isEditing ? (
-    <>
-      <textarea
-        value={a}
-        onChange={(e) => setA(e.target.value)}
-        rows={2}
-        maxLength={150}
-        className="w-full bg-transparent text-verde3 text-sm outline-none resize-none"
-        placeholder="Ingrese la respuesta a la pregunta"
-      />
-      <div className="mt-1 text-xs text-verde3 text-right">
-        {a.length}/150
+      <div className="min-h-[44px]">
+        {isEditing ? (
+          <>
+            <textarea
+              value={a}
+              onChange={(e) => setA(e.target.value)}
+              rows={2}
+              maxLength={150}
+              className="w-full bg-transparent text-verde3 text-sm outline-none resize-none"
+              placeholder="Ingrese la respuesta a la pregunta"
+            />
+            <div className="mt-1 text-xs text-verde3 text-right">
+              {a.length}/150
+            </div>
+          </>
+        ) : (
+          <p className="text-sm text-verde3 leading-relaxed">{respuesta}</p>
+        )}
       </div>
-    </>
-  ) : (
-    <p className="text-sm text-verde3 leading-relaxed">{respuesta}</p>
-  )}
-</div>
 
 
       {/* Actions */}
@@ -1518,6 +1528,53 @@ export function CardFAQAdmin({
     </div>
   );
 }
+
+export function CardPuntoAdmin({nombre, ubicacion, direccion, imagen}: CardPuntoProps) {
+    return (
+        <div className="bg-beige1 w-70 block border border-default border-borde1 rounded-xl relative flex flex-col">
+            <div className="flex justify-center items-center m-4 h-32">
+                <Image
+                    className="rounded-lg w-32 h-32 object-cover"
+                    src={imagen || "/punto1.png"}
+                    alt="Punto de encuentro"
+                    width={80}
+                    height={64}
+                />
+            </div>
+            <div className="flex-1 px-4 pb-4 flex flex-col justify-between items-center text-center">
+                <h3 className="text-lg font-medium text-black">{nombre}</h3>
+                <div className="mb-2 w-full">
+                    <a href={`https://maps.google.com/?q=${encodeURIComponent(ubicacion)}`} target="_blank" rel="noopener noreferrer" 
+                        className="text-sm text-verde3 hover:text-verde2 underline break-words">
+                        {ubicacion}
+                    </a>
+                </div>
+                <p className="text-sm text-verde3">{direccion}</p>
+            </div>
+            <hr className="border-1 border-borde1 mt-2 mx-4 mb-4 " />
+            <div className="flex justify-end items-center">
+                <button className="px-4 pb-4 rounded-b-xl hover:scale-105 transition-transform">
+                    <svg
+                        className="w-6 h-6 text-verde1 dark:text-verde1"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width={24}
+                        height={24}
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            fillRule="evenodd"
+                            d="M8.586 2.586A2 2 0 0 1 10 2h4a2 2 0 0 1 2 2v2h3a1 1 0 1 1 0 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a1 1 0 0 1 0-2h3V4a2 2 0 0 1 .586-1.414ZM10 6h4V4h-4v2Zm1 4a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Zm4 0a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Z"
+                            clipRule="evenodd"
+                        />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    );
+}
+
 
 /* ========================= ICONS ========================= */
 
@@ -1907,6 +1964,7 @@ export function CardPoliticaAdmin({
 
   useEffect(() => {
     if (!isEditing) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setT(titulo);
       setD(descripcion);
     }
@@ -2394,6 +2452,8 @@ export function HomeBar() {
                     className="w-4 h-4"
                     aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg"
+                    width={24}
+                    height={24}
                     fill="none"
                     viewBox="0 0 24 24"
                 >
@@ -2789,7 +2849,6 @@ export function ConfirmModal({
     </div>
   );
 }
-
 
 export function WhatsAppButton() {
     return (
@@ -3303,10 +3362,19 @@ export function TablaConsultas({ consultas, onMarcarResuelta }: {
                                             >
                                                 <svg
                                                     className="w-5 h-5 text-verde3"
-                                                    fill="currentColor"
+                                                    aria-hidden="true"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    width={24}
+                                                    height={24}
+                                                    fill="none"
                                                     viewBox="0 0 24 24"
                                                 >
-                                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884h-.004Z"/>
+                                                    <path
+                                                        stroke="currentColor"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884h-.004Z"/>
                                                 </svg>
                                                 WhatsApp
                                             </button>
@@ -3594,6 +3662,92 @@ export function TablaCupones({ cupones, onEliminar }: {
                         </tbody>
                     </table>
                 </div>
+            </div>
+        </div>
+    );
+}
+
+/*============================== Image Upload Component ==============================*/
+
+export function ImageUpload({
+    imagen,
+    onImageChange,
+    disabled = false,
+    label = "Imagen",
+    height = "h-64",
+    placeholder = "Haga clic para subir imagen",
+    accept = "image/*"
+}: ImageUploadProps) {
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            onImageChange(e.target.files[0]);
+        }
+    };
+
+    const handleRemoveImage = () => {
+        onImageChange(null);
+    };
+
+    return (
+        <div>
+            <label className="block mb-2.5 text-md font-medium text-black">
+                {label}
+            </label>
+            <div className={`border-2 border-dashed border-borde1 rounded-xl ${height} flex items-center justify-center bg-tabla-header`}>
+                {imagen ? (
+                    <div className="text-center">
+                        <Image 
+                            src={URL.createObjectURL(imagen)} 
+                            alt="Preview" 
+                            className="max-h-56 mx-auto rounded-lg"
+                            width={224}
+                            height={224}
+                            unoptimized
+                        />
+                        <button
+                            type="button"
+                            onClick={handleRemoveImage}
+                            className="mt-2 text-sm text-red-500 hover:text-red-700"
+                            disabled={disabled}
+                        >
+                            Eliminar imagen
+                        </button>
+                    </div>
+                ) : (
+                    <label htmlFor="imagen-upload" className={disabled ? "cursor-not-allowed" : "cursor-pointer"}>
+                        <div className="text-center text-verde2">
+                            <svg 
+                                className="w-16 h-16 mx-auto mb-2 text-verde2"
+                                xmlns="http://www.w3.org/2000/svg" 
+                                fill="none" 
+                                viewBox="0 0 24 24" 
+                                stroke="currentColor"
+                            >
+                                <path 
+                                    strokeLinecap="round" 
+                                    strokeLinejoin="round" 
+                                    strokeWidth={1.5} 
+                                    d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" 
+                                />
+                                <path 
+                                    strokeLinecap="round" 
+                                    strokeLinejoin="round" 
+                                    strokeWidth={1.5} 
+                                    d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" 
+                                />
+                            </svg>
+                            <p className="text-sm">{placeholder}</p>
+                        </div>
+                        <input
+                            id="imagen-upload"
+                            type="file"
+                            accept={accept}
+                            onChange={handleImageChange}
+                            className="hidden"
+                            disabled={disabled}
+                        />
+                    </label>
+                )}
             </div>
         </div>
     );
