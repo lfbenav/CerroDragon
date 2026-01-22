@@ -1,58 +1,52 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { SideBarAdmin, TopBar, CardIncidenciaAdmin } from "../../components";
+import { SideBarAdmin, TopBar, CardPoliticaAdmin } from "../../components";
 
-type IncTipo = "leve" | "moderado" | "grave" | "critico";
-
-type Incidencia = {
+type Politica = {
   id: string;
   titulo: string;
   descripcion: string;
-  fecha: string;
-  tipo: IncTipo;
 };
 
-export default function AdminIncidenciasClimaPage() {
-  const initial: Incidencia[] = useMemo(
+export default function AdminPoliticasPage() {
+  const initial: Politica[] = useMemo(
     () => [
       {
         id: "1",
-        titulo: "Fuertes vientos en la zona",
+        titulo: "¿Quiénes Somos?",
         descripcion:
-          "Se esperan ráfagas de viento que podrían afectar la seguridad de los tours al aire libre. Recomendamos a los clientes estar atentos a las actualizaciones y seguir las indicaciones del personal.",
-        fecha: "25 de noviembre de 2025",
-        tipo: "leve",
+          "En Cerro Dragón Tours trabajamos para ofrecer experiencias turísticas seguras, organizadas y transparentes. Las siguientes políticas y condiciones establecen las reglas generales que rigen el uso de nuestra plataforma, la realización de reservas, los pagos y la participación en nuestros tours. Su objetivo es proteger tanto a nuestros clientes como a la empresa, garantizando una operación clara, ordenada y confiable.",
       },
       {
         id: "2",
-        titulo: "Lluvia torrencial prevista",
+        titulo: "Política de Reservas",
         descripcion:
-          "Se pronostica lluvia intensa para las próximas 6 horas. Todos los tours programados para hoy han sido suspendidos por motivos de seguridad. Contacte con nuestro personal para reprogramar.",
-        fecha: "26 de noviembre de 2025",
-        tipo: "critico",
+          "Las reservas realizadas a través de la plataforma están sujetas a validación administrativa y disponibilidad operativa. Ninguna reserva se considera confirmada hasta que haya sido aprobada por Cerro Dragón Tours.",
       },
       {
         id: "3",
-        titulo: "Temperatura extrema",
+        titulo: "Política de Pagos",
         descripcion:
-          "Las temperaturas alcanzarán los 38°C durante el mediodía. Se recomienda a los visitantes hidratarse constantemente y evitar la exposición prolongada al sol.",
-        fecha: "24 de noviembre de 2025",
-        tipo: "grave",
+          "Todos los pagos deben realizarse mediante los métodos autorizados por la empresa y deben contar con un comprobante válido. La confirmación del servicio depende de la verificación manual del pago por parte del personal administrativo.",
       },
       {
         id: "4",
-        titulo: "Cierre temporal del sendero norte",
+        titulo: "Política de Cancelaciones",
         descripcion:
-          "Debido a trabajos de mantenimiento en el sendero norte, esta ruta permanecerá cerrada hasta nuevo aviso. Los tours han sido redirigidos al sendero sur sin costo adicional.",
-        fecha: "23 de noviembre de 2025",
-        tipo: "moderado",
+          "Las cancelaciones de reservas estarán sujetas a las condiciones y plazos definidos por Cerro Dragón Tours. Las solicitudes fuera de los plazos establecidos podrán no ser elegibles para reembolso.",
+      },
+      {
+        id: "5",
+        titulo: "Política de Reembolsos",
+        descripcion:
+          "Los reembolsos se evaluarán conforme a las políticas vigentes al momento de la reserva y únicamente aplicarán a reservas futuras según las condiciones definidas por la empresa.",
       },
     ],
     []
   );
 
-  const [items, setItems] = useState<Incidencia[]>(initial);
+  const [items, setItems] = useState<Politica[]>(initial);
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const handleNew = () => {
@@ -62,9 +56,7 @@ export default function AdminIncidenciasClimaPage() {
       {
         id: newId,
         titulo: "Ingrese el título",
-        descripcion: "Ingrese la descripción de la alerta",
-        fecha: "Ingrese la fecha",
-        tipo: "leve",
+        descripcion: "Ingrese la descripción",
       },
     ]);
     setEditingId(newId);
@@ -75,10 +67,7 @@ export default function AdminIncidenciasClimaPage() {
     setEditingId((cur) => (cur === id ? null : cur));
   };
 
-  const handleSave = (
-    id: string,
-    next: { titulo: string; descripcion: string; fecha: string; tipo: IncTipo }
-  ) => {
+  const handleSave = (id: string, next: { titulo: string; descripcion: string }) => {
     setItems((prev) => prev.map((x) => (x.id === id ? { ...x, ...next } : x)));
     setEditingId(null);
   };
@@ -95,16 +84,16 @@ export default function AdminIncidenciasClimaPage() {
 
         <main className="flex-1 flex flex-col pt-20 px-8 min-h-0">
           <div className="max-w-7xl mx-auto w-full flex flex-col h-full">
+            {/* Header */}
             <div className="flex-shrink-0">
               <div className="flex items-start justify-between gap-6">
                 <div>
                   <h1 className="text-3xl font-bold mb-1 text-black mt-4">
-                    Alertas de Clima e Incidencias
+                    Editar Políticas e Información
                   </h1>
                   <p className="text-verde3 mb-4 text-lg">
-                    Edite las alertas o agregue nuevas alertas de clima e
-                    incidencias que puedan afectar las actividades en Cerro
-                    Dragón.
+                    Gestionar la información que se muestra en la sección de políticas e información de la
+                    página principal.
                   </p>
                 </div>
 
@@ -113,23 +102,22 @@ export default function AdminIncidenciasClimaPage() {
                   className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-md bg-verde2 text-white text-sm font-medium hover:opacity-95"
                 >
                   <PlusIcon />
-                  Nueva Alerta
+                  Nueva Entrada
                 </button>
               </div>
 
               <div className="border-b border-black/20" />
             </div>
 
+            {/* Cards */}
             <div className="flex-1 overflow-y-auto min-h-0">
-              <div className="grid grid-cols-1 p-6 gap-6">
+              <div className="grid grid-cols-1 p-6 gap-6 w-full">
                 {items.map((it) => (
-                  <CardIncidenciaAdmin
+                  <CardPoliticaAdmin
                     key={it.id}
                     id={it.id}
                     titulo={it.titulo}
                     descripcion={it.descripcion}
-                    fecha={it.fecha}
-                    tipo={it.tipo}
                     isEditing={editingId === it.id}
                     onStartEdit={() => handleStartEdit(it.id)}
                     onCancelEdit={handleCancelEdit}

@@ -1772,6 +1772,167 @@ export function CardIncidenciaAdmin({
   );
 }
 
+/* ========================= ADMIN - POLITICAS ========================= */
+
+export function CardPoliticaAdmin({
+  id,
+  titulo,
+  descripcion,
+  isEditing,
+  onStartEdit,
+  onCancelEdit,
+  onSave,
+  onDelete,
+}: {
+  id: string;
+  titulo: string;
+  descripcion: string;
+  isEditing: boolean;
+  onStartEdit: () => void;
+  onCancelEdit: () => void;
+  onSave: (next: { titulo: string; descripcion: string }) => void;
+  onDelete: () => void;
+}) {
+  const TITLE_MAX = 60;
+  const DESC_MAX = 475;
+
+  const [t, setT] = useState(titulo);
+  const [d, setD] = useState(descripcion);
+
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isEditing) {
+      setT(titulo);
+      setD(descripcion);
+    }
+  }, [titulo, descripcion, isEditing]);
+
+  const handleEditOrSave = () => {
+    if (!isEditing) return onStartEdit();
+    onSave({ titulo: t.trim(), descripcion: d.trim() });
+  };
+
+  const handleCancel = () => {
+    setT(titulo);
+    setD(descripcion);
+    onCancelEdit();
+  };
+
+  const requestDelete = () => setConfirmOpen(true);
+  const cancelDelete = () => setConfirmOpen(false);
+  const confirmDelete = () => {
+    setConfirmOpen(false);
+    onDelete();
+  };
+
+  return (
+    <div className="bg-beige1 w-full h-auto border border-borde1 rounded-xl p-4 flex flex-col shadow-sm inline-block">
+      {/* header row + actions */}
+      <div className="flex items-start mx-4 gap-3">
+        <div className="flex-1">
+          {isEditing ? (
+            <>
+              <input
+                value={t}
+                onChange={(e) => setT(e.target.value)}
+                maxLength={TITLE_MAX}
+                className="w-full text-lg font-semibold text-black bg-transparent outline-none border-b border-borde1 pb-1"
+                placeholder="Título"
+              />
+              <div className="mt-1 text-right text-xs text-verde3">
+                {t.length}/{TITLE_MAX}
+              </div>
+            </>
+          ) : (
+            <h3 className="text-lg font-semibold text-black">{titulo}</h3>
+          )}
+        </div>
+
+        {/* actions on the right */}
+        <div className="flex items-center gap-2 mt-1">
+          <button
+            type="button"
+            onClick={handleEditOrSave}
+            className="w-8 h-8 inline-flex items-center justify-center rounded-full hover:bg-black/5 text-black"
+            aria-label={isEditing ? "Guardar" : "Editar"}
+            title={isEditing ? "Guardar" : "Editar"}
+          >
+            {isEditing ? <CheckIcon /> : <PencilIcon />}
+          </button>
+
+          {isEditing ? (
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="w-8 h-8 inline-flex items-center justify-center rounded-full hover:bg-black/5 text-black"
+              aria-label="Cancelar"
+              title="Cancelar"
+            >
+              <XIcon />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={requestDelete}
+              className="w-8 h-8 inline-flex items-center justify-center rounded-full hover:bg-black/5 text-black"
+              aria-label="Eliminar"
+              title="Eliminar"
+            >
+              <CircleXIcon />
+            </button>
+          )}
+        </div>
+      </div>
+
+      <hr className="border-borde1 mb-2 mx-4 border-1" />
+
+{/* description */}
+{isEditing ? (
+  <div className="px-4">
+    <textarea
+      value={d}
+      onChange={(e) => setD(e.target.value.slice(0, DESC_MAX))}
+      maxLength={DESC_MAX}
+      rows={4}
+      className="
+        w-full
+        pr-16
+        text-sm text-verde3 leading-relaxed
+        mb-1
+        bg-beige2
+        border border-borde2
+        rounded-md
+        px-3 py-2
+        outline-none
+        resize-none
+        focus:ring-2 focus:ring-verde2
+      "
+      placeholder="Descripción"
+    />
+    <div className="mb-2 text-right text-xs text-verde3">
+      {d.length}/{DESC_MAX}
+    </div>
+  </div>
+) : (
+  <p className="text-sm text-verde3 leading-relaxed px-4 mb-2">
+    {descripcion}
+  </p>
+)}
+
+      <ConfirmModal
+        open={confirmOpen}
+        title="Eliminar entrada"
+        message={`¿Está seguro de que desea eliminar "${titulo}"?\n\nEsta acción no se puede deshacer.`}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        confirmVariant="danger"
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+      />
+    </div>
+  );
+}
 
 /* ========================= CALENDARIO ========================= */
 
