@@ -3,4 +3,10 @@ const controller = require("../controllers/utils.controller");
 
 router.get("/test", controller.test);
 
+// Rutas para comidas
+router.get("/comidas", controller.getAllComidas);
+router.post("/comidas", controller.createComida);
+router.put("/comidas/:id", controller.updateComida);
+router.delete("/comidas/:id", controller.deleteComida);
+
 module.exports = router;

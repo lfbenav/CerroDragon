@@ -1,13 +1,91 @@
 "use client";
 import { CardPunto, SideBarClient, TopBar, WhatsAppButton } from "@/app/components";
+import { useState, useEffect } from "react";
+
+interface Punto {
+    id: number;
+    nombre: string;
+    ubicacion: string;
+    direccion: string;
+    activo: boolean;
+}
 
 export default function Puntos() {
+    const [puntos, setPuntos] = useState<Punto[]>([]);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [error, setError] = useState<string | null>(null);
+
+    // Datos mock - Reemplazar con datos reales de la API
+    const mockPuntos: Punto[] = [
+        {
+            id: 1,
+            nombre: "Uruca",
+            ubicacion: "https://share.google/ncSBFPw2B6kwbG8Lw",
+            direccion: "500 mts este del palo de mamón chino",
+            activo: true
+        },
+        {
+            id: 2,
+            nombre: "Ceiba Alta",
+            ubicacion: "https://share.google/ncSBFPw2B6kwbG8Lw",
+            direccion: "200 mts oeste del palo de mango",
+            activo: true
+        },
+        {
+            id: 3,
+            nombre: "San José Centro",
+            ubicacion: "https://share.google/ncSBFPw2B6kwbG8Lw",
+            direccion: "Frente al Teatro Nacional",
+            activo: true
+        },
+        {
+            id: 4,
+            nombre: "Cartago",
+            ubicacion: "https://share.google/ncSBFPw2B6kwbG8Lw",
+            direccion: "Terminal de buses de Cartago",
+            activo: true
+        },
+        {
+            id: 5,
+            nombre: "Heredia",
+            ubicacion: "https://share.google/ncSBFPw2B6kwbG8Lw",
+            direccion: "Parque Central de Heredia",
+            activo: false
+        }
+    ];
+
+    // TODO: Función para obtener puntos desde la API
+    const fetchPuntos = async () => {
+        try {
+            setError(null);
+            
+            // TODO: Llamada a la API para obtener los puntos
+            // const response = await fetch('/api/puntos');
+            // if (!response.ok) throw new Error('Error fetching puntos');
+            // const data = await response.json();
+            // setPuntos(data);
+            
+            // Por ahora usamos datos mockeados
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Simular delay de API
+            setPuntos(mockPuntos.filter(punto => punto.activo)); // Solo puntos activos
+            
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Error cargando puntos');
+            console.error('Error fetching puntos:', err);
+        }
+    };
+
+    useEffect(() => {
+        fetchPuntos();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     return (
         <div className="h-screen bg-gray-50 flex overflow-hidden">
             <SideBarClient />
             <div className="flex-1 flex flex-col">
                 <TopBar />
-                <main className="flex-1 flex flex-col pt-20 px-8 min-h-0">
+                <main className="flex-1 flex flex-col ml-72  pt-20 px-8 min-h-0">
                     <div className="max-w-7xl mx-auto w-full flex flex-col h-full">
                         <div className="flex-shrink-0 flex justify-between items-center">
                             <div className="">
@@ -25,41 +103,20 @@ export default function Puntos() {
                         {/* Scrollable puntos */}
                         <div className="overflow-x-auto mb-6">
                             <div className="flex gap-12 p-6 min-w-max">
-                                <CardPunto
-                                    nombre="Uruca"
-                                    ubicacion="https://share.google/ncSBFPw2B6kwbG8Lw"
-                                    direccion="500 mts este del palo de mamón chino" 
-                                />
-                                <CardPunto
-                                    nombre="Ceiba Alta"
-                                    ubicacion="https://share.google/ncSBFPw2B6kwbG8Lw"
-                                    direccion="200 mts oeste del palo de mango" 
-                                />
-                                <CardPunto
-                                    nombre="Ceiba Alta"
-                                    ubicacion="https://share.google/ncSBFPw2B6kwbG8Lw"
-                                    direccion="200 mts oeste del palo de mango" 
-                                />
-                                <CardPunto
-                                    nombre="Ceiba Alta"
-                                    ubicacion="https://share.google/ncSBFPw2B6kwbG8Lw"
-                                    direccion="200 mts oeste del palo de mango" 
-                                />
-                                <CardPunto
-                                    nombre="Ceiba Alta"
-                                    ubicacion="https://share.google/ncSBFPw2B6kwbG8Lw"
-                                    direccion="200 mts oeste del palo de mango" 
-                                />
-                                <CardPunto
-                                    nombre="Ceiba Alta"
-                                    ubicacion="https://share.google/ncSBFPw2B6kwbG8Lw"
-                                    direccion="200 mts oeste del palo de mango" 
-                                />
-                                <CardPunto
-                                    nombre="Ceiba Alta"
-                                    ubicacion="https://share.google/ncSBFPw2B6kwbG8Lw"
-                                    direccion="200 mts oeste del palo de mango" 
-                                />
+                                {puntos.length === 0 ? (
+                                    <div className="text-center py-8">
+                                        <p className="text-gray-500 text-lg">No hay puntos de encuentro disponibles</p>
+                                    </div>
+                                ) : (
+                                    puntos.map((punto) => (
+                                        <CardPunto
+                                            key={punto.id}
+                                            nombre={punto.nombre}
+                                            ubicacion={punto.ubicacion}
+                                            direccion={punto.direccion} 
+                                        />
+                                    ))
+                                )}
                             </div>
                         </div>
                         <div className="">

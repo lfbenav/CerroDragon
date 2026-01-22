@@ -8,7 +8,7 @@ export default function CheckInPage() {
             <SideBarClient />
             <div className="flex-1 flex flex-col">
                 <TopBar />
-                <main className="flex-1 flex flex-col pt-20 px-8 min-h-0">
+                <main className="flex-1 flex flex-col ml-72  pt-20 px-8 min-h-0">
                     <div className="max-w-7xl mx-auto w-full flex flex-col">
                         {/* Fixed header section */}
                         <div className="flex-shrink-0">
@@ -31,7 +31,7 @@ export default function CheckInPage() {
                                     <input
                                     type="text"
                                     id="visitors"
-                                    className="bg-tabla-header border border-borde1 text-heading text-sm 
+                                    className="bg-tabla-header border border-borde1 text-verde1 text-sm 
                                     rounded-xl focus:ring-borde2 focus:border-borde2 block w-full px-3 py-2.5 
                                     shadow-xs placeholder:text-verde2 placeholder:font-medium placeholder:opacity-50"
                                     placeholder="Joe Doe"
