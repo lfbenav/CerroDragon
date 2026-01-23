@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+ 
 'use client';
 import { CardPaquete, SideBarAdmin, TopBar, ConfirmModal } from "@/app/components";
 import { useSearchParams, useRouter } from "next/navigation";

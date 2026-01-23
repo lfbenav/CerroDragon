@@ -80,7 +80,7 @@ export default function Cupones() {
                             </div>
                             <div className="flex justify-end mb-0 items-center">
                                 <Link href="/admin/cupones/nuevo">
-                                    <button className="bg-verde3 text-white px-4 py-2 rounded-lg hover:bg-verde2 transition justify-between items-center flex">
+                                    <button className="bg-verde3 gap-2 text-white px-4 py-2 rounded-lg hover:bg-verde2 transition justify-between items-center flex">
                                         <svg
                                             className="w-6 h-6 text-white dark:text-white"
                                             aria-hidden="true"

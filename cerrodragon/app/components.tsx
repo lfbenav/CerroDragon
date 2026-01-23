@@ -456,13 +456,13 @@ export function SideBarAdmin() {
                 </a>
             </li>
             <li>
-                <a
+                <Link
                 href="/admin/clientes"
                 className="flex items-center px-2 py-1.5 text-white rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group"
                 >
                 <div className="w-5 h-5 mr-3"></div>
                 <span className="flex-1 whitespace-nowrap">Clientes</span>
-                </a>
+                </Link>
             </li>
             <li>
                 <a
@@ -894,6 +894,37 @@ export function CardGuide({nombre, activo, imagen}: {nombre: string, activo: str
                 )}
             </div>
         </div>
+    );
+
+}
+
+export function CardGuideAdmin({id, nombre, activo, imagen}: {id:number, nombre: string, activo: string, imagen?: string}) {
+    return (
+        <Link href={"/admin/guias/info?id="+id}>
+        <div className="bg-beige1 block w-60 h-80 border border-default border-borde1 rounded-xl relative flex flex-col shadow-md hover:scale-105 hover:shadow-lg transition-all">
+            <div className="h-48 overflow-hidden m-4 rounded-lg">
+                <Image
+                    className="rounded-lg w-full h-full object-cover"
+                    src={imagen || "/guia1.png"}
+                    alt="Guía turístico"
+                    width={208}
+                    height={160}
+                />
+            </div>
+            <div className="flex-1 px-4 pb-4 flex flex-col justify-between items-center text-center">
+                <h3 className="text-lg font-medium text-black">{nombre}</h3>
+                {activo === 'Activo' ? (
+                    <span className="inline-flex items-center px-4 py-1 text-verde3 text-sm font-bold rounded bg-verdetrans w-fit">
+                        Activo
+                    </span>                
+                ) : (
+                    <span className="inline-flex items-center px-4 py-1 text-rojovino text-sm font-bold rounded bg-rojotrans w-fit">
+                        Inactivo
+                    </span>
+                )}
+            </div>
+        </div>
+        </Link>
     );
 
 }
@@ -3150,6 +3181,15 @@ export function Cuadro({texto, cantidad}: CuadroProps) {
     );
 }
 
+export function CuadroTexto({titulo, texto}: {titulo: string, texto: string}) {
+    return (
+        <div className='bg-beige1 w-[400px] border-borde1 border rounded-xl p-4 flex flex-col 1justify-start shadow-sm'>
+            <h3 className="mb-2 text-sm font-medium text-verde3">{titulo}</h3>
+            <p className="text-2xl font-normal text-black pl-4">{texto}</p>
+        </div>
+    );
+}
+
 export function ConfirmModal({
   open,
   title,
@@ -4140,6 +4180,100 @@ export function TablaMisAlojamientos({ reservas }: { reservas: AlojamientoProps[
                                     </td>
                                     <td className="px-6 py-4 text-black hover:underline hover:cursor-pointer">
                                         Descargar
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export function TablaAlojamientosAdmin({ reservas }: { reservas: AlojamientoProps[] }) {
+    const getEstadoBadge = (estado: ReservaProps['estado']) => {
+        switch (estado) {
+            case 'confirmada':
+                return (
+                    <span className="inline-flex items-center px-3 py-1 text-verde3 text-sm font-bold rounded bg-verdetrans">
+                        Confirmada
+                    </span>
+                );
+            case 'pendiente':
+                return (
+                    <span className="inline-flex items-center px-3 py-1 text-amarillo text-sm font-bold rounded bg-amarillotrans">
+                        Pendiente
+                    </span>
+                );
+            case 'cancelada':
+                return (
+                    <span className="inline-flex items-center px-3 py-1 text-rojovino text-sm font-bold rounded bg-rojotrans">
+                        Cancelada
+                    </span>
+                );
+            case 'reembolsada':
+                return (
+                    <span className="inline-flex items-center px-3 py-1 text-azul1 text-sm font-bold rounded bg-azultrans">
+                        Reembolsada
+                    </span>
+                );
+        }
+    };
+
+    return (
+        <div className="flex-1 overflow-y-auto min-h-0">
+            <div className="bg-beige1 rounded-lg shadow-sm border border-borde1 mt-6">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left">
+                        <thead className="bg-tabla-header text-center text-black text-sm font-bold tracking-wider">
+                            <tr>
+                                <th className='px-1 py-3'>ID</th>
+                                <th className='px-2 py-3'>Cliente</th>
+                                <th className='px-1 py-3'>Personas</th>
+                                <th className='px-1 py-3'>Fecha de Reserva</th>
+                                <th className='px-1 py-3'>Fecha de Llegada</th>
+                                <th className='px-1 py-3'>Fecha Final</th>
+                                <th className='px-2 py-3'>Cabaña</th>
+                                <th className='px-1 py-3'>Estado</th>
+                                <th className='px-1 py-3'></th>
+
+                            </tr>
+                        </thead>
+                        <tbody className="bg-beige1 divide-y divide-borde1">
+                            {reservas.map((reserva) => (
+                                <tr key={reserva.id} className='bg-tabla-row text-center hover:bg-tabla-header'>
+                                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-black">{reserva.id}</td>
+                                    <td className="px-2 py-4 whitespace-nowrap">
+                                        <div className="text-sm font-bold text-verde1">{reserva.clienteNombre}</div>
+                                        <div className="text-sm text-verde3">{reserva.clienteEmail}</div>
+                                    </td>
+                                    <td className="px-2 py-4 whitespace-nowrap text-lg text-rojosuave font-bold">{reserva.personas}</td>
+                                    <td className="px-4 py-4 whitespace-nowrap text-sm text-black">{reserva.fechaReserva}</td>
+                                    <td className="px-4 py-4 whitespace-nowrap text-sm text-black">{reserva.fechaLlegada}</td>
+                                    <td className="px-4 py-4 whitespace-nowrap text-sm text-black">{reserva.fechaFinal}</td>
+                                    <td className="px-4 py-4 whitespace-nowrap text-sm text-black">{reserva.cabana}</td>
+                                    <td className="px-2 py-4 whitespace-nowrap">{getEstadoBadge(reserva.estado)}</td>
+                                    <td className="px-1 py-4 whitespace-nowrap text-sm flex  justify-center items-center">
+                                        <Link href={`/admin/alojamientos/editar?id=${reserva.id}`}>
+                                            <button className="text-verde1 font-bold hover:text-rojo1 flex items-center justify-center px-1 py-1 hover:[&>svg]:text-rojo1 hover:cursor-pointer">
+                                                <svg
+                                                    className="w-6 h-6 text-verde1 dark:text-verde1"
+                                                    aria-hidden="true"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    width={24}
+                                                    height={24}
+                                                    fill="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        fillRule="evenodd"
+                                                        d="M14 4.182A4.136 4.136 0 0 1 16.9 3c1.087 0 2.13.425 2.899 1.182A4.01 4.01 0 0 1 21 7.037c0 1.068-.43 2.092-1.194 2.849L18.5 11.214l-5.8-5.71 1.287-1.31.012-.012Zm-2.717 2.763L6.186 12.13l2.175 2.141 5.063-5.218-2.141-2.108Zm-6.25 6.886-1.98 5.849a.992.992 0 0 0 .245 1.026 1.03 1.03 0 0 0 1.043.242L10.282 19l-5.25-5.168Zm6.954 4.01 5.096-5.186-2.218-2.183-5.063 5.218 2.185 2.15Z"
+                                                        clipRule="evenodd"
+                                                    />
+                                                </svg>
+                                            </button>
+                                        </Link>
                                     </td>
                                 </tr>
                             ))}

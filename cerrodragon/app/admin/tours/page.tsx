@@ -55,9 +55,6 @@ export default function Tours() {
         }
     };
 
-    const refreshTours = () => {
-        fetchTours();
-    };
 
     // TODO: Poner el search funcional en components
     //
@@ -97,13 +94,6 @@ export default function Tours() {
                                     </p>
                                 </div>
                                 <div className="flex gap-2">
-                                    <button 
-                                        onClick={refreshTours}
-                                        className="bg-gray-500 px-4 py-2 text-white flex items-center justify-center rounded-lg hover:bg-gray-600"
-                                        disabled={loading}
-                                    >
-                                        {loading ? "Cargando..." : "Refrescar"}
-                                    </button>
                                     <Link href="/admin/tours/nuevo">
                                         <button className="bg-verde3 text-white px-4 py-2 rounded-lg hover:bg-verde2 transition justify-between items-center flex">
                                             <svg

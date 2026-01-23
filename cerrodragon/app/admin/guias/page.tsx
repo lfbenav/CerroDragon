@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { CardGuide, Cuadro, SearchBarwFilters, SideBarAdmin, TopBar } from "@/app/components";
+import { CardGuideAdmin, Cuadro, SearchBarwFilters, SideBarAdmin, TopBar } from "@/app/components";
 import Link from "next/link";
 
 interface Guide {
@@ -130,7 +130,8 @@ export default function GestionGuias() {
                             ) : (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-6 p-6">
                                     {filteredGuides.map((guide) => (
-                                        <CardGuide
+                                        <CardGuideAdmin
+                                            id={guide.id}
                                             key={guide.id}
                                             nombre={guide.nombre}
                                             activo={guide.activo}
