@@ -901,7 +901,7 @@ export function CardGuide({nombre, activo, imagen}: {nombre: string, activo: str
 export function CardCabana({id, nombre, descripcion, capacidad, etiqueta, imagen}: CardCabanaProps) {
     return (
         <div className="bg-beige1 block w-[350px] h-80 border border-default border-borde1 rounded-xl cardTour relative flex flex-col">
-        <a href={"/"+id} className="block overflow-hidden relative">
+        <a href={`/cliente/cabanas/info?id=${id}`} className="block overflow-hidden relative">
             <div className="h-48 overflow-hidden">
                 <Image
                 className="rounded-t-xl w-full h-full object-cover"
@@ -957,7 +957,7 @@ export function CardCabana({id, nombre, descripcion, capacidad, etiqueta, imagen
                     </span>
                 )}
                 <a
-                href="#"
+                href={`/cliente/cabanas/info?id=${id}`}
                 className="inline-flex items-end text-verde3 bg-brand font-medium text-sm py-2"
                 >
                     Ver más
