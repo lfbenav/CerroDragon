@@ -1044,7 +1044,7 @@ export function CardCabanaAdmin({id, nombre, descripcion, capacidad, etiqueta, i
                     </span>
                 )}
                 <Link
-                href="/admin/cabanas/[id]"
+                href={`/admin/cabanas/${id}`}
                 className="inline-flex items-end text-verde3 bg-brand font-medium text-sm py-2"
                 >
                     Editar
