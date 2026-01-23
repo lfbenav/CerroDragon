@@ -22,7 +22,7 @@ export default function AdminCheckinRespuestaPage() {
 
   const data: CheckinResponse = useMemo(
     () => ({
-      code,
+      code: 'fbjds -2026-01-10-cerrodragon-rv001',
       cliente: "Carlos Alvarado",
       tour: "Cerro Dragón",
       reservaId: "RV-001",
