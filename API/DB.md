@@ -166,8 +166,8 @@ CREATE TABLE promotion_package_items (
 CREATE TABLE meeting_points (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text NOT NULL,
-  description text,
-  extra_cost_per_person_usd numeric(10,2) NOT NULL DEFAULT 0 CHECK (extra_cost_per_person_usd >= 0),
+  description text, -- poner el link aqui
+  link text,
   is_active boolean NOT NULL DEFAULT true
 );
 
@@ -347,6 +347,7 @@ CREATE TABLE accommodations (   -- Cabaña
 CREATE TABLE accommodation_reservations (   -- Reservar cabaña
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   customer_id uuid NOT NULL REFERENCES customers(id) ON DELETE RESTRICT,
+  accommodation_id uuid NOT NULL REFERENCES accommodations(id) ON DELETE CASCADE,
   start_date date NOT NULL,
   end_date date NOT NULL,
   persons integer NOT NULL CHECK (persons >= 1),

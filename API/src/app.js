@@ -19,7 +19,14 @@ app.use("/assign-guide", require("./routes/assignGuide.routes"));           // A
 app.use("/my-reservations", require("./routes/myReservations.routes"));     // Reservaciones del cliente
 app.use("/documents", require("./routes/documents.routes"));                // Documentos
 app.use("/users", require("./routes/users.routes"));                        // Usuarios
-app.use("/utils", require("./routes/utils.routes"));                        // Cosas como forms de comida, inventario, cabañas, etc.
+app.use("/foods", require("./routes/foods.routes"));                        // Cosas como forms de comida
+app.use("/calendar", require("./routes/calendar.routes"));                  // Calendarios
+app.use("/accomodations", require("./routes/accomodations.routes"));        // cabañas
+app.use("/images", require("./routes/images.routes"));                      // imagenes
+app.use("/others", require("./routes/others.routes"));                      // clima, logs, puntos de encuentro, testimonios, políticas, etc.
+
+
+// inventario, cabañas, etc.
 
 app.use((req, res, next) => {
     next(new AppError("Ruta no encontrada", 404, "NOT_FOUND"));

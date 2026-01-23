@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const controller = require("../controllers/utils.controller");
+const controller = require("../controllers/foods.controller");
 
 router.get("/test", controller.test);
 

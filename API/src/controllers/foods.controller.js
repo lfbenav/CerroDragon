@@ -4,7 +4,7 @@ const AppError = require("../utils/AppError");
 
 // Solo para hacer pruebas rápidas de funcionamiento 
 exports.test = asyncHandler(async (req, res) => {
-    res.send("API de Utilidades funcionando");
+    res.send("API de Comida funcionando");
 });
 
 // GET /utils/comidas - Obtener todas las comidas
@@ -120,3 +120,4 @@ exports.deleteComida = asyncHandler(async (req, res) => {
         message: "Comida eliminada exitosamente"
     });
 });
+
