@@ -38,17 +38,23 @@ exports.getById = asyncHandler(async (req, res) => {
 
 // Crear una cabaña
 exports.create = asyncHandler(async (req, res) => {
-    const { name, description, capacity } = req.body || {};
+    const { name, description, capacity, price, image_url } = req.body || {};
 
-    if (!name || !capacity) {
+    if (!name || capacity == null) {
         throw new AppError("name y capacity requeridos", 400);
     }
 
     const { rows } = await pool.query(`
-        INSERT INTO accommodations (name, description, capacity)
-        VALUES ($1, $2, $3)
+        INSERT INTO accommodations (name, description, capacity, price, image_url)
+        VALUES ($1, $2, $3, $4, $5)
         RETURNING *
-    `, [name, description || null, capacity]);
+    `, [
+        name,
+        description || null,
+        capacity,
+        price || null,
+        image_url || null
+    ]);
 
     res.status(201).json({ success: true, data: rows[0] });
 });
@@ -56,16 +62,18 @@ exports.create = asyncHandler(async (req, res) => {
 // Actualizar info de una cabaña
 exports.update = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { name, description, capacity } = req.body || {};
+    const { name, description, capacity, price, image_url } = req.body || {};
 
     const { rowCount, rows } = await pool.query(`
         UPDATE accommodations
         SET name = COALESCE($1, name),
             description = COALESCE($2, description),
-            capacity = COALESCE($3, capacity)
-        WHERE id = $4
+            capacity = COALESCE($3, capacity),
+            price = COALESCE($4, price),
+            image_url = COALESCE($5, image_url)
+        WHERE id = $6
         RETURNING *
-    `, [name, description, capacity, id]);
+    `, [name, description, capacity, price, image_url, id]);
 
     if (!rowCount) {
         throw new AppError("Alojamiento no encontrado", 404);

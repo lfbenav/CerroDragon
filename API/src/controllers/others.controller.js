@@ -156,17 +156,22 @@ exports.getMeetingPoints = asyncHandler(async (req, res) => {
 
 // Crear punto de encuentro
 exports.createMeetingPoint = asyncHandler(async (req, res) => {
-    const { name, description, link } = req.body || {};
+    const { name, description, link, image_url } = req.body || {};
 
     if (!name) {
         throw new AppError("name requerido", 400);
     }
 
     const { rows } = await pool.query(`
-        INSERT INTO meeting_points (name, description, link)
-        VALUES ($1, $2, $3)
+        INSERT INTO meeting_points (name, description, link, image_url)
+        VALUES ($1, $2, $3, $4)
         RETURNING *
-    `, [name, description || null, link || null]);
+    `, [
+        name,
+        description || null,
+        link || null,
+        image_url || null
+    ]);
 
     res.status(201).json({ success: true, data: rows[0] });
 });
@@ -174,17 +179,18 @@ exports.createMeetingPoint = asyncHandler(async (req, res) => {
 // Actualizar punto de encuentro
 exports.updateMeetingPoint = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { name, description, link, is_active } = req.body || {};
+    const { name, description, link, image_url, is_active } = req.body || {};
 
     const { rowCount, rows } = await pool.query(`
         UPDATE meeting_points
         SET name = COALESCE($1, name),
             description = COALESCE($2, description),
             link = COALESCE($3, link),
-            is_active = COALESCE($4, is_active)
-        WHERE id = $5
+            image_url = COALESCE($4, image_url),
+            is_active = COALESCE($5, is_active)
+        WHERE id = $6
         RETURNING *
-    `, [name, description, link, is_active, id]);
+    `, [name, description, link, image_url, is_active, id]);
 
     if (!rowCount) {
         throw new AppError("Punto de encuentro no encontrado", 404);

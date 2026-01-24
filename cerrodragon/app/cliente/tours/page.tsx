@@ -15,7 +15,7 @@ interface Tour {
   duration_hours: number | null;
   duration_days: number | null;
   max_persons: number;
-  price_person: number;
+  person_price: number;
   image_url: string;
 }
 
@@ -110,7 +110,7 @@ export default function Tours() {
                         id={tour.id}
                         nombre={tour.title}
                         descripcion={tour.description}
-                        precio={tour.price_person}
+                        precio={tour.person_price}
                         imagen={tour.image_url}
                         capacidad={tour.max_persons}
                         duracion={duracion}

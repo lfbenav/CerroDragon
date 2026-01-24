@@ -180,6 +180,7 @@ CREATE TABLE meeting_points (
   name text NOT NULL,
   description text, -- poner el link aqui
   link text,
+  image_url text,
   is_active boolean NOT NULL DEFAULT true
 );
 
@@ -353,7 +354,9 @@ CREATE TABLE accommodations (   -- Cabaña
   capacity integer NOT NULL CHECK (capacity >= 1),
   is_active boolean NOT NULL DEFAULT true,
   status text NOT NULL CHECK (status IN ('AVAILABLE','RESERVED','INACTIVE')) DEFAULT 'AVAILABLE',
-  last_reserved timestamptz
+  last_reserved timestamptz,
+  price integer,
+  image_url text
 );
 
 CREATE TABLE accommodation_reservations (   -- Reservar cabaña

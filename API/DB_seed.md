@@ -41,11 +41,41 @@ WHERE r.name = 'guide';
 -- TOURS
 -- =========================
 INSERT INTO tours (
-  id, title, description, duration_hours, duration_days,
-  max_persons, base_location
+  id,
+  title,
+  description,
+  duration_hours,
+  duration_days,
+  max_persons,
+  person_price,
+  image_url,
+  base_location,
+  is_active
 ) VALUES
-  (gen_random_uuid(), 'Tour Catarata', 'Caminata guiada a la catarata', 4, 1, 10, 5000, 'La Fortuna'),
-  (gen_random_uuid(), 'Tour Mirador', 'Vista panorámica al amanecer', 3, 1, 8, 2000, 'Monteverde');
+(
+  gen_random_uuid(),
+  'Tour Catarata',
+  'Caminata guiada a una catarata natural',
+  4,
+  1,
+  10,
+  25000,
+  'http://localhost:3000/images/miau/1769134462806-484245176.png',
+  'La Fortuna',
+  true
+),
+(
+  gen_random_uuid(),
+  'Tour Mirador',
+  'Vista panorámica al amanecer desde el mirador',
+  3,
+  1,
+  8,
+  18000,
+  'http://localhost:3000/images/miau/1769134462806-484245176.png',
+  'Monteverde',
+  true
+);
 
 -- =========================
 -- TAGS
@@ -55,27 +85,57 @@ INSERT INTO tags (id, name) VALUES
   (gen_random_uuid(), 'Aventura');
 
 INSERT INTO tour_tags (tour_id, tag_id)
-SELECT t.id, tg.id FROM tours t CROSS JOIN tags tg;
+SELECT t.id, tg.id
+FROM tours t
+CROSS JOIN tags tg;
 
 -- =========================
 -- TOUR PACKAGES
 -- =========================
 INSERT INTO tour_packages (id, tour_id, name, price_usd)
-SELECT gen_random_uuid(), t.id, 'Básico', 50 FROM tours t;
+SELECT gen_random_uuid(), t.id, 'Básico', 15000
+FROM tours t;
 
 INSERT INTO tour_packages (id, tour_id, name, price_usd)
-SELECT gen_random_uuid(), t.id, 'Premium', 85 FROM tours t;
+SELECT gen_random_uuid(), t.id, 'Premium', 28000
+FROM tours t;
 
 INSERT INTO tour_package_items (package_id, item_name)
-SELECT tp.id, 'Guía certificado' FROM tour_packages tp;
+SELECT tp.id, 'Guía certificado'
+FROM tour_packages tp;
+
+INSERT INTO tour_package_items (package_id, item_name)
+SELECT tp.id, 'Seguro INS'
+FROM tour_packages tp
+WHERE tp.name = 'Premium';
 
 -- =========================
 -- MEETING POINTS
 -- =========================
-INSERT INTO meeting_points (id, name, description, link)
-VALUES
-  (gen_random_uuid(), 'Entrada Principal', 'Entrada al parque', 'https://maps.google.com'),
-  (gen_random_uuid(), 'Hotel', 'Recogida en hotel', 'https://maps.google.com');
+INSERT INTO meeting_points (
+  id,
+  name,
+  description,
+  link,
+  image_url,
+  is_active
+) VALUES
+(
+  gen_random_uuid(),
+  'Entrada Principal',
+  'Entrada principal al parque',
+  'https://maps.google.com',
+  'http://localhost:3000/images/miau/1769134462806-484245176.png',
+  true
+),
+(
+  gen_random_uuid(),
+  'Hotel',
+  'Recogida en hotel cercano',
+  'https://maps.google.com',
+  'http://localhost:3000/images/miau/1769134462806-484245176.png',
+  true
+);
 
 INSERT INTO tour_meeting_points (tour_id, meeting_point_id)
 SELECT t.id, mp.id
@@ -87,19 +147,22 @@ JOIN meeting_points mp ON mp.name = 'Entrada Principal';
 -- =========================
 INSERT INTO inventory_items (name, unit, quantity)
 VALUES
-  ('Agua', 'botellas', 100),
-  ('Snacks', 'paquetes', 40);
+  ('Agua', 'botellas', 120),
+  ('Snacks', 'paquetes', 50),
+  ('Botiquín', 'unidades', 3);
 
 -- =========================
 -- POLICIES
 -- =========================
-INSERT INTO policies (title, content)
+INSERT INTO policies (title, content, is_active)
 VALUES
-  ('Política de Cancelación',
-   'Las cancelaciones deben realizarse con al menos 24 horas de anticipación.');
+(
+  'Política de Cancelación',
+  'Las cancelaciones deben realizarse con al menos 24 horas de anticipación para aplicar reembolso.',
+  true
+);
 
 COMMIT;
-
 
 -- Fin
 ```
