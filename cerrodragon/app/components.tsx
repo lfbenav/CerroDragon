@@ -574,11 +574,11 @@ export function SideBarAdmin() {
             </li>
             <li>
                 <a
-                href="/admin/insumos"
+                href="/admin/inventario"
                 className="flex items-center px-2 py-1.5 text-white rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group"
                 >
                 <div className="w-5 h-5 mr-3"></div>
-                <span className="flex-1 whitespace-nowrap">Insumos</span>
+                <span className="flex-1 whitespace-nowrap">Inventario</span>
                 </a>
             </li>
             <li>
@@ -607,6 +607,15 @@ export function SideBarAdmin() {
                 <div className="w-5 h-5 mr-3"></div>
                 <span className="flex-1 whitespace-nowrap">Auditoria</span>
                 </a>
+            </li>
+            <li>
+                <Link
+                href="/admin/administradores"
+                className="flex items-center px-2 py-1.5 text-white rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group"
+                >
+                <div className="w-5 h-5 mr-3"></div>
+                <span className="flex-1 whitespace-nowrap">Administradores</span>
+                </Link>
             </li>
             </ul>
         </div>
