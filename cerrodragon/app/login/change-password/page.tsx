@@ -72,7 +72,7 @@ export default function ChangePasswordPage() {
                 ¿No recibió ningún código? Presione{" "}
                 <a
                   className="underline text-amber-400 hover:text-amber-300"
-                  href="#"
+                  href="/login/recover"
                 >
                   aquí
                 </a>{" "}

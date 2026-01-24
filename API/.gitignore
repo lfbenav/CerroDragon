@@ -9,7 +9,7 @@ node_modules/
 !.yarn/versions
 
 # ENV / SECRETS
-#.env       En un proyecto real probablemente esto deberia estar bloqueado pero de momento estoy testeando con en local
+.env       
 .env.*
 *.pem
 

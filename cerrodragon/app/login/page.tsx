@@ -49,7 +49,55 @@ function EyeIcon({ open }: { open: boolean }) {
 }
 
 export default function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const [showPass, setShowPass] = useState(false);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    try {
+      const res = await fetch("http://localhost:3000/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Error al iniciar sesión");
+      }
+
+      // Guardar token temporalmente
+      localStorage.setItem("access_token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      // Redireccionar
+      if (data.user.type === "admin") {
+        window.location.href = "/admin/tours";
+      } else {
+        window.location.href = "/cliente/tours";
+      }
+
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Error al iniciar sesión";
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <main className="relative min-h-screen">
@@ -80,22 +128,29 @@ export default function LoginPage() {
             <div className="w-full max-w-md rounded-xl border border-white/40 bg-black/25 backdrop-blur-sm p-6 text-white">
               <h2 className="text-lg font-semibold mb-4">Iniciar sesión</h2>
 
-              <form className="space-y-4">
+              <form className="space-y-4" onSubmit={handleLogin}>
+                {/* Email */}
                 <div>
                   <label className="block text-md mb-1">
                     Correo Electrónico
                   </label>
                   <input
                     type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     placeholder="Ingrese su correo electrónico"
                     className="w-full rounded-md border border-white/40 bg-white/10 px-3 py-2 outline-none placeholder:text-white/60 focus:border-white"
                   />
                 </div>
+
+                {/* Password */}
                 <div>
                   <label className="block text-md mb-1">Contraseña</label>
                   <div className="relative">
                     <input
                       type={showPass ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                       placeholder="Ingrese su contraseña"
                       className="w-full rounded-md border border-white/40 bg-white/10 px-3 py-2 pr-10 outline-none placeholder:text-white/60 focus:border-white"
                     />
@@ -109,27 +164,24 @@ export default function LoginPage() {
                     </button>
                   </div>
                 </div>
+
+                {/* ERROR DEL BACKEND */}
+                {error && (
+                  <p className="text-sm text-red-300 text-center">
+                    {error}
+                  </p>
+                )}
+
+                {/* BOTÓN */}
                 <button
                   type="submit"
-                  className="w-full rounded-md bg-amber-400 text-black font-semibold py-2 hover:opacity-90 flex items-center justify-center gap-3"
+                  disabled={loading}
+                  className="w-full rounded-md bg-amber-400 text-black font-semibold py-2 hover:opacity-90 flex items-center justify-center gap-3 disabled:opacity-60"
                 >
-                  Iniciar Sesión
-                  <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-amber-400">
-                    <svg
-                      className="w-4 h-4 text-black"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                    >
-                      <path
-                        d="M4 12h12m0 0-4-4m4 4-4 4"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </span>
+                  {loading ? "Ingresando..." : "Iniciar Sesión"}
                 </button>
+
+                {/* LINKS */}
                 <div className="text-md text-white/90 space-y-1 pt-3 text-center">
                   <p>
                     ¿No tiene una cuenta? Regístrese{" "}

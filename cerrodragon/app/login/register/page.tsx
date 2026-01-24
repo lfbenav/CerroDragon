@@ -49,8 +49,60 @@ function EyeIcon({ open }: { open: boolean }) {
 }
 
 export default function RegisterPage() {
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [password2, setPassword2] = useState("");
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const [showPass, setShowPass] = useState(false);
   const [showPass2, setShowPass2] = useState(false);
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    if (password !== password2) {
+      setError("Las contraseñas no coinciden");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const res = await fetch("http://localhost:3000/auth/register/client", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          full_name: fullName,
+          email,
+          phone,
+          password,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Error al registrarse");
+      }
+
+      // Registro exitoso
+      window.location.href = "/login";
+
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Error al registrarse";
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <main className="relative min-h-screen">
@@ -78,50 +130,70 @@ export default function RegisterPage() {
           </section>
           <section className="flex lg:justify-end">
             <div className="w-full max-w-md rounded-xl border border-white/45 bg-black/25 backdrop-blur-sm p-6 text-white">
-              <form className="space-y-4">
-                <Field label="Nombre Completo" placeholder="Ingrese su nombre" />
+              <form className="space-y-4" onSubmit={handleRegister}>
+                {/* Nombre completo */}
+                <Field
+                  label="Nombre Completo"
+                  placeholder="Ingrese su nombre"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                />
+
+                {/* Email */}
                 <Field
                   label="Correo Electrónico"
                   placeholder="Ingrese su correo electrónico"
                   type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
+
+                {/* Teléfono */}
                 <Field
                   label="Número Telefónico"
                   placeholder="Ingrese su número telefónico"
                   type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
                 />
 
+                {/* Password */}
                 <PasswordField
                   label="Contraseña"
                   placeholder="Ingrese su contraseña"
                   show={showPass}
                   toggle={() => setShowPass((v) => !v)}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
+
+                {/* Confirmar password */}
                 <PasswordField
                   label="Confirmar Contraseña"
                   placeholder="Ingrese su contraseña de nuevo"
                   show={showPass2}
                   toggle={() => setShowPass2((v) => !v)}
+                  value={password2}
+                  onChange={(e) => setPassword2(e.target.value)}
                 />
 
+                {/* ERROR */}
+                {error && (
+                  <p className="text-sm text-red-300 text-center">
+                    {error}
+                  </p>
+                )}
+
+                {/* BOTÓN */}
                 <button
                   type="submit"
-                  className="w-full rounded-md bg-amber-400 text-black font-semibold py-2 hover:opacity-95 flex items-center justify-center gap-2"
+                  disabled={loading}
+                  className="w-full rounded-md bg-amber-400 text-black font-semibold py-2 hover:opacity-95 flex items-center justify-center gap-2 disabled:opacity-60"
                 >
-                  Registrarse
-                  <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-amber-400">
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M4 12h12m0 0-4-4m4 4-4 4"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </span>
+                  {loading ? "Registrando..." : "Registrarse"}
                 </button>
 
+                {/* LINK LOGIN */}
                 <p className="text-md text-white/90 text-center pt-3">
                   ¿Ya tiene una cuenta? <br />
                   Inicie sesión{" "}
@@ -145,16 +217,22 @@ function Field({
   label,
   placeholder,
   type = "text",
+  value,
+  onChange,
 }: {
   label: string;
   placeholder: string;
   type?: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
   return (
     <div>
       <label className="block text-md mb-1 text-white/90">{label}</label>
       <input
         type={type}
+        value={value}
+        onChange={onChange}
         placeholder={placeholder}
         className="w-full rounded-md border border-white/45 bg-white/10 px-3 py-2 outline-none placeholder:text-white/55 focus:border-white"
       />
@@ -162,16 +240,21 @@ function Field({
   );
 }
 
+
 function PasswordField({
   label,
   placeholder,
   show,
   toggle,
+  value,
+  onChange,
 }: {
   label: string;
   placeholder: string;
   show: boolean;
   toggle: () => void;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
   return (
     <div>
@@ -179,6 +262,8 @@ function PasswordField({
       <div className="relative">
         <input
           type={show ? "text" : "password"}
+          value={value}
+          onChange={onChange}
           placeholder={placeholder}
           className="w-full rounded-md border border-white/45 bg-white/10 px-3 py-2 pr-10 outline-none placeholder:text-white/55 focus:border-white"
         />
@@ -193,3 +278,4 @@ function PasswordField({
     </div>
   );
 }
+

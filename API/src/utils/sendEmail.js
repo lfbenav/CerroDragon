@@ -17,6 +17,8 @@ const sendEmail = async ({ to, subject, html }) => {
         subject,
         html
     });
+
+    console.log("Correo enviado");
 };
 
 module.exports = sendEmail;
