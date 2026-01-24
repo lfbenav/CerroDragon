@@ -104,6 +104,8 @@ CREATE TABLE tours (
   duration_hours integer NOT NULL CHECK (duration_hours > 0),
   duration_days integer NOT NULL CHECK (duration_days > 0),
   max_persons integer NOT NULL CHECK (max_persons > 0),
+  person_price integer NOT NULL CHECK (person_price > 0),
+  image_url text,
   base_location text,
   is_active boolean NOT NULL DEFAULT true,
   created_at timestamptz NOT NULL DEFAULT now()
