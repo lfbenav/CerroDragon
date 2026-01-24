@@ -11,6 +11,7 @@ export default function EditarTour() {
     const [horas, setHoras] = useState('2');
     const [dias, setDias] = useState('00');
     const [personas, setPersonas] = useState('15');
+    const [precio, setPrecio] = useState('15000');
     const [etiquetas, setEtiquetas] = useState<string[]>(['Experto', 'Moderado']);
     const [imagen, setImagen] = useState<File | null>(null);
     const [imagenActual, setImagenActual] = useState('/tour1.png');
@@ -262,6 +263,28 @@ export default function EditarTour() {
                                                 placeholder="15"
                                                 disabled={isLoading}
                                                 min="1"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label
+                                                htmlFor="precio"
+                                                className="block mb-2.5 text-md font-medium text-black"
+                                            >
+                                                Precio por persona (₡)
+                                            </label>
+                                            <input
+                                                type="number"
+                                                id="precio"
+                                                value={precio}
+                                                onChange={(e) => setPrecio(e.target.value)}
+                                                className="bg-tabla-header border border-borde1 text-verde1 text-sm 
+                                                rounded-xl focus:ring-borde2 focus:border-borde2 block w-full px-3 py-2.5 
+                                                shadow-xs placeholder:text-verde2 placeholder:font-medium placeholder:opacity-50"
+                                                placeholder="15000"
+                                                disabled={isLoading}
+                                                min="0"
+                                                step="100"
                                             />
                                         </div>
 

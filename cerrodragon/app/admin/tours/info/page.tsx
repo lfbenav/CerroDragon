@@ -2,28 +2,74 @@
 'use client';
 import { CardPaquete, SideBarAdmin, TopBar, ConfirmModal } from "@/app/components";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
+// Datos de ejemplo de tours - Reemplazar con llamada a API
+const toursData = [
+    { id: 1, nombre: "Tour al Amanecer", descripcion: "Disfruta de un espectacular amanecer en Cerro Dragón con nuestro tour guiado.", precio: 85, capacidad: 10, duracion: "3 horas", etiqueta: "Todos", imagen: "/tour1.png" },
+    { id: 2, nombre: "Aventura Nocturna", descripcion: "Explora los senderos misteriosos del Cerro bajo la luz de las estrellas.", precio: 120, capacidad: 8, duracion: "5 horas", etiqueta: "Moderado", imagen: "/tour2.png" },
+    { id: 3, nombre: "Expedición Extrema", descripcion: "Desafía tus límites con esta expedición completa a las cumbres más altas.", precio: 250, capacidad: 6, duracion: "1 día", etiqueta: "Experto", imagen: "/tour3.png" },
+    { id: 4, nombre: "Caminata Familiar", descripcion: "Un tour relajado perfecto para toda la familia con paradas para descanso.", precio: 65, capacidad: 15, duracion: "2 horas", etiqueta: "Principiante", imagen: "/tour1.png" },
+    { id: 5, nombre: "Safari Fotográfico", descripcion: "Captura la belleza natural del Cerro con nuestro guía especializado en fotografía.", precio: 95, capacidad: 12, duracion: "4 horas", etiqueta: "Todos", imagen: "/tour2.png" },
+    { id: 6, nombre: "Ruta de las Cascadas", descripcion: "Descubre las cascadas ocultas en un recorrido lleno de aventura y naturaleza.", precio: 110, capacidad: 10, duracion: "6 horas", etiqueta: "Moderado", imagen: "/tour3.png" },
+    { id: 7, nombre: "Trekking de Resistencia", descripcion: "Una prueba de resistencia física en los senderos más desafiantes del Cerro.", precio: 180, capacidad: 8, duracion: "8 horas", etiqueta: "Experto", imagen: "/tour1.png" },
+    { id: 8, nombre: "Picnic en las Alturas", descripcion: "Disfruta de un almuerzo con vista panorámica en uno de los miradores más hermosos.", precio: 55, capacidad: 20, duracion: "3 horas", etiqueta: "Todos", imagen: "/tour2.png" },
+];
 
 export default function TourInfoPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const id = searchParams.get('id');
-    const [nombreTour] = useState('Sendero Dragón');
-    const [descripcionTour] = useState('Recorrido completo del sendero principal, se proporciona comida y un guía para la experiencia');
-    const [duracionTour] = useState('2 horas');
-    const [capacidadTour] = useState(15);
-    const [etiquetaTour] = useState('Moderado');
+    const tourId = id ? parseInt(id) : 1;
+    
+    const [nombreTour, setNombreTour] = useState('Sendero Dragón');
+    const [descripcionTour, setDescripcionTour] = useState('Recorrido completo del sendero principal, se proporciona comida y un guía para la experiencia');
+    const [duracionTour, setDuracionTour] = useState('2 horas');
+    const [capacidadTour, setCapacidadTour] = useState(15);
+    const [precioTour, setPrecioTour] = useState(15000);
+    const [etiquetaTour, setEtiquetaTour] = useState('Moderado');
     const [experienciasCompletadas] = useState(121);
     const [paquetes] = useState([
         { nombre: 'Paquete 1', descripcion: 'Incluye: Almuerzo, Guía y Poliza INS', precio: 50 },
         { nombre: 'Paquete 2', descripcion: 'Incluye: Almuerzo, autoguiado', precio: 30 }
     ]);
-    const [imagenTour] = useState('/tour1.png');
+    const [imagenTour, setImagenTour] = useState('/tour1.png');
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [paqueteToDelete, setPaqueteToDelete] = useState<number | null>(null);
+
+    // Cargar datos del tour según el ID
+    useEffect(() => {
+        const tour = toursData.find(t => t.id === tourId);
+        if (tour) {
+            setNombreTour(tour.nombre);
+            setDescripcionTour(tour.descripcion);
+            setPrecioTour(tour.precio);
+            setCapacidadTour(tour.capacidad);
+            setDuracionTour(tour.duracion);
+            setEtiquetaTour(tour.etiqueta);
+            setImagenTour(tour.imagen);
+        }
+        // TODO: Reemplazar con llamada a API cuando esté disponible
+        // const fetchTour = async () => {
+        //     try {
+        //         const response = await fetch(`/api/tours/${tourId}`);
+        //         if (!response.ok) throw new Error('Error al cargar el tour');
+        //         const data = await response.json();
+        //         setNombreTour(data.nombre);
+        //         setDescripcionTour(data.descripcion);
+        //         setPrecioTour(data.precio);
+        //         setCapacidadTour(data.capacidad);
+        //         setDuracionTour(data.duracion);
+        //         setEtiquetaTour(data.etiqueta);
+        //         setImagenTour(data.imagen);
+        //     } catch (error) {
+        //         console.error('Error:', error);
+        //     }
+        // };
+        // fetchTour();
+    }, [tourId]);
 
     const handleDeletePaquete = (index: number) => {
         setPaqueteToDelete(index);
@@ -121,6 +167,12 @@ export default function TourInfoPage() {
                                 <div className="mb-6 flex flex-row gap-12">
                                     <p className="text-md font-medium text-black"> <span className="text-verde3 font-bold"> Tiempo: </span> {duracionTour}</p>
                                     <p className="text-md font-medium text-black ml-24"><span className="text-verde3 font-bold">Cantidad de personas:</span> {capacidadTour} personas</p>
+                                </div>
+                                <div className="mb-6">
+                                    <p className="text-md font-medium text-black">
+                                        <span className="text-verde3 font-bold">Precio por persona:</span>
+                                        <span className="ml-3 text-2xl font-bold text-naranja">₡{precioTour.toLocaleString()}</span>
+                                    </p>
                                 </div>
                                 <p className="mb-24 text-black font-medium"> <span className="text-verde3 font-bold">Etiquetas:</span>     
                                     {etiquetaTour === 'Moderado' ? (

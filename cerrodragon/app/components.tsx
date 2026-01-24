@@ -312,15 +312,6 @@ export function SideBarClient() {
             </li>
             <li>
                 <a
-                href="/cliente/reservas"
-                className="flex items-center px-2 py-1.5 text-white rounded-base group"
-                >
-                <div className="w-5 h-5 mr-3"></div>
-                <span className="flex-1 whitespace-nowrap">Reembolsos</span>
-                </a>
-            </li>
-            <li>
-                <a
                 href="/cliente/puntos"
                 className="flex items-center px-2 py-1.5 text-white rounded-base group"
                 >
@@ -2720,8 +2711,8 @@ export function HomeBar() {
             </span>
             </a>
             <div className="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
-            <button
-                type="button"
+            <Link
+                href="/login"
                 className="text-white bg-verde2 rounded-xl x-12 box-border border border-transparent shadow-xs font-medium leading-5 rounded-base text-sm px-3 py-2 flex items-center gap-2"
             >
                 <svg
@@ -2742,7 +2733,7 @@ export function HomeBar() {
                     />
                 </svg>
                 Login
-            </button>
+            </Link>
             </div>
             <div
             className="items-center justify-between hidden w-full md:flex md:w-auto md:order-1"
