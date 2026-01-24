@@ -44,8 +44,8 @@ INSERT INTO tours (
   id, title, description, duration_hours, duration_days,
   max_persons, base_location
 ) VALUES
-  (gen_random_uuid(), 'Tour Catarata', 'Caminata guiada a la catarata', 4, 1, 10, 'La Fortuna'),
-  (gen_random_uuid(), 'Tour Mirador', 'Vista panorámica al amanecer', 3, 1, 8, 'Monteverde');
+  (gen_random_uuid(), 'Tour Catarata', 'Caminata guiada a la catarata', 4, 1, 10, 5000, 'La Fortuna'),
+  (gen_random_uuid(), 'Tour Mirador', 'Vista panorámica al amanecer', 3, 1, 8, 2000, 'Monteverde');
 
 -- =========================
 -- TAGS

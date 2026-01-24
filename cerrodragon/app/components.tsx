@@ -658,12 +658,10 @@ export function CardTour({id, nombre, descripcion, precio, capacidad, duracion, 
                 ${precio}
             </div>
             <div className="h-36 overflow-hidden">
-                <Image
-                className="rounded-t-xl w-full h-full object-cover"
-                src={imagen || "/tour1.png"}
-                alt=""
-                width={325}
-                height={100}
+                <img
+                    src={imagen || "/tour1.png"}
+                    alt={nombre}
+                    className="rounded-t-xl w-full h-full object-cover"
                 />
             </div>
         </a>
@@ -768,9 +766,11 @@ export function CardTourAdmin({id, nombre, descripcion, precio, capacidad, durac
     return (
     <div className="bg-beige1 block w-[350px] h-92 border border-default border-borde1 rounded-xl cardTour relative flex flex-col">
         <a href={`/admin/tours/info?id=${id}`} className="block overflow-hidden relative">
-            <div className="absolute top-4 left-4 bg-amarillo text-black text-sm font-semibold px-3 py-1 rounded-md z-20">
-                ${precio}
-            </div>
+            {precio && precio > 0 && (
+                <div className="absolute top-4 left-4 bg-amarillo text-black text-sm font-semibold px-3 py-1 rounded-md z-20">
+                    ${precio}
+                </div>
+            )}
             <div className="h-36 overflow-hidden">
                 <Image
                 className="rounded-t-xl w-full h-full object-cover"
@@ -2677,16 +2677,37 @@ export function AdminCalendarGrid({
 /* ========================= TOP BAR ========================= */
 
 export function TopBar() {
+//   let email: string | null = null;
+
+//   if (typeof window !== "undefined") {
+//     try {
+//         const userRaw = localStorage.getItem("user");
+//         if (userRaw) {
+//             const user = JSON.parse(userRaw);
+//             email = user.email ?? null;
+//         }
+//     } catch {}
+//   }
+
   return (
     <nav className="bg-beige1 fixed top-0 left-64 right-0 z-20 border-b border-gray-200">
-        <div className="flex items-center justify-end px-4 py-4">
+      <div className="flex items-center justify-end px-6 py-4 gap-3">
+        {/* Email */}
+        {/* {email && (
+          <span className="text-sm text-gray-700 hidden sm:block">
+            {email}
+          </span>
+        )} */}
+
+        {/* Avatar */}
+        <Link href="/profile">
             <button
                 type="button"
-                className="flex text-sm rounded-full focus:ring-4 focus:ring-gray-300 pr-25"
+                className="flex text-sm rounded-full focus:ring-4 focus:ring-gray-300"
                 id="user-menu-button"
                 aria-expanded="false"
             >
-                <span className="sr-only">User</span>
+                <span className="sr-only">User menu</span>
                 <Image
                 className="w-8 h-8 rounded-full"
                 src="/cerro.png"
@@ -2695,7 +2716,8 @@ export function TopBar() {
                 height={32}
                 />
             </button>
-        </div>
+        </Link>
+      </div>
     </nav>
   );
 }
