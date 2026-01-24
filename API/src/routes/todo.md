@@ -1,0 +1,1 @@
+Hace falta poner los auth y permisos, pero si no se pueden solo omitir porque hay que configurar cosas en el front pq quité algunos porque no funcionaban
