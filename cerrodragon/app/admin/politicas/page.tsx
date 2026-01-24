@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { SideBarAdmin, TopBar, CardPoliticaAdmin } from "../../components";
 
 type Politica = {
@@ -9,71 +9,153 @@ type Politica = {
   descripcion: string;
 };
 
+const API_URL = "http://localhost:3000";
+
+type PolicyAPI = {
+  id: string;
+  title: string;
+  content: string;
+  is_active: boolean;
+  created_at: string;
+};
+
 export default function AdminPoliticasPage() {
-  const initial: Politica[] = useMemo(
-    () => [
-      {
-        id: "1",
-        titulo: "¿Quiénes Somos?",
-        descripcion:
-          "En Cerro Dragón Tours trabajamos para ofrecer experiencias turísticas seguras, organizadas y transparentes. Las siguientes políticas y condiciones establecen las reglas generales que rigen el uso de nuestra plataforma, la realización de reservas, los pagos y la participación en nuestros tours. Su objetivo es proteger tanto a nuestros clientes como a la empresa, garantizando una operación clara, ordenada y confiable.",
-      },
-      {
-        id: "2",
-        titulo: "Política de Reservas",
-        descripcion:
-          "Las reservas realizadas a través de la plataforma están sujetas a validación administrativa y disponibilidad operativa. Ninguna reserva se considera confirmada hasta que haya sido aprobada por Cerro Dragón Tours.",
-      },
-      {
-        id: "3",
-        titulo: "Política de Pagos",
-        descripcion:
-          "Todos los pagos deben realizarse mediante los métodos autorizados por la empresa y deben contar con un comprobante válido. La confirmación del servicio depende de la verificación manual del pago por parte del personal administrativo.",
-      },
-      {
-        id: "4",
-        titulo: "Política de Cancelaciones",
-        descripcion:
-          "Las cancelaciones de reservas estarán sujetas a las condiciones y plazos definidos por Cerro Dragón Tours. Las solicitudes fuera de los plazos establecidos podrán no ser elegibles para reembolso.",
-      },
-      {
-        id: "5",
-        titulo: "Política de Reembolsos",
-        descripcion:
-          "Los reembolsos se evaluarán conforme a las políticas vigentes al momento de la reserva y únicamente aplicarán a reservas futuras según las condiciones definidas por la empresa.",
-      },
-    ],
-    []
-  );
-
-  const [items, setItems] = useState<Politica[]>(initial);
+  const [items, setItems] = useState<Politica[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
+  /* =========================
+     FETCH POLICIES
+  ========================== */
+  useEffect(() => {
+    const fetchPolicies = async () => {
+      try {
+        const res = await fetch(`${API_URL}/others/policies`);
+        const json = await res.json();
+
+        if (res.ok) {
+          const mapped: Politica[] = json.data.map((p: PolicyAPI) => ({
+            id: p.id,
+            titulo: p.title,
+            descripcion: p.content,
+          }));
+
+          setItems(mapped);
+        }
+      } catch (err) {
+        console.error("Error cargando políticas", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPolicies();
+  }, []);
+
+  /* =========================
+     NUEVA POLÍTICA
+  ========================== */
   const handleNew = () => {
     const newId = `new-${Date.now()}`;
+
     setItems((prev) => [
-      ...prev,
       {
         id: newId,
         titulo: "Ingrese el título",
         descripcion: "Ingrese la descripción",
       },
+      ...prev,
     ]);
+
     setEditingId(newId);
   };
 
-  const handleDelete = (id: string) => {
-    setItems((prev) => prev.filter((x) => x.id !== id));
-    setEditingId((cur) => (cur === id ? null : cur));
+  /* =========================
+     GUARDAR (CREATE / UPDATE)
+  ========================== */
+  const handleSave = async (
+    id: string,
+    next: { titulo: string; descripcion: string }
+  ) => {
+    try {
+      const isNew = id.startsWith("new-");
+
+      if (isNew) {
+        const res = await fetch(`${API_URL}/others/policies`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: next.titulo,
+            content: next.descripcion,
+          }),
+        });
+
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.message);
+
+        setItems((prev) =>
+          prev.map((x) =>
+            x.id === id
+              ? {
+                  id: String(json.data.id),
+                  titulo: json.data.title,
+                  descripcion: json.data.content,
+                }
+              : x
+          )
+        );
+      } else {
+        const res = await fetch(`${API_URL}/others/policies/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: next.titulo,
+            content: next.descripcion,
+          }),
+        });
+
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.message);
+
+        setItems((prev) =>
+          prev.map((x) =>
+            x.id === id
+              ? { ...x, titulo: next.titulo, descripcion: next.descripcion }
+              : x
+          )
+        );
+      }
+
+      setEditingId(null);
+    } catch (err) {
+      console.error("Error guardando política", err);
+      alert("Error al guardar la política");
+    }
   };
 
-  const handleSave = (id: string, next: { titulo: string; descripcion: string }) => {
-    setItems((prev) => prev.map((x) => (x.id === id ? { ...x, ...next } : x)));
-    setEditingId(null);
-  };
+  /* =========================
+     ELIMINAR
+  ========================== */
+  const handleDelete = async (id: string) => {
+    try {
+      const isNew = id.startsWith("new-");
 
-  const handleStartEdit = (id: string) => setEditingId(id);
-  const handleCancelEdit = () => setEditingId(null);
+      if (!isNew) {
+        const res = await fetch(`${API_URL}/others/policies/${id}`, {
+          method: "DELETE",
+        });
+
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.message);
+      }
+
+      setItems((prev) => prev.filter((x) => x.id !== id));
+      setEditingId(null);
+    } catch (err) {
+      console.error("Error eliminando política", err);
+      alert("Error al eliminar la política");
+    }
+  };
 
   return (
     <div className="h-screen bg-gray-50 flex overflow-hidden">
@@ -82,7 +164,7 @@ export default function AdminPoliticasPage() {
       <div className="flex-1 flex flex-col">
         <TopBar />
 
-        <main className="flex-1 flex flex-col ml-72  pt-20 px-8 min-h-0">
+        <main className="flex-1 flex flex-col ml-72 pt-20 px-8 min-h-0">
           <div className="max-w-7xl mx-auto w-full flex flex-col h-full">
             {/* Header */}
             <div className="flex-shrink-0">
@@ -92,8 +174,8 @@ export default function AdminPoliticasPage() {
                     Editar Políticas e Información
                   </h1>
                   <p className="text-verde3 mb-4 text-lg">
-                    Gestionar la información que se muestra en la sección de políticas e información de la
-                    página principal.
+                    Gestionar la información que se muestra en la sección de
+                    políticas e información.
                   </p>
                 </div>
 
@@ -111,21 +193,25 @@ export default function AdminPoliticasPage() {
 
             {/* Cards */}
             <div className="flex-1 overflow-y-auto min-h-0">
-              <div className="grid grid-cols-1 p-6 gap-6 w-full">
-                {items.map((it) => (
-                  <CardPoliticaAdmin
-                    key={it.id}
-                    id={it.id}
-                    titulo={it.titulo}
-                    descripcion={it.descripcion}
-                    isEditing={editingId === it.id}
-                    onStartEdit={() => handleStartEdit(it.id)}
-                    onCancelEdit={handleCancelEdit}
-                    onSave={(next) => handleSave(it.id, next)}
-                    onDelete={() => handleDelete(it.id)}
-                  />
-                ))}
-              </div>
+              {loading ? (
+                <p className="p-6 text-verde3">Cargando políticas...</p>
+              ) : (
+                <div className="grid grid-cols-1 p-6 gap-6 w-full">
+                  {items.map((it) => (
+                    <CardPoliticaAdmin
+                      key={it.id}
+                      id={it.id}
+                      titulo={it.titulo}
+                      descripcion={it.descripcion}
+                      isEditing={editingId === it.id}
+                      onStartEdit={() => setEditingId(it.id)}
+                      onCancelEdit={() => setEditingId(null)}
+                      onSave={(next) => handleSave(it.id, next)}
+                      onDelete={() => handleDelete(it.id)}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </main>
