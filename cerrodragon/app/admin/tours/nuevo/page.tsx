@@ -34,7 +34,7 @@ export default function NuevoTour() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (!nombre.trim()) {
             setError('El nombre del tour es requerido');
             return;
@@ -44,34 +44,71 @@ export default function NuevoTour() {
         setError('');
 
         try {
-            // TODO: Implementar la lógica para guardar el nuevo tour
-            // const formData = new FormData();
-            // formData.append('nombre', nombre.trim());
-            // formData.append('descripcion', descripcion.trim());
-            // formData.append('horas', horas);
-            // formData.append('dias', dias);
-            // formData.append('personas', personas);
-            // formData.append('etiquetas', JSON.stringify(etiquetas));
-            // if (imagen) formData.append('imagen', imagen);
+            let imageUrl: string | null = null;
 
-            // const response = await fetch('/api/tours', {
-            //     method: 'POST',
-            //     body: formData,
-            // });
+            /* =========================
+            1. SUBIR IMAGEN (si existe)
+            ========================== */
+            if (imagen) {
+                const formData = new FormData();
+                formData.append('image', imagen);
 
-            // if (!response.ok) {
-            //     throw new Error('Error al crear el tour');
-            // }
+                const imgRes = await fetch(
+                    'http://localhost:3000/images/upload/tours',
+                    {
+                        method: 'POST',
+                        body: formData,
+                    }
+                );
 
-            // Navigate back to management screen
-            router.push('/admin/tours');
+                const imgJson = await imgRes.json();
+
+                if (!imgRes.ok) {
+                    throw new Error(imgJson.message || 'Error al subir la imagen');
+                }
+
+                imageUrl = `http://localhost:3000${imgJson.file.path}`;
+            }
+
+            /* =========================
+            2. CREAR TOUR
+            ========================== */
+            const tourRes = await fetch('http://localhost:3000/tours', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    title: nombre.trim(),
+                    description: descripcion.trim() || null,
+                    duration_hours: Number(horas) || 0,
+                    duration_days: Number(dias) || 0,
+                    max_persons: Number(personas),
+                    person_price: Number(precio),
+                    image_url: imageUrl,
+                    base_location: null,
+                }),
+            });
+
+            const tourJson = await tourRes.json();
+
+            if (!tourRes.ok) {
+                throw new Error(tourJson.message || 'Error al crear el tour');
+            }
+
+            /* =========================
+            3. REDIRECCIONAR AL TOUR
+            ========================== */
+            router.push(`/admin/tours/${tourJson.data.id}`);
+
         } catch (error) {
+            console.error(error);
             setError('Error al guardar el tour. Por favor, intente nuevamente.');
-            console.error('Error:', error);
         } finally {
             setIsLoading(false);
         }
     };
+
 
     const getEtiquetaColor = (etiqueta: string) => {
         switch (etiqueta) {

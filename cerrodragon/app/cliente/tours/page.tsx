@@ -114,7 +114,7 @@ export default function Tours() {
                         imagen={tour.image_url}
                         capacidad={tour.max_persons}
                         duracion={duracion}
-                        etiqueta="Todos"
+                        etiqueta="Todos" //! Falta poner la etiqueta que le corresponda aqui, eso no se como es @naranjo
                       />
                     );
                   })}

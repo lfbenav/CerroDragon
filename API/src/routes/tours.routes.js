@@ -12,9 +12,9 @@ router.get("/", toursController.getAll);
 router.get("/all", toursController.getAll);
 router.get("/allActive", toursController.getAllActive);
 router.get("/:id", toursController.getById);
-router.post("/", auth, requirePermission("MANAGE_TOURS"), toursController.create);
-router.put("/:id", auth, requirePermission("MANAGE_TOURS"), toursController.update);
-router.delete("/:id", auth, requirePermission("MANAGE_TOURS"), toursController.delete);
+router.post("/", toursController.create);
+router.put("/:id", toursController.update);
+router.delete("/:id", toursController.delete);
 
 // Tour Tags
 router.get("/:id/tags", tagsController.getByTour);
