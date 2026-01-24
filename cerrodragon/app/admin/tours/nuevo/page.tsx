@@ -9,6 +9,7 @@ export default function NuevoTour() {
     const [horas, setHoras] = useState('');
     const [dias, setDias] = useState('');
     const [personas, setPersonas] = useState('');
+    const [precio, setPrecio] = useState('');
     const [etiquetas, setEtiquetas] = useState<string[]>([]);
     const [imagen, setImagen] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -204,6 +205,28 @@ export default function NuevoTour() {
                                                 placeholder="00"
                                                 disabled={isLoading}
                                                 min="1"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label
+                                                htmlFor="precio"
+                                                className="block mb-2.5 text-md font-medium text-black"
+                                            >
+                                                Precio por persona (₡)
+                                            </label>
+                                            <input
+                                                type="number"
+                                                id="precio"
+                                                value={precio}
+                                                onChange={(e) => setPrecio(e.target.value)}
+                                                className="bg-tabla-header border border-borde1 text-verde1 text-sm 
+                                                rounded-xl focus:ring-borde2 focus:border-borde2 block w-full px-3 py-2.5 
+                                                shadow-xs placeholder:text-verde2 placeholder:font-medium placeholder:opacity-50"
+                                                placeholder="15000"
+                                                disabled={isLoading}
+                                                min="0"
+                                                step="100"
                                             />
                                         </div>
 
