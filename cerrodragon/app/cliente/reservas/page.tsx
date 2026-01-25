@@ -1,13 +1,13 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { SideBarClient, TopBar, TablaReservas, WhatsAppButton } from "@/app/components";
 
 const API_URL = "http://localhost:3000";
 
 interface ReservaAPI {
-    id: number;
-    customer_id: number;
-    tour_id: number;
+    id: string;
+    customer_id: string;
+    tour_id: string;
     tour_date: string;
     persons: number;
     total_usd: number;
@@ -17,62 +17,70 @@ interface ReservaAPI {
 
 interface ReservaDisplay {
     id: string;
+    rawId: string;
     clienteNombre: string;
     clienteEmail: string;
     tour: string;
     monto: number;
     fecha: string;
     personas: number;
-    estado: "confirmada" | "pendiente" | "reembolsada" | "cancelada";
+    estado: "confirmada" | "pendiente" | "reembolsada" | "cancelada" | "solicitado";
 }
 
 export default function Reservas() {
     const [reservas, setReservas] = useState<ReservaDisplay[]>([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchReservas = async () => {
-            try {
-                const token = localStorage.getItem('access_token');
-                const res = await fetch(`${API_URL}/my-reservations`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                
-                if (res.ok) {
-                    const json = await res.json();
-                    const userData = JSON.parse(localStorage.getItem('user') || '{}');
-                    
-                    const mapped: ReservaDisplay[] = json.data.map((r: ReservaAPI) => ({
-                        id: `RV-${r.id}`,
-                        clienteNombre: userData.full_name || 'Usuario',
-                        clienteEmail: userData.email || '',
-                        tour: r.tour_title,
-                        monto: r.total_usd,
-                        fecha: new Date(r.tour_date).toLocaleDateString('es-CR', {
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric'
-                        }),
-                        personas: r.persons,
-                        estado: r.status === 'CONFIRMED' ? 'confirmada' 
-                              : r.status === 'CANCELLED' ? 'cancelada'
-                              : r.status === 'REFUNDED' ? 'reembolsada'
-                              : 'pendiente'
-                    }));
-                    
-                    setReservas(mapped);
+    const fetchReservas = useCallback(async () => {
+        try {
+            const token = localStorage.getItem('access_token');
+            const res = await fetch(`${API_URL}/my-reservations`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
                 }
-            } catch (error) {
-                console.error('Error cargando reservas:', error);
-            } finally {
-                setLoading(false);
+            });
+            
+            if (res.ok) {
+                const json = await res.json();
+                const userData = JSON.parse(localStorage.getItem('user') || '{}');
+                
+                const mapped: ReservaDisplay[] = json.data.map((r: ReservaAPI) => ({
+                    id: `RV-${r.id.substring(0, 8)}`,
+                    rawId: r.id,
+                    clienteNombre: userData.full_name || 'Usuario',
+                    clienteEmail: userData.email || '',
+                    tour: r.tour_title,
+                    monto: r.total_usd,
+                    fecha: new Date(r.tour_date).toLocaleDateString('es-CR', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric'
+                    }),
+                    personas: r.persons,
+                    estado: r.status === 'CONFIRMED' ? 'confirmada' 
+                          : r.status === 'CANCELLED' ? 'cancelada'
+                          : r.status === 'REFUNDED' ? 'reembolsada'
+                          : r.status === 'REFUND_REQUESTED' ? 'solicitado'
+                          : 'pendiente'
+                }));
+                
+                setReservas(mapped);
             }
-        };
-
-        fetchReservas();
+        } catch (error) {
+            console.error('Error cargando reservas:', error);
+        } finally {
+            setLoading(false);
+        }
     }, []);
+
+    useEffect(() => {
+        fetchReservas();
+    }, [fetchReservas]);
+
+    const handleRefundRequested = () => {
+        // Recargar las reservas para mostrar el nuevo estado
+        fetchReservas();
+    };
 
     return (
         <div className="h-screen bg-gray-50 flex overflow-hidden">
@@ -99,7 +107,7 @@ export default function Reservas() {
                         ) : reservas.length === 0 ? (
                             <p className="text-verde3">No tienes reservas aún</p>
                         ) : (
-                            <TablaReservas reservas={reservas} />
+                            <TablaReservas reservas={reservas} onRefundRequested={handleRefundRequested} />
                         )}
                     </div>
                     

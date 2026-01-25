@@ -1,10 +1,13 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { SideBarAdmin, TopBar, SearchBar } from "@/app/components";
+
+const API_URL = "http://localhost:3000";
 
 interface SolicitudReembolso {
     id: string;
+    rawId: string;
     cliente: string;
     correoCliente: string;
     telefono: string;
@@ -12,54 +15,76 @@ interface SolicitudReembolso {
     productoId: string;
     montoReembolso: number;
     fechaSolicitud: string;
-    motivoSolicitud: string;
     estado: "no-atendido" | "en-proceso" | "atendido";
 }
 
-// Datos de ejemplo
-const solicitudesEjemplo: SolicitudReembolso[] = [
-    {
-        id: "RB-001",
-        cliente: "Carlos Alvarado",
-        correoCliente: "c.alvarado@gmail.com",
-        telefono: "8888-1234",
-        producto: "Tour al amanecer",
-        productoId: "RV-502",
-        montoReembolso: 30000,
-        fechaSolicitud: "20 de Enero de 2026",
-        motivoSolicitud: "Condiciones climáticas adversas",
-        estado: "no-atendido",
-    },
-    {
-        id: "RB-002",
-        cliente: "María González",
-        correoCliente: "maria.g@hotmail.com",
-        telefono: "7777-5678",
-        producto: "Aventura en la montaña",
-        productoId: "RV-503",
-        montoReembolso: 45000,
-        fechaSolicitud: "19 de Enero de 2026",
-        motivoSolicitud: "Emergencia familiar",
-        estado: "en-proceso",
-    },
-    {
-        id: "RB-003",
-        cliente: "Pedro Martínez",
-        correoCliente: "p.martinez@company.com",
-        telefono: "6666-9012",
-        producto: "Tour nocturno",
-        productoId: "RV-504",
-        montoReembolso: 25000,
-        fechaSolicitud: "18 de Enero de 2026",
-        motivoSolicitud: "Cambio de planes de viaje",
-        estado: "atendido",
-    },
-];
+interface ReservaAPI {
+    id: string;
+    customer_name: string;
+    customer_email: string;
+    customer_phone: string;
+    tour_title: string;
+    total_usd: number;
+    reserved_at: string;
+    status: string;
+}
 
 export default function ReembolsosPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [filtroEstado, setFiltroEstado] = useState<string>("todos");
-    const [solicitudes, setSolicitudes] = useState<SolicitudReembolso[]>(solicitudesEjemplo);
+    const [solicitudes, setSolicitudes] = useState<SolicitudReembolso[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchSolicitudes = useCallback(async () => {
+        try {
+            const token = localStorage.getItem('access_token');
+            
+            // Obtener reservas con estado REFUND_REQUESTED y REFUNDED
+            const [requestedRes, refundedRes] = await Promise.all([
+                fetch(`${API_URL}/reservations?status=REFUND_REQUESTED`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                }),
+                fetch(`${API_URL}/reservations?status=REFUNDED`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+            ]);
+
+            const requestedData = requestedRes.ok ? await requestedRes.json() : { data: [] };
+            const refundedData = refundedRes.ok ? await refundedRes.json() : { data: [] };
+
+            const allReservas = [
+                ...requestedData.data.map((r: ReservaAPI) => ({ ...r, isRefunded: false })),
+                ...refundedData.data.map((r: ReservaAPI) => ({ ...r, isRefunded: true }))
+            ];
+
+            const mapped: SolicitudReembolso[] = allReservas.map((r: ReservaAPI & { isRefunded: boolean }) => ({
+                id: `RB-${r.id.substring(0, 8)}`,
+                rawId: r.id,
+                cliente: r.customer_name || 'Sin nombre',
+                correoCliente: r.customer_email || 'Sin correo',
+                telefono: r.customer_phone || 'Sin teléfono',
+                producto: r.tour_title,
+                productoId: `RV-${r.id.substring(0, 8)}`,
+                montoReembolso: r.total_usd,
+                fechaSolicitud: new Date(r.reserved_at).toLocaleDateString('es-CR', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                }),
+                estado: r.isRefunded ? 'atendido' : 'no-atendido'
+            }));
+
+            setSolicitudes(mapped);
+        } catch (error) {
+            console.error('Error cargando solicitudes:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchSolicitudes();
+    }, [fetchSolicitudes]);
 
     const solicitudesFiltradas = useMemo(() => {
         let filtered = solicitudes;
@@ -94,10 +119,41 @@ export default function ReembolsosPage() {
         };
     }, [solicitudes]);
 
-    const handleEstadoChange = (id: string, nuevoEstado: SolicitudReembolso["estado"]) => {
+    const handleEstadoChange = async (solicitud: SolicitudReembolso, nuevoEstado: SolicitudReembolso["estado"]) => {
+        // Actualizar estado local primero para UI responsiva
         setSolicitudes(prev =>
-            prev.map(s => s.id === id ? { ...s, estado: nuevoEstado } : s)
+            prev.map(s => s.id === solicitud.id ? { ...s, estado: nuevoEstado } : s)
         );
+
+        // Si el estado es "atendido", marcar como REFUNDED en la API
+        if (nuevoEstado === 'atendido') {
+            try {
+                const token = localStorage.getItem('access_token');
+                const res = await fetch(`${API_URL}/reservations/${solicitud.rawId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status: 'REFUNDED' })
+                });
+
+                if (!res.ok) {
+                    // Revertir cambio si hay error
+                    setSolicitudes(prev =>
+                        prev.map(s => s.id === solicitud.id ? { ...s, estado: 'no-atendido' } : s)
+                    );
+                    alert('Error al actualizar el estado');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                // Revertir cambio si hay error
+                setSolicitudes(prev =>
+                    prev.map(s => s.id === solicitud.id ? { ...s, estado: 'no-atendido' } : s)
+                );
+                alert('Error de conexión');
+            }
+        }
     };
 
     const handleContactarWhatsApp = (solicitud: SolicitudReembolso) => {
@@ -173,6 +229,11 @@ export default function ReembolsosPage() {
                         </div>
 
                         {/* Tabla */}
+                        {loading ? (
+                            <div className="flex-1 flex items-center justify-center">
+                                <p className="text-gray-500">Cargando solicitudes de reembolso...</p>
+                            </div>
+                        ) : (
                         <div className="flex-1 min-h-0 overflow-auto">
                             <div className="bg-white border-2 border-gray-300 rounded-xl overflow-hidden shadow-sm">
                                 <table className="w-full">
@@ -248,7 +309,7 @@ export default function ReembolsosPage() {
                                                     <td className="px-4 py-3">
                                                         <select
                                                             value={solicitud.estado}
-                                                            onChange={(e) => handleEstadoChange(solicitud.id, e.target.value as SolicitudReembolso["estado"])}
+                                                            onChange={(e) => handleEstadoChange(solicitud, e.target.value as SolicitudReembolso["estado"])}
                                                             className={`w-full text-xs font-semibold rounded-lg px-3 py-2 border-2 focus:outline-none focus:ring-2 focus:ring-verde2 ${
                                                                 solicitud.estado === "no-atendido" 
                                                                     ? "bg-red-50 text-red-800 border-red-400" 
@@ -281,12 +342,13 @@ export default function ReembolsosPage() {
                                 </table>
                             </div>
                         </div>
+                        )}
 
                         {/* Leyenda */}
                         <div className="shrink-0 mt-6 p-4 bg-blue-50 border-2 border-blue-300 rounded-xl">
                             <p className="text-sm text-blue-900 font-medium">
                                 <strong>Nota:</strong> Puede cambiar el estado de las solicitudes directamente desde la tabla. 
-                                Para contactar al cliente, haga clic en el botón de correo.
+                                Para contactar al cliente, haga clic en el botón de WhatsApp.
                             </p>
                         </div>
                     </div>

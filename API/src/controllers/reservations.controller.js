@@ -17,9 +17,14 @@ exports.getAll = asyncHandler(async (req, res) => {
                r.meeting_point_id, r.subtotal_usd, r.discount_usd,
                r.meeting_extra_usd, r.total_usd, r.status,
                r.confirmed_at, r.cancelled_at,
-               t.title as tour_title
+               t.title as tour_title,
+               c.full_name as customer_name,
+               c.phone as customer_phone,
+               u.email as customer_email
         FROM reservations r
         JOIN tours t ON t.id = r.tour_id
+        LEFT JOIN customers c ON c.id = r.customer_id
+        LEFT JOIN users u ON u.id = c.user_id
         WHERE 1=1
     `;
     const params = [];
@@ -352,17 +357,20 @@ exports.requestRefund = asyncHandler(async (req, res) => {
     try {
         await client.query('BEGIN');
 
-        // Get reservation and verify ownership
+        // Get reservation and verify ownership (join with customers to get user_id)
         const current = await client.query(`
-            SELECT id, status, customer_id FROM reservations WHERE id = $1 FOR UPDATE
+            SELECT r.id, r.status, r.customer_id, c.user_id 
+            FROM reservations r
+            JOIN customers c ON c.id = r.customer_id
+            WHERE r.id = $1
         `, [id]);
 
         if (!current.rows.length) {
             throw new AppError("Reservación no encontrada", 404, "RESERVATION_NOT_FOUND");
         }
 
-        // Verify customer owns this reservation
-        if (current.rows[0].customer_id !== user.id) {
+        // Verify customer owns this reservation (compare with user_id from customers table)
+        if (current.rows[0].user_id !== user.id) {
             throw new AppError("No autorizado", 403, "FORBIDDEN");
         }
 

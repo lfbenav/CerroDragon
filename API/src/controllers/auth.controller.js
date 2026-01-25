@@ -286,14 +286,16 @@ exports.login = asyncHandler(async (req, res) => {
         UPDATE users SET last_login_at = now() WHERE id = $1
     `, [user.id]);
 
-    // Get customer_id if user is a client
+    // Get customer_id and full_name if user is a client
     let customerId = null;
+    let fullName = null;
     if (user.type === 'client') {
         const customerRes = await pool.query(`
-            SELECT id FROM customers WHERE user_id = $1
+            SELECT id, full_name FROM customers WHERE user_id = $1
         `, [user.id]);
         if (customerRes.rows.length) {
             customerId = customerRes.rows[0].id;
+            fullName = customerRes.rows[0].full_name;
         }
     }
 
@@ -305,6 +307,7 @@ exports.login = asyncHandler(async (req, res) => {
             email: user.email,
             type: user.type,
             customer_id: customerId,
+            full_name: fullName,
         },
     });
 });

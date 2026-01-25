@@ -79,13 +79,14 @@ interface CardIncidenciaProps {
 
 interface ReservaProps {
     id: string;
+    rawId?: string; // ID real de la reserva (sin el prefijo RV-)
     clienteNombre: string;
     clienteEmail: string;
     tour: string;
     monto: number;
     fecha: string;
     personas: number;
-    estado: 'confirmada' | 'pendiente' | 'cancelada' | 'reembolsada';
+    estado: 'confirmada' | 'pendiente' | 'cancelada' | 'reembolsada' | 'solicitado';
 }
 
 interface GestionReservaProps {
@@ -3286,7 +3287,195 @@ export function WhatsAppButton() {
 
 /* ========================= TABLA ========================= */
 
-export function TablaReservas({ reservas }: { reservas: ReservaProps[] }) {
+export function TablaReservas({ reservas, onRefundRequested }: { reservas: ReservaProps[], onRefundRequested?: (id: string) => void }) {
+    const [loadingId, setLoadingId] = useState<string | null>(null);
+
+    const handleDescargarComprobante = async (reserva: ReservaProps) => {
+        // Importar jsPDF dinámicamente para evitar problemas de SSR
+        const { jsPDF } = await import('jspdf');
+        
+        const doc = new jsPDF();
+        const pageWidth = doc.internal.pageSize.getWidth();
+        
+        // Colores
+        const verdeOscuro = [34, 87, 57]; // #225739
+        const grisOscuro = [51, 51, 51];
+        
+        // Header con fondo verde
+        doc.setFillColor(verdeOscuro[0], verdeOscuro[1], verdeOscuro[2]);
+        doc.rect(0, 0, pageWidth, 45, 'F');
+        
+        // Título
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(24);
+        doc.setFont('helvetica', 'bold');
+        doc.text('CERRO DRAGÓN', pageWidth / 2, 20, { align: 'center' });
+        
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Comprobante de Reserva', pageWidth / 2, 32, { align: 'center' });
+        
+        // Línea decorativa
+        doc.setDrawColor(255, 255, 255);
+        doc.setLineWidth(0.5);
+        doc.line(40, 38, pageWidth - 40, 38);
+        
+        // Contenido
+        doc.setTextColor(grisOscuro[0], grisOscuro[1], grisOscuro[2]);
+        let y = 60;
+        
+        // ID de reserva destacado
+        doc.setFillColor(245, 245, 245);
+        doc.rect(15, y - 5, pageWidth - 30, 15, 'F');
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Número de Reserva:', 20, y + 5);
+        doc.setTextColor(verdeOscuro[0], verdeOscuro[1], verdeOscuro[2]);
+        doc.text(reserva.id, pageWidth - 20, y + 5, { align: 'right' });
+        
+        y += 25;
+        doc.setTextColor(grisOscuro[0], grisOscuro[1], grisOscuro[2]);
+        
+        // Información del cliente
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Información del Cliente', 20, y);
+        y += 10;
+        
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Nombre: ${reserva.clienteNombre}`, 25, y);
+        y += 8;
+        doc.text(`Correo: ${reserva.clienteEmail}`, 25, y);
+        y += 15;
+        
+        // Detalles del tour
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Detalles del Tour', 20, y);
+        y += 10;
+        
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Tour: ${reserva.tour}`, 25, y);
+        y += 8;
+        doc.text(`Fecha: ${reserva.fecha}`, 25, y);
+        y += 8;
+        doc.text(`Personas: ${reserva.personas}`, 25, y);
+        y += 15;
+        
+        // Información de pago
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Información de Pago', 20, y);
+        y += 10;
+        
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Monto Total: ₡${reserva.monto.toLocaleString()}`, 25, y);
+        y += 15;
+        
+        // Estado con color
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Estado de la Reserva', 20, y);
+        y += 10;
+        
+        const estadoTexto = {
+            'confirmada': 'CONFIRMADA',
+            'pendiente': 'PENDIENTE',
+            'cancelada': 'CANCELADA',
+            'reembolsada': 'REEMBOLSADA',
+            'solicitado': 'REEMBOLSO SOLICITADO'
+        };
+        
+        const estadoColor: { [key: string]: number[] } = {
+            'confirmada': [34, 139, 34],
+            'pendiente': [218, 165, 32],
+            'cancelada': [178, 34, 34],
+            'reembolsada': [70, 130, 180],
+            'solicitado': [255, 140, 0]
+        };
+        
+        doc.setFillColor(estadoColor[reserva.estado][0], estadoColor[reserva.estado][1], estadoColor[reserva.estado][2]);
+        doc.roundedRect(25, y - 5, 60, 12, 3, 3, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.text(estadoTexto[reserva.estado], 55, y + 3, { align: 'center' });
+        
+        y += 25;
+        
+        // Línea separadora
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.3);
+        doc.line(20, y, pageWidth - 20, y);
+        
+        y += 15;
+        
+        // Fecha de generación
+        doc.setTextColor(128, 128, 128);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        const fechaGeneracion = new Date().toLocaleDateString('es-CR', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        doc.text(`Documento generado el ${fechaGeneracion}`, pageWidth / 2, y, { align: 'center' });
+        
+        // Footer
+        const footerY = doc.internal.pageSize.getHeight() - 20;
+        doc.setFillColor(verdeOscuro[0], verdeOscuro[1], verdeOscuro[2]);
+        doc.rect(0, footerY - 5, pageWidth, 30, 'F');
+        
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(10);
+        doc.text('Cerro Dragón Tours | Costa Rica', pageWidth / 2, footerY + 5, { align: 'center' });
+        doc.setFontSize(8);
+        doc.text('WhatsApp: +506 8460-3211 | www.cerrodragon.com', pageWidth / 2, footerY + 12, { align: 'center' });
+        
+        // Descargar
+        doc.save(`Reserva_${reserva.id}.pdf`);
+    };
+
+    const handleSolicitarReembolso = async (reserva: ReservaProps) => {
+        const rawId = reserva.rawId || reserva.id.replace('RV-', '');
+        
+        if (!confirm('¿Está seguro que desea solicitar un reembolso para esta reserva?')) {
+            return;
+        }
+
+        setLoadingId(reserva.id);
+        try {
+            const token = localStorage.getItem('access_token');
+            const res = await fetch(`http://localhost:3000/reservations/${rawId}/request-refund`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (res.ok) {
+                alert('Solicitud de reembolso enviada correctamente');
+                if (onRefundRequested) {
+                    onRefundRequested(reserva.id);
+                }
+            } else {
+                const data = await res.json();
+                alert(data.message || 'Error al solicitar reembolso');
+            }
+        } catch (error) {
+            console.error('Error solicitando reembolso:', error);
+            alert('Error al conectar con el servidor');
+        } finally {
+            setLoadingId(null);
+        }
+    };
+
     const getEstadoBadge = (estado: ReservaProps['estado']) => {
         switch (estado) {
             case 'confirmada':
@@ -3313,7 +3502,72 @@ export function TablaReservas({ reservas }: { reservas: ReservaProps[] }) {
                         Reembolsada
                     </span>
                 );
+            case 'solicitado':
+                return (
+                    <span className="inline-flex items-center px-3 py-1 text-orange-700 text-sm font-bold rounded bg-orange-100">
+                        Reembolso Solicitado
+                    </span>
+                );
         }
+    };
+
+    const getRefundButton = (reserva: ReservaProps) => {
+        const isLoading = loadingId === reserva.id;
+
+        if (reserva.estado === 'reembolsada') {
+            return (
+                <button disabled className="text-gray-400 bg-gray-200 font-bold flex items-center rounded-md justify-center px-3 py-1 gap-2 cursor-not-allowed">
+                    <svg className="w-6 h-6 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width={24} height={24} fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Reembolsado
+                </button>
+            );
+        }
+
+        if (reserva.estado === 'solicitado') {
+            return (
+                <button disabled className="text-orange-700 bg-orange-100 font-bold flex items-center rounded-md justify-center px-3 py-1 gap-2 cursor-not-allowed">
+                    <svg className="w-6 h-6 text-orange-700 animate-pulse" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width={24} height={24} fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Solicitado
+                </button>
+            );
+        }
+
+        if (reserva.estado === 'cancelada') {
+            return (
+                <button disabled className="text-gray-400 bg-gray-200 font-bold flex items-center rounded-md justify-center px-3 py-1 gap-2 cursor-not-allowed">
+                    No disponible
+                </button>
+            );
+        }
+
+        return (
+            <button 
+                onClick={() => handleSolicitarReembolso(reserva)}
+                disabled={isLoading}
+                className="text-rojovino bg-rojotrans font-bold hover:text-rojo1 flex items-center rounded-md justify-center px-3 py-1 gap-2 hover:[&>svg]:text-rojo1 hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+                {isLoading ? (
+                    <>
+                        <svg className="w-6 h-6 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Enviando...
+                    </>
+                ) : (
+                    <>
+                        <svg className="w-6 h-6 text-rojovino dark:text-rojovino" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width={24} height={24} fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 10 19 7l3 3-3 3-3-3ZM5 13l4 4L19 7" />
+                        </svg>
+                        Solicitar
+                    </>
+                )}
+            </button>
+        );
     };
 
     return (
@@ -3348,53 +3602,19 @@ export function TablaReservas({ reservas }: { reservas: ReservaProps[] }) {
                                     <td className="px-6 py-4 whitespace-nowrap text-lg text-rojosuave font-bold">{reserva.personas}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-verde3">₡{reserva.monto.toLocaleString()}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">{getEstadoBadge(reserva.estado)}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm flex  justify-center items-center">
-                                        {reserva.estado != 'reembolsada' ? (
-                                            <button className="text-rojovino bg-rojotrans font-bold hover:text-rojo1 flex items-center rounded-md justify-center px-3 py-1 gap-2 hover:[&>svg]:text-rojo1 hover:cursor-pointer">
-                                                <svg
-                                                    className="w-6 h-6 text-rojovino dark:text-rojovino"
-                                                    aria-hidden="true"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    width={24}
-                                                    height={24}
-                                                    fill="none"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        stroke="currentColor"
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M16 10 19 7l3 3-3 3-3-3ZM5 13l4 4L19 7"
-                                                    />
-                                                </svg>
-                                                Solicitar
-                                            </button>
-                                        ) : (
-                                            <button disabled className="text-gray-400 bg-gray-200 font-bold flex items-center rounded-md justify-center px-3 py-1 gap-2 cursor-not-allowed">
-                                                <svg
-                                                    className="w-6 h-6 text-gray-400"
-                                                    aria-hidden="true"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    width={24}
-                                                    height={24}
-                                                    fill="none"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        stroke="currentColor"
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M5 13l4 4L19 7"
-                                                    />
-                                                </svg>
-                                                Reembolsado
-                                            </button>
-                                        )}
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm flex justify-center items-center">
+                                        {getRefundButton(reserva)}
                                     </td>
-                                    <td className="px-6 py-4 text-black hover:underline hover:cursor-pointer">
-                                        Descargar
+                                    <td className="px-6 py-4">
+                                        <button 
+                                            onClick={() => handleDescargarComprobante(reserva)}
+                                            className="text-verde3 hover:text-verde1 hover:underline hover:cursor-pointer flex items-center gap-1"
+                                        >
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                            Descargar
+                                        </button>
                                     </td>
                                 </tr>
                             ))}
