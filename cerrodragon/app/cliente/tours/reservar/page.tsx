@@ -34,6 +34,8 @@ export default function ReservarTourPage() {
     // Obtener parámetros de la URL
     const tourIdParam = searchParams.get("tourId");
     const nombreParam = searchParams.get("nombre");
+    const promotionIdParam = searchParams.get("promotionId");
+    const precioPromoParam = searchParams.get("precioPromo");
 
     // Tour data
     const [tourData, setTourData] = useState<TourAPI | null>(null);
@@ -99,12 +101,17 @@ export default function ReservarTourPage() {
 
     // Calcular precios
     const precioPorPersona = useMemo(() => {
+        // Si hay precio de promoción, usarlo
+        if (precioPromoParam) {
+            return parseFloat(precioPromoParam);
+        }
+        // Si hay paquete seleccionado, usar su precio
         if (paqueteId && paquetes.length > 0) {
             const selectedPkg = paquetes.find(p => String(p.id) === paqueteId);
             if (selectedPkg) return selectedPkg.price_usd;
         }
         return tourData?.person_price || 0;
-    }, [paqueteId, paquetes, tourData]);
+    }, [paqueteId, paquetes, tourData, precioPromoParam]);
 
     const montoFinal = useMemo(() => {
         return precioPorPersona * parseInt(cantidadPersonas || '0');
@@ -136,6 +143,7 @@ export default function ReservarTourPage() {
             console.log('Enviando reserva:', {
                 customer_id: userData.customer_id,
                 tour_id: tourIdParam,
+                promotion_id: promotionIdParam || null,
                 tour_package_id: paqueteId || null,
                 tour_date: fechaTour,
                 persons: parseInt(cantidadPersonas),
@@ -152,6 +160,7 @@ export default function ReservarTourPage() {
                 body: JSON.stringify({
                     customer_id: userData.customer_id,
                     tour_id: tourIdParam,
+                    promotion_id: promotionIdParam || null,
                     tour_package_id: paqueteId || null,
                     tour_date: fechaTour,
                     persons: parseInt(cantidadPersonas),
@@ -320,6 +329,11 @@ export default function ReservarTourPage() {
                                         <div>
                                             <label className="block text-sm font-medium text-black mb-1">
                                                 Precio por persona
+                                                {promotionIdParam && (
+                                                    <span className="ml-2 text-xs text-verde3 bg-verdetrans px-2 py-0.5 rounded">
+                                                        Promoción aplicada
+                                                    </span>
+                                                )}
                                             </label>
                                             <div className="relative">
                                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-naranja font-semibold text-lg">

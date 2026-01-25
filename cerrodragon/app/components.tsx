@@ -3840,6 +3840,9 @@ export function TablaGestionReservas({ reservas, guias }: { reservas: GestionRes
     }, [reservas]);
 
     const handleGuiaChange = async (reservaId: string, nuevoGuia: string) => {
+        // Guardar estado anterior por si hay que revertir
+        const prevReservas = [...localReservas];
+        
         // Actualizar el estado local inmediatamente para reflejar el cambio en la UI
         setLocalReservas(prev => 
             prev.map(reserva => 
@@ -3849,29 +3852,42 @@ export function TablaGestionReservas({ reservas, guias }: { reservas: GestionRes
             )
         );
 
-        // TODO: Implementar llamada al backend cuando esté disponible
-        // try {
-        //   const response = await fetch(`/api/reservas/${reservaId}/asignar-guia`, {
-        //     method: 'PATCH',
-        //     headers: {
-        //       'Content-Type': 'application/json',
-        //     },
-        //     body: JSON.stringify({
-        //       guiaAsignado: nuevoGuia
-        //     })
-        //   });
-        //   
-        //   if (!response.ok) {
-        //     throw new Error('Error al asignar guía');
-        //   }
-        //   
-        //   console.log('Guía asignado exitosamente');
-        // } catch (error) {
-        //   console.error('Error:', error);
-        //   // Revertir el cambio local en caso de error
-        //   setLocalReservas(reservas);
-        // }
-        console.log(`Asignar guía ${nuevoGuia} a reserva ${reservaId}`);
+        try {
+            const token = localStorage.getItem('access_token');
+            // Extraer el ID numérico de la reserva (RV-123 -> 123)
+            const numericReservationId = reservaId.replace('RV-', '');
+            
+            // Encontrar el guía seleccionado para obtener su ID
+            const guiaSeleccionado = guias.find(g => g.nombre === nuevoGuia);
+            
+            if (!guiaSeleccionado && nuevoGuia) {
+                console.error('Guía no encontrado');
+                return;
+            }
+            
+            if (guiaSeleccionado) {
+                // Extraer el ID numérico del guía (G-xxx -> xxx)
+                const guideId = guiaSeleccionado.id.replace('G-', '');
+                
+                const response = await fetch(`http://localhost:3000/assign-guide/${numericReservationId}/${guideId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Error al asignar guía');
+                }
+                
+                console.log('Guía asignado exitosamente');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            // Revertir el cambio local en caso de error
+            setLocalReservas(prevReservas);
+        }
     };
 
     const getEstadoBadge = (estado: ReservaProps['estado']) => {

@@ -47,7 +47,7 @@ export default function Tours() {
             const json = await response.json();
             
             // Mapear datos de la API al formato del componente
-            const mappedTours: Tour[] = json.data.map((tour: TourAPI) => {
+            const mappedTours: Tour[] = await Promise.all(json.data.map(async (tour: TourAPI) => {
                 let imgUrl = '/tour1.png';
                 if (tour.image_url) {
                     if (tour.image_url.startsWith('http')) {
@@ -58,6 +58,21 @@ export default function Tours() {
                         imgUrl = tour.image_url;
                     }
                 }
+                
+                // Fetch tags for this tour
+                let etiqueta = 'Todos';
+                try {
+                    const tagsRes = await fetch(`${API_URL}/tours/${tour.id}/tags`);
+                    if (tagsRes.ok) {
+                        const tagsJson = await tagsRes.json();
+                        if (tagsJson.data && tagsJson.data.length > 0) {
+                            etiqueta = tagsJson.data[0].name; // Tomar el primer tag
+                        }
+                    }
+                } catch {
+                    // Si falla, mantener 'Todos'
+                }
+                
                 return {
                     id: tour.id,
                     nombre: tour.title,
@@ -68,10 +83,10 @@ export default function Tours() {
                     duracion: tour.duration_days > 0 
                         ? `${tour.duration_days} día${tour.duration_days > 1 ? 's' : ''}` 
                         : `${tour.duration_hours} hora${tour.duration_hours > 1 ? 's' : ''}`,
-                    etiqueta: 'Todos',
+                    etiqueta: etiqueta,
                     activo: tour.is_active
                 };
-            });
+            }));
             
             setTours(mappedTours);
         } catch (err) {

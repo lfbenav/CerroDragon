@@ -5,6 +5,11 @@ import { SideBarAdmin, TopBar } from "@/app/components";
 
 const API_URL = "http://localhost:3000";
 
+interface Tag {
+    id: string;
+    name: string;
+}
+
 export default function EditarTour() {
     const searchParams = useSearchParams();
     const tourId = searchParams.get('tourId');
@@ -14,7 +19,8 @@ export default function EditarTour() {
     const [dias, setDias] = useState('0');
     const [personas, setPersonas] = useState('');
     const [precio, setPrecio] = useState('');
-    const [etiquetas, setEtiquetas] = useState<string[]>([]);
+    const [etiquetasSeleccionadas, setEtiquetasSeleccionadas] = useState<string[]>([]); // IDs de tags seleccionados
+    const [tagsDisponibles, setTagsDisponibles] = useState<Tag[]>([]); // Tags desde la API
     const [imagen, setImagen] = useState<File | null>(null);
     const [imagenActual, setImagenActual] = useState('/tour1.png');
     const [isLoading, setIsLoading] = useState(false);
@@ -22,18 +28,23 @@ export default function EditarTour() {
     const [error, setError] = useState('');
     const router = useRouter();
 
-    const etiquetasDisponibles = ['Experto', 'Moderado', 'Fácil', 'Todos'];
-
     useEffect(() => {
         const fetchTour = async () => {
             if (!tourId) return;
             
             try {
                 setLoadingData(true);
-                const response = await fetch(`${API_URL}/tours/${tourId}`);
-                if (!response.ok) throw new Error('Error al cargar el tour');
-                const json = await response.json();
-                const tour = json.data;
+                
+                // Fetch tour data, tour tags, and all available tags in parallel
+                const [tourResponse, tourTagsResponse, allTagsResponse] = await Promise.all([
+                    fetch(`${API_URL}/tours/${tourId}`),
+                    fetch(`${API_URL}/tours/${tourId}/tags`),
+                    fetch(`${API_URL}/tags`)
+                ]);
+                
+                if (!tourResponse.ok) throw new Error('Error al cargar el tour');
+                const tourJson = await tourResponse.json();
+                const tour = tourJson.data;
                 
                 setNombre(tour.title || '');
                 setDescripcion(tour.description || '');
@@ -41,6 +52,19 @@ export default function EditarTour() {
                 setDias(String(tour.duration_days || 0));
                 setPersonas(String(tour.max_persons || ''));
                 setPrecio(String(tour.person_price || ''));
+                
+                // Cargar todos los tags disponibles
+                if (allTagsResponse.ok) {
+                    const allTagsJson = await allTagsResponse.json();
+                    setTagsDisponibles(allTagsJson.data);
+                }
+                
+                // Cargar etiquetas existentes del tour (por ID)
+                if (tourTagsResponse.ok) {
+                    const tourTagsJson = await tourTagsResponse.json();
+                    const tagIds = tourTagsJson.data.map((tag: Tag) => tag.id);
+                    setEtiquetasSeleccionadas(tagIds);
+                }
                 
                 // Handle image URL
                 let imgUrl = '/tour1.png';
@@ -71,11 +95,11 @@ export default function EditarTour() {
         }
     };
 
-    const handleEtiquetaToggle = (etiqueta: string) => {
-        if (etiquetas.includes(etiqueta)) {
-            setEtiquetas(etiquetas.filter(e => e !== etiqueta));
+    const handleEtiquetaToggle = (tagId: string) => {
+        if (etiquetasSeleccionadas.includes(tagId)) {
+            setEtiquetasSeleccionadas(etiquetasSeleccionadas.filter(id => id !== tagId));
         } else {
-            setEtiquetas([...etiquetas, etiqueta]);
+            setEtiquetasSeleccionadas([...etiquetasSeleccionadas, tagId]);
         }
     };
 
@@ -150,6 +174,36 @@ export default function EditarTour() {
 
             if (!response.ok) {
                 throw new Error('Error al actualizar el tour');
+            }
+
+            // Actualizar etiquetas del tour
+            // Primero obtener las etiquetas actuales
+            const currentTagsRes = await fetch(`${API_URL}/tours/${tourId}/tags`);
+            const currentTagsJson = await currentTagsRes.json();
+            const currentTagIds: string[] = currentTagsJson.data?.map((t: Tag) => t.id) || [];
+            
+            // Eliminar tags que ya no están seleccionados
+            for (const tagId of currentTagIds) {
+                if (!etiquetasSeleccionadas.includes(tagId)) {
+                    await fetch(`${API_URL}/tours/${tourId}/tags/${tagId}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                }
+            }
+            
+            // Agregar nuevos tags
+            for (const tagId of etiquetasSeleccionadas) {
+                if (!currentTagIds.includes(tagId)) {
+                    await fetch(`${API_URL}/tours/${tourId}/tags`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ tag_id: tagId })
+                    });
+                }
             }
 
             router.push(`/admin/tours/info?id=${tourId}`);
@@ -349,20 +403,20 @@ export default function EditarTour() {
                                             <label className="block mb-2.5 text-md font-medium text-black">
                                                 Etiquetas:
                                             </label>
-                                            <div className="flex gap-3">
-                                                {etiquetasDisponibles.map((etiqueta) => (
+                                            <div className="flex gap-3 flex-wrap">
+                                                {tagsDisponibles.map((tag) => (
                                                     <button
-                                                        key={etiqueta}
+                                                        key={tag.id}
                                                         type="button"
-                                                        onClick={() => handleEtiquetaToggle(etiqueta)}
+                                                        onClick={() => handleEtiquetaToggle(tag.id)}
                                                         className={`px-4 py-2 rounded-lg border-2 font-semibold transition-all ${
-                                                            etiquetas.includes(etiqueta)
-                                                                ? getEtiquetaColor(etiqueta)
+                                                            etiquetasSeleccionadas.includes(tag.id)
+                                                                ? getEtiquetaColor(tag.name)
                                                                 : 'bg-white text-gray-400 border-gray-300 hover:border-gray-400'
                                                         }`}
                                                         disabled={isLoading}
                                                     >
-                                                        {etiquetas.includes(etiqueta) && (
+                                                        {etiquetasSeleccionadas.includes(tag.id) && (
                                                             <svg
                                                                 className="w-4 h-4 inline mr-1"
                                                                 fill="none"
@@ -377,7 +431,7 @@ export default function EditarTour() {
                                                                 />
                                                             </svg>
                                                         )}
-                                                        {etiqueta}
+                                                        {tag.name}
                                                     </button>
                                                 ))}
                                             </div>

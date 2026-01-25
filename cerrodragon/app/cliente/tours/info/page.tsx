@@ -40,7 +40,7 @@ export default function TourInfoPage() {
     const [duracionTour, setDuracionTour] = useState('');
     const [capacidadTour, setCapacidadTour] = useState(0);
     const [precioTour, setPrecioTour] = useState(0);
-    const [etiquetaTour, setEtiquetaTour] = useState('Todos');
+    const [etiquetasTour, setEtiquetasTour] = useState<string[]>([]);
     const [paquetes, setPaquetes] = useState<{nombre: string; descripcion: string; precio: number}[]>([]);
     const [imagenTour, setImagenTour] = useState('/tour1.png');
     const [loading, setLoading] = useState(true);
@@ -79,6 +79,14 @@ export default function TourInfoPage() {
                     }
                 }
                 setImagenTour(imgUrl);
+                
+                // Fetch tags for this tour
+                const tagsRes = await fetch(`${API_URL}/tours/${tourId}/tags`);
+                if (tagsRes.ok) {
+                    const tagsJson = await tagsRes.json();
+                    const tagNames = tagsJson.data.map((tag: { id: string; name: string }) => tag.name);
+                    setEtiquetasTour(tagNames);
+                }
                 
                 // Fetch packages for this tour
                 const pkgRes = await fetch(`${API_URL}/tour-packages?tour_id=${tourId}`);
@@ -179,22 +187,21 @@ export default function TourInfoPage() {
                                     </p>
                                 </div>
                                 <p className="mb-24 text-black font-medium"> <span className="text-verde3 font-bold">Etiqueta:</span>     
-                                    {etiquetaTour === 'Moderado' ? (
-                                        <span className="inline-flex items-center mx-8 px-6 py-0.5 text-amarillo text-sm font-bold rounded bg-amarillotrans">
-                                            Moderado
-                                        </span>
-                                    ) : etiquetaTour === 'Experto' ? (
-                                        <span className="inline-flex items-center mx-8 px-6 py-0.5 text-rojovino text-sm font-bold rounded bg-rojotrans">
-                                            Experto
-                                        </span>
-                                    ) : etiquetaTour === 'Fácil' ? (
-                                        <span className="inline-flex items-center mx-8 px-6 py-0.5 text-verde3 text-sm font-bold rounded bg-verdetrans">
-                                            Fácil
+                                    {etiquetasTour.length === 0 ? (
+                                        <span className="inline-flex items-center mx-2 px-6 py-0.5 text-gray-500 text-sm font-bold rounded bg-gray-200">
+                                            Sin etiquetas
                                         </span>
                                     ) : (
-                                        <span className="inline-flex items-center mx-8 px-6 py-0.5 text-azul1 text-sm font-bold rounded bg-azultrans">
-                                            Todos
-                                        </span>
+                                        etiquetasTour.map((etiqueta, index) => (
+                                            <span key={index} className={`inline-flex items-center mx-2 px-6 py-0.5 text-sm font-bold rounded ${
+                                                etiqueta === 'Moderado' ? 'text-amarillo bg-amarillotrans' :
+                                                etiqueta === 'Experto' ? 'text-rojovino bg-rojotrans' :
+                                                etiqueta === 'Fácil' ? 'text-verde3 bg-verdetrans' :
+                                                'text-azul1 bg-azultrans'
+                                            }`}>
+                                                {etiqueta}
+                                            </span>
+                                        ))
                                     )}
                                 </p>
                             </div>

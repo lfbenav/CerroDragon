@@ -1,7 +1,14 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { SideBarAdmin, TopBar } from "@/app/components";
+
+const API_URL = "http://localhost:3000";
+
+interface Tag {
+    id: string;
+    name: string;
+}
 
 export default function NuevoTour() {
     const [nombre, setNombre] = useState('');
@@ -10,13 +17,28 @@ export default function NuevoTour() {
     const [dias, setDias] = useState('');
     const [personas, setPersonas] = useState('');
     const [precio, setPrecio] = useState('');
-    const [etiquetas, setEtiquetas] = useState<string[]>([]);
+    const [etiquetasSeleccionadas, setEtiquetasSeleccionadas] = useState<string[]>([]); // IDs de tags seleccionados
+    const [tagsDisponibles, setTagsDisponibles] = useState<Tag[]>([]); // Tags desde la API
     const [imagen, setImagen] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const router = useRouter();
 
-    const etiquetasDisponibles = ['Experto', 'Moderado', 'Fácil', 'Todos'];
+    // Cargar tags disponibles al montar el componente
+    useEffect(() => {
+        const fetchTags = async () => {
+            try {
+                const response = await fetch(`${API_URL}/tags`);
+                if (response.ok) {
+                    const json = await response.json();
+                    setTagsDisponibles(json.data);
+                }
+            } catch (error) {
+                console.error('Error cargando tags:', error);
+            }
+        };
+        fetchTags();
+    }, []);
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -24,11 +46,11 @@ export default function NuevoTour() {
         }
     };
 
-    const handleEtiquetaToggle = (etiqueta: string) => {
-        if (etiquetas.includes(etiqueta)) {
-            setEtiquetas(etiquetas.filter(e => e !== etiqueta));
+    const handleEtiquetaToggle = (tagId: string) => {
+        if (etiquetasSeleccionadas.includes(tagId)) {
+            setEtiquetasSeleccionadas(etiquetasSeleccionadas.filter(id => id !== tagId));
         } else {
-            setEtiquetas([...etiquetas, etiqueta]);
+            setEtiquetasSeleccionadas([...etiquetasSeleccionadas, tagId]);
         }
     };
 
@@ -73,10 +95,12 @@ export default function NuevoTour() {
             /* =========================
             2. CREAR TOUR
             ========================== */
+            const token = localStorage.getItem('access_token');
             const tourRes = await fetch('http://localhost:3000/tours', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
                     title: nombre.trim(),
@@ -96,10 +120,26 @@ export default function NuevoTour() {
                 throw new Error(tourJson.message || 'Error al crear el tour');
             }
 
+            const tourId = tourJson.data.id;
+
             /* =========================
-            3. REDIRECCIONAR AL TOUR
+            3. GUARDAR ETIQUETAS
             ========================== */
-            router.push(`/admin/tours/info?id=${tourJson.data.id}`);
+            for (const tagId of etiquetasSeleccionadas) {
+                await fetch(`${API_URL}/tours/${tourId}/tags`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ tag_id: tagId })
+                });
+            }
+
+            /* =========================
+            4. REDIRECCIONAR AL TOUR
+            ========================== */
+            router.push(`/admin/tours/info?id=${tourId}`);
 
         } catch (error) {
             console.error(error);
@@ -271,20 +311,20 @@ export default function NuevoTour() {
                                             <label className="block mb-2.5 text-md font-medium text-black">
                                                 Etiquetas:
                                             </label>
-                                            <div className="flex gap-3">
-                                                {etiquetasDisponibles.map((etiqueta) => (
+                                            <div className="flex gap-3 flex-wrap">
+                                                {tagsDisponibles.map((tag) => (
                                                     <button
-                                                        key={etiqueta}
+                                                        key={tag.id}
                                                         type="button"
-                                                        onClick={() => handleEtiquetaToggle(etiqueta)}
+                                                        onClick={() => handleEtiquetaToggle(tag.id)}
                                                         className={`px-4 py-2 rounded-lg border-2 font-semibold transition-all ${
-                                                            etiquetas.includes(etiqueta)
-                                                                ? getEtiquetaColor(etiqueta)
+                                                            etiquetasSeleccionadas.includes(tag.id)
+                                                                ? getEtiquetaColor(tag.name)
                                                                 : 'bg-white text-gray-400 border-gray-300 hover:border-gray-400'
                                                         }`}
                                                         disabled={isLoading}
                                                     >
-                                                        {etiquetas.includes(etiqueta) && (
+                                                        {etiquetasSeleccionadas.includes(tag.id) && (
                                                             <svg
                                                                 className="w-4 h-4 inline mr-1"
                                                                 fill="none"
@@ -299,7 +339,7 @@ export default function NuevoTour() {
                                                                 />
                                                             </svg>
                                                         )}
-                                                        {etiqueta}
+                                                        {tag.name}
                                                     </button>
                                                 ))}
                                             </div>

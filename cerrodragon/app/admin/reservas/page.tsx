@@ -57,6 +57,22 @@ export default function Reservas() {
                     }
                 });
                 
+                // Fetch guide assignments
+                const resAssignments = await fetch(`${API_URL}/assign-guide`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                // Crear un mapa de reservation_id -> guide_name
+                const assignmentMap: Record<string, string> = {};
+                if (resAssignments.ok) {
+                    const jsonAssignments = await resAssignments.json();
+                    jsonAssignments.data.forEach((a: { reservation_id: number; guide_name: string }) => {
+                        assignmentMap[a.reservation_id] = a.guide_name;
+                    });
+                }
+                
                 if (resReservas.ok) {
                     const jsonReservas = await resReservas.json();
                     
@@ -72,7 +88,7 @@ export default function Reservas() {
                             year: 'numeric'
                         }),
                         personas: r.persons,
-                        guiaAsignado: '',
+                        guiaAsignado: assignmentMap[r.id] || '',
                         estado: r.status === 'CONFIRMED' ? 'confirmada' 
                               : r.status === 'CANCELLED' ? 'cancelada'
                               : r.status === 'REFUNDED' ? 'reembolsada'

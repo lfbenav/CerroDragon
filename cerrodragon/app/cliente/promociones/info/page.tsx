@@ -115,7 +115,7 @@ export default function InfoPromocionCliente() {
 
     const handleReservar = () => {
         if (tourId) {
-            router.push(`/cliente/tours/reservar?tourId=${tourId}&nombre=${encodeURIComponent(nombreTour)}`);
+            router.push(`/cliente/tours/reservar?tourId=${tourId}&nombre=${encodeURIComponent(nombreTour)}&promotionId=${id}&precioPromo=${paquetePromo.precio}`);
         }
     };
 

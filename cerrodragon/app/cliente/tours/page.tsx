@@ -17,7 +17,10 @@ interface Tour {
   max_persons: number;
   person_price: number;
   image_url: string;
+  etiqueta?: string;
 }
+
+const API_URL = "http://localhost:3000";
 
 export default function Tours() {
   const [tours, setTours] = useState<Tour[]>([]);
@@ -31,12 +34,30 @@ export default function Tours() {
   useEffect(() => {
     const fetchTours = async () => {
       try {
-        const res = await fetch("http://localhost:3000/tours/allActive");
+        const res = await fetch(`${API_URL}/tours/allActive`);
         const json = await res.json();
 
         if (res.ok) {
-          setTours(json.data);
-          setFilteredTours(json.data);
+          // Cargar etiquetas para cada tour
+          const toursWithTags = await Promise.all(
+            json.data.map(async (tour: Tour) => {
+              let etiqueta = 'Todos';
+              try {
+                const tagsRes = await fetch(`${API_URL}/tours/${tour.id}/tags`);
+                if (tagsRes.ok) {
+                  const tagsJson = await tagsRes.json();
+                  if (tagsJson.data && tagsJson.data.length > 0) {
+                    etiqueta = tagsJson.data[0].name;
+                  }
+                }
+              } catch {
+                // Si falla, mantener 'Todos'
+              }
+              return { ...tour, etiqueta };
+            })
+          );
+          setTours(toursWithTags);
+          setFilteredTours(toursWithTags);
         }
       } catch (error) {
         console.error("Error cargando tours", error);
@@ -126,7 +147,7 @@ export default function Tours() {
                         imagen={imgUrl}
                         capacidad={tour.max_persons}
                         duracion={duracion}
-                        etiqueta="Todos" //! Falta poner la etiqueta que le corresponda aqui, eso no se como es @naranjo
+                        etiqueta={tour.etiqueta || 'Todos'}
                       />
                     );
                   })}

@@ -18,7 +18,7 @@ router.delete("/:id", toursController.delete);
 
 // Tour Tags
 router.get("/:id/tags", tagsController.getByTour);
-router.post("/:id/tags", auth, requirePermission("MANAGE_TOURS"), tagsController.addToTour);
-router.delete("/:id/tags/:tag_id", auth, requirePermission("MANAGE_TOURS"), tagsController.removeFromTour);
+router.post("/:id/tags", auth, tagsController.addToTour);
+router.delete("/:id/tags/:tag_id", auth, tagsController.removeFromTour);
 
 module.exports = router;
