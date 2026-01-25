@@ -139,6 +139,12 @@ exports.registerAdmin = asyncHandler(async (req, res) => {
 
         const roleId = roleRes.rows[0].id;
 
+        // Asignar TODOS los permisos al rol del admin
+        await client.query(`
+            INSERT INTO role_permissions (role_id, permission_id)
+            SELECT $1, id FROM permissions
+        `, [roleId]);
+
         // Asignar rol al user
         await client.query(`
             INSERT INTO user_roles (user_id, role_id)
@@ -280,6 +286,17 @@ exports.login = asyncHandler(async (req, res) => {
         UPDATE users SET last_login_at = now() WHERE id = $1
     `, [user.id]);
 
+    // Get customer_id if user is a client
+    let customerId = null;
+    if (user.type === 'client') {
+        const customerRes = await pool.query(`
+            SELECT id FROM customers WHERE user_id = $1
+        `, [user.id]);
+        if (customerRes.rows.length) {
+            customerId = customerRes.rows[0].id;
+        }
+    }
+
     res.status(200).json({
         success: true,
         token,
@@ -287,6 +304,7 @@ exports.login = asyncHandler(async (req, res) => {
             id: user.id,
             email: user.email,
             type: user.type,
+            customer_id: customerId,
         },
     });
 });

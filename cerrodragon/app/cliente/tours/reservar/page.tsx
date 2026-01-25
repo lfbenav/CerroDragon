@@ -4,10 +4,27 @@ import { useMemo, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SideBarClient, TopBar, WhatsAppButton } from "@/app/components";
 
+const API_URL = "http://localhost:3000";
+
 const MONTHS = [
     "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
     "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
 ];
+
+interface TourAPI {
+    id: string;
+    title: string;
+    description: string;
+    person_price: number;
+    max_persons: number;
+    image_url: string | null;
+}
+
+interface PaqueteAPI {
+    id: string;
+    name: string;
+    price_usd: number;
+}
 
 export default function ReservarTourPage() {
     const router = useRouter();
@@ -18,28 +35,80 @@ export default function ReservarTourPage() {
     const tourIdParam = searchParams.get("tourId");
     const nombreParam = searchParams.get("nombre");
 
+    // Tour data
+    const [tourData, setTourData] = useState<TourAPI | null>(null);
+    const [paquetes, setPaquetes] = useState<PaqueteAPI[]>([]);
+    const [loadingTour, setLoadingTour] = useState(true);
+
     // Form state
     const [nombreTour, setNombreTour] = useState("Cerro Dragón");
     const [descripcion, setDescripcion] = useState("Una aventura increíble");
     const [cantidadPersonas, setCantidadPersonas] = useState("2");
-    const [paquete, setPaquete] = useState("Completo");
+    const [paqueteId, setPaqueteId] = useState("");
 
     const [day, setDay] = useState("21");
     const [month, setMonth] = useState("Enero");
     const [year, setYear] = useState("2026");
 
-    const [precioPorPersona] = useState(15000);
-    const [montoFinal] = useState(30000);
-
     const [isLoading, setIsLoading] = useState(false);
 
-    // Cargar datos del tour si vienen de la URL
+    // Cargar datos del tour desde la API
+    useEffect(() => {
+        const fetchTourData = async () => {
+            if (!tourIdParam) {
+                setLoadingTour(false);
+                return;
+            }
+
+            try {
+                // Fetch tour details
+                const tourRes = await fetch(`${API_URL}/tours/${tourIdParam}`);
+                if (tourRes.ok) {
+                    const tourJson = await tourRes.json();
+                    const tour: TourAPI = tourJson.data;
+                    setTourData(tour);
+                    setNombreTour(tour.title);
+                    setDescripcion(tour.description || '');
+                }
+
+                // Fetch packages for this tour
+                const pkgRes = await fetch(`${API_URL}/tour-packages?tour_id=${tourIdParam}`);
+                if (pkgRes.ok) {
+                    const pkgJson = await pkgRes.json();
+                    setPaquetes(pkgJson.data);
+                    if (pkgJson.data.length > 0) {
+                        setPaqueteId(String(pkgJson.data[0].id));
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading tour data:', error);
+            } finally {
+                setLoadingTour(false);
+            }
+        };
+
+        fetchTourData();
+    }, [tourIdParam]);
+
+    // Si viene el nombre de la URL, actualizarlo
     useEffect(() => {
         if (nombreParam) {
             setNombreTour(decodeURIComponent(nombreParam));
         }
-        // TODO: Cargar más detalles del tour usando tourIdParam si es necesario
-    }, [nombreParam, tourIdParam]);
+    }, [nombreParam]);
+
+    // Calcular precios
+    const precioPorPersona = useMemo(() => {
+        if (paqueteId && paquetes.length > 0) {
+            const selectedPkg = paquetes.find(p => String(p.id) === paqueteId);
+            if (selectedPkg) return selectedPkg.price_usd;
+        }
+        return tourData?.person_price || 0;
+    }, [paqueteId, paquetes, tourData]);
+
+    const montoFinal = useMemo(() => {
+        return precioPorPersona * parseInt(cantidadPersonas || '0');
+    }, [precioPorPersona, cantidadPersonas]);
 
     const handleBack = () => {
         router.back();
@@ -50,14 +119,55 @@ export default function ReservarTourPage() {
         setIsLoading(true);
 
         try {
-            // TODO: API crear reserva
-            // POST /api/reservas
-            // const fechaTour = `${year}-${String(MONTHS.indexOf(month) + 1).padStart(2, "0")}-${day}`;
+            const token = localStorage.getItem('access_token');
+            const userData = JSON.parse(localStorage.getItem('user') || '{}');
+            
+            // Validate customer_id exists
+            if (!userData.customer_id) {
+                alert('Error: No se encontró tu perfil de cliente. Por favor cierra sesión y vuelve a iniciar sesión.');
+                setIsLoading(false);
+                return;
+            }
+            
+            // Format date
+            const monthIndex = MONTHS.indexOf(month) + 1;
+            const fechaTour = `${year}-${String(monthIndex).padStart(2, "0")}-${day.padStart(2, "0")}`;
 
-            // Redirigir a mis reservas después de crear
+            console.log('Enviando reserva:', {
+                customer_id: userData.customer_id,
+                tour_id: tourIdParam,
+                tour_package_id: paqueteId || null,
+                tour_date: fechaTour,
+                persons: parseInt(cantidadPersonas),
+                subtotal_usd: montoFinal,
+                total_usd: montoFinal
+            });
+
+            const response = await fetch(`${API_URL}/reservations`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    customer_id: userData.customer_id,
+                    tour_id: tourIdParam,
+                    tour_package_id: paqueteId || null,
+                    tour_date: fechaTour,
+                    persons: parseInt(cantidadPersonas),
+                    subtotal_usd: montoFinal,
+                    total_usd: montoFinal
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Error al crear la reserva');
+            }
+
             router.push("/cliente/reservas");
         } catch (err) {
             console.error(err);
+            alert('Error al crear la reserva. Por favor intente de nuevo.');
         } finally {
             setIsLoading(false);
         }
@@ -65,10 +175,10 @@ export default function ReservarTourPage() {
 
     const canSubmit = 
         !isLoading &&
+        !loadingTour &&
         nombreTour.trim().length > 0 &&
-        descripcion.trim().length > 0 &&
         Number(cantidadPersonas) > 0 &&
-        paquete.trim().length > 0;
+        tourIdParam;
 
     return (
         <div className="h-screen bg-gray-50 flex overflow-hidden">
@@ -135,6 +245,7 @@ export default function ReservarTourPage() {
                                                 value={cantidadPersonas}
                                                 onChange={(e) => setCantidadPersonas(e.target.value)}
                                                 min="1"
+                                                max={tourData?.max_persons || 20}
                                                 className="w-full bg-tabla-header border border-borde1 text-verde1 text-sm rounded-xl focus:ring-verde2 focus:border-verde2 block px-3 py-2.5 shadow-xs"
                                                 disabled={isLoading}
                                             />
@@ -145,14 +256,17 @@ export default function ReservarTourPage() {
                                                 Paquete:
                                             </label>
                                             <select
-                                                value={paquete}
-                                                onChange={(e) => setPaquete(e.target.value)}
+                                                value={paqueteId}
+                                                onChange={(e) => setPaqueteId(e.target.value)}
                                                 className="w-full bg-tabla-header border border-borde1 text-verde1 text-sm rounded-xl focus:ring-verde2 focus:border-verde2 block px-3 py-2.5 shadow-xs"
-                                                disabled={isLoading}
+                                                disabled={isLoading || paquetes.length === 0}
                                             >
-                                                <option value="Completo">Completo</option>
-                                                <option value="Básico">Básico</option>
-                                                <option value="Premium">Premium</option>
+                                                <option value="">Sin paquete (precio base)</option>
+                                                {paquetes.map((pkg) => (
+                                                    <option key={pkg.id} value={pkg.id}>
+                                                        {pkg.name} - ${pkg.price_usd}
+                                                    </option>
+                                                ))}
                                             </select>
                                         </div>
                                     </div>

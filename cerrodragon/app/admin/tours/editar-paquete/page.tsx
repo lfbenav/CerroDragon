@@ -3,31 +3,45 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { SideBarAdmin, TopBar } from "@/app/components";
 
+const API_URL = "http://localhost:3000";
+
 export default function EditarPaquete() {
     const searchParams = useSearchParams();
     const tourId = searchParams.get('tourId');
     const paqueteId = searchParams.get('paqueteId');
-    const [descripcion, setDescripcion] = useState('Incluye:\n• Almuerzo\n• Guía\n• Poliza INS');
-    const [precio, setPrecio] = useState('50');
+    const [descripcion, setDescripcion] = useState('');
+    const [precio, setPrecio] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [loadingData, setLoadingData] = useState(true);
     const [error, setError] = useState('');
     const router = useRouter();
 
     useEffect(() => {
-        // TODO: Cargar datos del paquete según el paqueteId
-        // const fetchPaquete = async () => {
-        //     try {
-        //         const response = await fetch(`/api/paquetes/${paqueteId}`);
-        //         if (!response.ok) throw new Error('Error al cargar el paquete');
-        //         const data = await response.json();
-        //         setDescripcion(data.descripcion);
-        //         setPrecio(data.precio.toString());
-        //     } catch (error) {
-        //         console.error('Error:', error);
-        //     }
-        // };
-        // fetchPaquete();
-    }, [paqueteId]);
+        const fetchPaquete = async () => {
+            if (!paqueteId) return;
+            
+            try {
+                setLoadingData(true);
+                const response = await fetch(`${API_URL}/tour-packages?tour_id=${tourId}`);
+                if (!response.ok) throw new Error('Error al cargar el paquete');
+                const json = await response.json();
+                
+                // Find the specific package
+                const paquete = json.data.find((p: { id: string }) => p.id === paqueteId);
+                if (paquete) {
+                    setDescripcion(paquete.name || '');
+                    setPrecio(String(paquete.price_usd || ''));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                setError('Error al cargar el paquete');
+            } finally {
+                setLoadingData(false);
+            }
+        };
+        
+        fetchPaquete();
+    }, [paqueteId, tourId]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -46,23 +60,23 @@ export default function EditarPaquete() {
         setError('');
 
         try {
-            // TODO: Implementar la lógica para actualizar el paquete
-            // const response = await fetch(`/api/paquetes/${paqueteId}`, {
-            //     method: 'PUT',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //     },
-            //     body: JSON.stringify({
-            //         descripcion: descripcion.trim(),
-            //         precio: parseFloat(precio),
-            //     }),
-            // });
+            const token = localStorage.getItem('access_token');
+            const response = await fetch(`${API_URL}/tour-packages/${paqueteId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    name: descripcion.trim(),
+                    price_usd: parseFloat(precio),
+                }),
+            });
 
-            // if (!response.ok) {
-            //     throw new Error('Error al actualizar el paquete');
-            // }
+            if (!response.ok) {
+                throw new Error('Error al actualizar el paquete');
+            }
 
-            // Navigate back to tour info screen
             router.push(`/admin/tours/info?id=${tourId}`);
         } catch (error) {
             setError('Error al actualizar el paquete. Por favor, intente nuevamente.');
@@ -71,6 +85,20 @@ export default function EditarPaquete() {
             setIsLoading(false);
         }
     };
+
+    if (loadingData) {
+        return (
+            <div className="h-screen bg-gray-50 flex overflow-hidden">
+                <SideBarAdmin />
+                <div className="flex-1 flex flex-col">
+                    <TopBar />
+                    <main className="flex-1 flex items-center justify-center ml-72 pt-20">
+                        <p className="text-verde3 text-lg">Cargando paquete...</p>
+                    </main>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="h-screen bg-gray-50 flex overflow-hidden">

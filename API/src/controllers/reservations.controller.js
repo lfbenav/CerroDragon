@@ -311,6 +311,20 @@ exports.getStatusHistory = asyncHandler(async (req, res) => {
 exports.getMyReservations = asyncHandler(async (req, res) => {
     const user = req.user;
 
+    // Get customer_id from user_id
+    const customerRes = await pool.query(`
+        SELECT id FROM customers WHERE user_id = $1
+    `, [user.id]);
+
+    if (!customerRes.rows.length) {
+        return res.status(200).json({
+            success: true,
+            data: []
+        });
+    }
+
+    const customerId = customerRes.rows[0].id;
+
     const { rows } = await pool.query(`
         SELECT r.id, r.tour_id, r.promotion_id, r.tour_package_id,
                r.tour_date, r.reserved_at, r.persons,
@@ -321,7 +335,7 @@ exports.getMyReservations = asyncHandler(async (req, res) => {
         JOIN tours t ON t.id = r.tour_id
         WHERE r.customer_id = $1
         ORDER BY r.reserved_at DESC
-    `, [user.id]);
+    `, [customerId]);
 
     res.status(200).json({
         success: true,

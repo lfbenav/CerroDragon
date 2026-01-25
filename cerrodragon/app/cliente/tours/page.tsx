@@ -104,6 +104,18 @@ export default function Tours() {
                         ? `${tour.duration_days} día(s)`
                         : `${tour.duration_hours} horas`;
 
+                    // Handle image URL
+                    let imgUrl = '/tour1.png';
+                    if (tour.image_url) {
+                      if (tour.image_url.startsWith('http')) {
+                        imgUrl = tour.image_url;
+                      } else if (tour.image_url.startsWith('/')) {
+                        imgUrl = `http://localhost:3000${tour.image_url}`;
+                      } else {
+                        imgUrl = tour.image_url;
+                      }
+                    }
+
                     return (
                       <CardTour
                         key={tour.id}
@@ -111,7 +123,7 @@ export default function Tours() {
                         nombre={tour.title}
                         descripcion={tour.description}
                         precio={tour.person_price}
-                        imagen={tour.image_url}
+                        imagen={imgUrl}
                         capacidad={tour.max_persons}
                         duracion={duracion}
                         etiqueta="Todos" //! Falta poner la etiqueta que le corresponda aqui, eso no se como es @naranjo

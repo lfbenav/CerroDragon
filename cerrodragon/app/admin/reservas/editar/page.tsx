@@ -3,6 +3,8 @@ import { CuadroTexto, SideBarAdmin, TopBar } from "@/app/components";
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 
+const API_URL = "http://localhost:3000";
+
 interface ReservaData {
     id: string;
     clienteNombre: string;
@@ -15,6 +17,17 @@ interface ReservaData {
     estado: 'confirmada' | 'pendiente' | 'cancelada' | 'reembolsada';
 }
 
+interface ReservaAPI {
+    id: number;
+    customer_id: number;
+    tour_id: number;
+    tour_date: string;
+    persons: number;
+    total_usd: number;
+    subtotal_usd: number;
+    status: string;
+    tour_title: string;
+}
 
 export default function EditarReservas() {
     const searchParams = useSearchParams();
@@ -42,30 +55,38 @@ export default function EditarReservas() {
                 setLoading(true);
                 setError(null);
 
-                // TODO: Reemplazar con llamadas reales al backend
-                // const [reservaResponse, guiasResponse] = await Promise.all([
-                //   fetch(`/api/reservas/${reservaId}`),
-                //   fetch('/api/guias')
-                // ]);
-                // 
-                // if (!reservaResponse.ok || !guiasResponse.ok) {
-                //   throw new Error('Error al cargar datos');
-                // }
-                // 
-                // const reservaData = await reservaResponse.json();
-                // const guiasData = await guiasResponse.json();
+                // Extract numeric ID from "RV-123" format
+                const numericId = reservaId.replace('RV-', '');
+                
+                const token = localStorage.getItem('access_token');
+                const response = await fetch(`${API_URL}/reservations/${numericId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) throw new Error('Error al cargar datos');
+                
+                const json = await response.json();
+                const r: ReservaAPI = json.data;
 
-                // Datos mock para desarrollo
                 const reservaData: ReservaData = {
                     id: reservaId,
-                    clienteNombre: 'Carlos Alvarado',
-                    clienteEmail: 'carlos@email.com',
-                    tour: 'Sendero Dragón',
-                    fecha: '20 de diciembre de 2025',
-                    personas: 4,
-                    monto: 60000,
-                    precioPorPersona: 15000,
-                    estado: 'pendiente'
+                    clienteNombre: `Cliente #${r.customer_id}`,
+                    clienteEmail: '',
+                    tour: r.tour_title,
+                    fecha: new Date(r.tour_date).toLocaleDateString('es-CR', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric'
+                    }),
+                    personas: r.persons,
+                    monto: r.total_usd,
+                    precioPorPersona: r.persons > 0 ? Math.round(r.subtotal_usd / r.persons) : 0,
+                    estado: r.status === 'CONFIRMED' ? 'confirmada' 
+                          : r.status === 'CANCELLED' ? 'cancelada'
+                          : r.status === 'REFUNDED' ? 'reembolsada'
+                          : 'pendiente'
                 };
 
                 setReserva(reservaData);
@@ -93,31 +114,32 @@ export default function EditarReservas() {
             setSaving(true);
             setError(null);
 
-            // TODO: Implementar llamada al backend
-            // const response = await fetch(`/api/reservas/${reserva.id}`, {
-            //   method: 'PATCH',
-            //   headers: {
-            //     'Content-Type': 'application/json',
-            //   },
-            //   body: JSON.stringify({
-            //     estado,
-            //     guiaAsignado: guiaSeleccionado
-            //   })
-            // });
-            // 
-            // if (!response.ok) {
-            //   throw new Error('Error al actualizar la reserva');
-            // }
-
-            // Simulación para desarrollo
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            const numericId = reserva.id.replace('RV-', '');
+            const token = localStorage.getItem('access_token');
             
-            console.log('Reserva actualizada:', {
-                id: reserva.id,
-                estado
+            // Map status to API format
+            const statusMap: Record<string, string> = {
+                'confirmada': 'CONFIRMED',
+                'pendiente': 'PENDING',
+                'cancelada': 'CANCELLED',
+                'reembolsada': 'REFUNDED'
+            };
+
+            const response = await fetch(`${API_URL}/reservations/${numericId}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    status: statusMap[estado]
+                })
             });
 
-            // Redirigir de vuelta a la lista de reservas
+            if (!response.ok) {
+                throw new Error('Error al actualizar la reserva');
+            }
+
             router.push('/admin/reservas');
             
         } catch (err) {

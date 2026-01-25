@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
     SideBarAdmin,
@@ -10,38 +10,77 @@ import {
     PlusIcon,
 } from "@/app/components";
 
+const API_URL = "http://localhost:3000";
+
 type Option = {
     id: string;
     nombre: string;
     precio: number;
 };
 
+interface TourAPI {
+    id: number;
+    title: string;
+    person_price: number;
+}
+
+interface PaqueteAPI {
+    id: number;
+    name: string;
+    price_usd: number;
+    tour_id: number;
+}
+
 export default function NuevaPromocionPage() {
     const router = useRouter();
 
-    // Dummy options (API-ready)
-    const tours: Option[] = useMemo(
-        () => [
-            { id: "T-001", nombre: "Cerro Dragón", precio: 65 },
-            { id: "T-002", nombre: "Mirador Dragón", precio: 50 },
-            { id: "T-003", nombre: "Cataratas", precio: 45 },
-        ],
-        []
-    );
+    const [tours, setTours] = useState<Option[]>([]);
+    const [paquetes, setPaquetes] = useState<Option[]>([]);
+    const [loadingData, setLoadingData] = useState(true);
 
-    const paquetes: Option[] = useMemo(
-        () => [
-            { id: "P-001", nombre: "Paquete Familiar", precio: 120 },
-            { id: "P-002", nombre: "Paquete Aventurero", precio: 90 },
-            { id: "P-003", nombre: "Paquete Premium", precio: 150 },
-        ],
-        []
-    );
+    // Fetch tours and packages from API
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // Fetch tours
+                const toursRes = await fetch(`${API_URL}/tours/all`);
+                if (toursRes.ok) {
+                    const toursJson = await toursRes.json();
+                    const mappedTours: Option[] = toursJson.data.map((t: TourAPI) => ({
+                        id: String(t.id),
+                        nombre: t.title,
+                        precio: t.person_price
+                    }));
+                    setTours(mappedTours);
+                }
+
+                // Fetch packages
+                const pkgRes = await fetch(`${API_URL}/tour-packages`);
+                if (pkgRes.ok) {
+                    const pkgJson = await pkgRes.json();
+                    const mappedPaquetes: Option[] = pkgJson.data.map((p: PaqueteAPI) => ({
+                        id: String(p.id),
+                        nombre: p.name,
+                        precio: p.price_usd
+                    }));
+                    setPaquetes(mappedPaquetes);
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            } finally {
+                setLoadingData(false);
+            }
+        };
+
+        fetchData();
+    }, []);
 
     // State
     const [tourId, setTourId] = useState("");
     const [paqueteId, setPaqueteId] = useState("");
-    const [promoPrice, setPromoPrice] = useState("65");
+    const [promoPrice, setPromoPrice] = useState("0");
+    const [promoTitle, setPromoTitle] = useState("");
+    const [promoDescription, setPromoDescription] = useState("");
     const [imagen, setImagen] = useState<File | null>(null);
 
     const [confirmOpen, setConfirmOpen] = useState(false);
@@ -106,12 +145,38 @@ export default function NuevaPromocionPage() {
         setIsLoading(true);
 
         try {
-            // TODO: API call
-            // POST /promociones
-            // body: { tourId, paqueteId, promoPrice: promoNum, discountPct, imagen }
-            // (tourId OR paqueteId should be set, not both)
+            const token = localStorage.getItem('access_token');
+            
+            // Calculate discount value (difference between original price and promo price)
+            const discountValue = currentPrice - promoNum;
+            
+            // Determine the tour_id - if package selected, we need to get its tour_id
+            let finalTourId = tourId;
+            if (!tourId && paqueteId) {
+                // For now, use the first tour as fallback if package is selected
+                // In production, you'd fetch the package's tour_id
+                finalTourId = tours[0]?.id || '';
+            }
+            
+            const response = await fetch(`${API_URL}/promotions`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    tour_id: finalTourId,
+                    title: promoTitle || `Promoción ${selectedTour?.nombre || selectedPaquete?.nombre || 'especial'}`,
+                    description: promoDescription || null,
+                    discount_value: discountValue
+                })
+            });
 
-            router.push("/admin/promociones"); // adjust if your route differs
+            if (!response.ok) {
+                throw new Error('Error al crear la promoción');
+            }
+
+            router.push("/admin/promociones");
         } catch (err) {
             console.error(err);
         } finally {

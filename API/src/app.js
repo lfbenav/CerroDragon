@@ -15,6 +15,7 @@ app.use("/tour-packages", require("./routes/tourPackages.routes"));         // T
 app.use("/tour-package-items", require("./routes/tourPackageItems.routes"));// Tour Package Items
 app.use("/reservations", require("./routes/reservations.routes"));          // Reservar tours
 app.use("/promotions", require("./routes/promotions.routes"));              // Promociones
+app.use("/guides", require("./routes/guides.routes"));                      // Guías
 app.use("/assign-guide", require("./routes/assignGuide.routes"));           // Asignación de guías
 app.use("/my-reservations", require("./routes/myReservations.routes"));     // Reservaciones del cliente
 app.use("/documents", require("./routes/documents.routes"));                // Documentos
@@ -30,6 +31,8 @@ app.use("/others", require("./routes/others.routes"));                      // c
 
 app.use((req, res, next) => {
     next(new AppError("Ruta no encontrada", 404, "NOT_FOUND"));
+    console.log("DB URL:", process.env.DATABASE_URL);
+
 });
 
 app.use(require("./middlewares/errorHandler.middleware"));

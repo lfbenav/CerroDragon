@@ -1,25 +1,140 @@
 'use client';
-import { CardPaquetePromo, SideBarAdmin, TopBar } from "@/app/components";
-import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { CardPaquetePromo, SideBarClient, TopBar } from "@/app/components";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 
-export default function InfoPromocionAdmin() {
+const API_URL = "http://localhost:3000";
+
+interface PromocionAPI {
+    id: number;
+    tour_id: number;
+    title: string;
+    description: string;
+    discount_value: number;
+    is_active: boolean;
+    tour_title: string;
+}
+
+interface TourAPI {
+    id: number;
+    title: string;
+    description: string;
+    duration_hours: number;
+    duration_days: number;
+    max_persons: number;
+    person_price: number;
+    image_url: string | null;
+}
+
+export default function InfoPromocionCliente() {
     const searchParams = useSearchParams();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const id = searchParams.get('id'); // ! Este parámetro se usará para obtener la info de la promoción específica viene de la URL 
-    //! ya esta listo para usarse nada mas falta la llamada a la api con este id
-    const [nombreTour] = useState('Sendero Dragón');
-    const [descripcionTour] = useState('Recorrido completo del sendero principal, se proporciona comida ');
-    const [duracionTour] = useState('3 horas');
-    const [capacidadTour] = useState(10);
-    const [descuentoPromo] = useState(20);
-    const [etiquetaTour] = useState('Moderado');
-    const [paquetePromo] = useState({ nombre: 'Paquete 1', descripcion: 'Incluye: Almuerzo, Guía y Poliza INS', precio: 50, precioAntes: 70 });
-    const [imagenTour] = useState('/tour1.png');
+    const router = useRouter();
+    const id = searchParams.get('id');
+    
+    const [nombreTour, setNombreTour] = useState('');
+    const [descripcionTour, setDescripcionTour] = useState('');
+    const [duracionTour, setDuracionTour] = useState('');
+    const [capacidadTour, setCapacidadTour] = useState(0);
+    const [descuentoPromo, setDescuentoPromo] = useState(0);
+    const [etiquetaTour, setEtiquetaTour] = useState('Todos');
+    const [paquetePromo, setPaquetePromo] = useState({ 
+        nombre: '', 
+        descripcion: '', 
+        precio: 0, 
+        precioAntes: 0 
+    });
+    const [imagenTour, setImagenTour] = useState('/tour1.png');
+    const [tourId, setTourId] = useState<number | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchPromocion = async () => {
+            if (!id) return;
+            
+            try {
+                setLoading(true);
+                
+                // Fetch promotion
+                const promoRes = await fetch(`${API_URL}/promotions/${id}`);
+                if (!promoRes.ok) throw new Error('Error al cargar promoción');
+                const promoJson = await promoRes.json();
+                const promo: PromocionAPI = promoJson.data;
+                
+                setTourId(promo.tour_id);
+                
+                // Fetch tour details
+                const tourRes = await fetch(`${API_URL}/tours/${promo.tour_id}`);
+                if (tourRes.ok) {
+                    const tourJson = await tourRes.json();
+                    const tour: TourAPI = tourJson.data;
+                    
+                    setNombreTour(tour.title);
+                    setDescripcionTour(promo.description || tour.description || '');
+                    setCapacidadTour(tour.max_persons);
+                    setDuracionTour(
+                        tour.duration_days > 0 
+                            ? `${tour.duration_days} día${tour.duration_days > 1 ? 's' : ''}` 
+                            : `${tour.duration_hours} hora${tour.duration_hours > 1 ? 's' : ''}`
+                    );
+                    
+                    // Handle image URL
+                    let imgUrl = '/tour1.png';
+                    if (tour.image_url) {
+                        if (tour.image_url.startsWith('http')) {
+                            imgUrl = tour.image_url;
+                        } else if (tour.image_url.startsWith('/')) {
+                            imgUrl = `${API_URL}${tour.image_url}`;
+                        } else {
+                            imgUrl = tour.image_url;
+                        }
+                    }
+                    setImagenTour(imgUrl);
+                    
+                    const precioOriginal = tour.person_price;
+                    const descuento = promo.discount_value;
+                    const precioFinal = precioOriginal - descuento;
+                    
+                    setDescuentoPromo(Math.round((descuento / precioOriginal) * 100));
+                    setPaquetePromo({
+                        nombre: promo.title,
+                        descripcion: promo.description || `Promoción especial para ${tour.title}`,
+                        precioAntes: precioOriginal,
+                        precio: precioFinal > 0 ? precioFinal : precioOriginal * (1 - descuento/100)
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        
+        fetchPromocion();
+    }, [id]);
+
+    const handleReservar = () => {
+        if (tourId) {
+            router.push(`/cliente/tours/reservar?tourId=${tourId}&nombre=${encodeURIComponent(nombreTour)}`);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="h-screen bg-gray-50 flex overflow-hidden">
+                <SideBarClient />
+                <div className="flex-1 flex flex-col">
+                    <TopBar />
+                    <main className="flex-1 flex items-center justify-center ml-72 pt-20">
+                        <p className="text-verde3 text-lg">Cargando promoción...</p>
+                    </main>
+                </div>
+            </div>
+        );
+    }
     return (
         <div className="h-screen bg-gray-50 flex overflow-hidden">
-            <SideBarAdmin />
+            <SideBarClient />
             <div className="flex-1 flex flex-col">
                 <TopBar />
                 <main className="flex-1 flex flex-col ml-72  pt-20 px-8 min-h-0">
@@ -35,7 +150,8 @@ export default function InfoPromocionAdmin() {
                                 </div>
                                 <div className="flex justify-end">
                                     <button
-                                    type="submit"
+                                    type="button"
+                                    onClick={handleReservar}
                                     className="mt-1 text-white bg-verde3 hover:bg-verde2 font-medium rounded-xl 
                                     text-md px-5 py-2.5 text-center flex items-center justify-center gap-2"
                                     >
@@ -96,12 +212,12 @@ export default function InfoPromocionAdmin() {
                                     <div className="absolute top-6 left-4 bg-rojo2 text-black text-sm font-bold px-2 py-1 rounded-md z-20 transform -rotate-12">
                                         PROMOCIÓN -{descuentoPromo}%
                                     </div>
-                                    <Image
+                                    <img
                                         src={imagenTour}
                                         alt={`Imagen del tour ${nombreTour}`}
                                         width={400}
                                         height={300}
-                                        className="rounded-xl mt-2 mr-8"
+                                        className="rounded-xl mt-2 mr-8 object-cover"
                                     />
                                 </div>
                             </div>

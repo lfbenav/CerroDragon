@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { SideBarAdmin, TopBar, CardTourAdmin, SearchBarAdmin, Cuadro} from "../../components";
 import Link from "next/link";
 
+const API_URL = "http://localhost:3000";
+
 interface Tour {
     id: number;
     nombre: string;
@@ -15,39 +17,63 @@ interface Tour {
     activo?: boolean;
 }
 
+interface TourAPI {
+    id: number;
+    title: string;
+    description: string;
+    duration_hours: number;
+    duration_days: number;
+    max_persons: number;
+    person_price: number;
+    image_url: string | null;
+    base_location: string | null;
+    is_active: boolean;
+    created_at: string;
+}
+
 export default function Tours() {
     const [tours, setTours] = useState<Tour[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
 
-    // Mock data for development
-    const mockTours: Tour[] = [
-        { id: 1, nombre: "Tour al Amanecer", descripcion: "Disfruta de un espectacular amanecer en Cerro Dragón con nuestro tour guiado.", precio: 85, imagen: "/tour1.png", capacidad: 10, duracion: "3 horas", etiqueta: "Todos", activo: true },
-        { id: 2, nombre: "Aventura Nocturna", descripcion: "Explora los senderos misteriosos del Cerro bajo la luz de las estrellas.", precio: 120, imagen: "/tour2.png", capacidad: 8, duracion: "5 horas", etiqueta: "Moderado", activo: true },
-        { id: 3, nombre: "Expedición Extrema", descripcion: "Desafía tus límites con esta expedición completa a las cumbres más altas.", precio: 250, imagen: "/tour3.png", capacidad: 6, duracion: "1 día", etiqueta: "Experto", activo: true },
-        { id: 4, nombre: "Caminata Familiar", descripcion: "Un tour relajado perfecto para toda la familia con paradas para descanso.", precio: 65, imagen: "/tour1.png", capacidad: 15, duracion: "2 horas", etiqueta: "Principiante", activo: false },
-        { id: 5, nombre: "Safari Fotográfico", descripcion: "Captura la belleza natural del Cerro con nuestro guía especializado en fotografía.", precio: 95, imagen: "/tour2.png", capacidad: 12, duracion: "4 horas", etiqueta: "Todos", activo: true },
-        { id: 6, nombre: "Ruta de las Cascadas", descripcion: "Descubre las cascadas ocultas en un recorrido lleno de aventura y naturaleza.", precio: 110, imagen: "/tour3.png", capacidad: 10, duracion: "6 horas", etiqueta: "Moderado", activo: true },
-        { id: 7, nombre: "Trekking de Resistencia", descripcion: "Una prueba de resistencia física en los senderos más desafiantes del Cerro.", precio: 180, imagen: "/tour1.png", capacidad: 8, duracion: "8 horas", etiqueta: "Experto", activo: true },
-        { id: 8, nombre: "Picnic en las Alturas", descripcion: "Disfruta de un almuerzo con vista panorámica en uno de los miradores más hermosos.", precio: 75, imagen: "/tour2.png", capacidad: 20, duracion: "3 horas", etiqueta: "Principiante", activo: true },
-        { id: 9, nombre: "Escalada Técnica", descripcion: "Para expertos en escalada que buscan conquistar las paredes rocosas más retadoras.", precio: 300, imagen: "/tour3.png", capacidad: 4, duracion: "1 día", etiqueta: "Experto", activo: false }
-    ];
-
     const fetchTours = async () => {
         try {
             setLoading(true);
             setError(null);
             
-            // TODO: Replace with actual API endpoint
-            // const response = await fetch('/api/tours');
-            // if (!response.ok) throw new Error('Failed to fetch tours');
-            // const data = await response.json();
-            // setTours(data);
+            const response = await fetch(`${API_URL}/tours/all`);
+            if (!response.ok) throw new Error('Error al cargar tours');
+            const json = await response.json();
             
-            // Simulate API call delay
-            await new Promise(resolve => setTimeout(resolve, 500));
-            setTours(mockTours);
+            // Mapear datos de la API al formato del componente
+            const mappedTours: Tour[] = json.data.map((tour: TourAPI) => {
+                let imgUrl = '/tour1.png';
+                if (tour.image_url) {
+                    if (tour.image_url.startsWith('http')) {
+                        imgUrl = tour.image_url;
+                    } else if (tour.image_url.startsWith('/')) {
+                        imgUrl = `${API_URL}${tour.image_url}`;
+                    } else {
+                        imgUrl = tour.image_url;
+                    }
+                }
+                return {
+                    id: tour.id,
+                    nombre: tour.title,
+                    descripcion: tour.description || '',
+                    precio: tour.person_price,
+                    imagen: imgUrl,
+                    capacidad: tour.max_persons,
+                    duracion: tour.duration_days > 0 
+                        ? `${tour.duration_days} día${tour.duration_days > 1 ? 's' : ''}` 
+                        : `${tour.duration_hours} hora${tour.duration_hours > 1 ? 's' : ''}`,
+                    etiqueta: 'Todos',
+                    activo: tour.is_active
+                };
+            });
+            
+            setTours(mappedTours);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Error loading tours');
         } finally {

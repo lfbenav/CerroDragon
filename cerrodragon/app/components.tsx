@@ -763,12 +763,10 @@ export function CardTourAdmin({id, nombre, descripcion, precio, capacidad, durac
                 </div>
             )}
             <div className="h-36 overflow-hidden">
-                <Image
+                <img
                 className="rounded-t-xl w-full h-full object-cover"
                 src={imagen || "/tour1.png"}
                 alt=""
-                width={325}
-                height={100}
                 />
             </div>
         </a>
@@ -934,12 +932,10 @@ export function CardCabana({id, nombre, descripcion, capacidad, etiqueta, imagen
         <div className="bg-beige1 block w-[350px] h-80 border border-default border-borde1 rounded-xl cardTour relative flex flex-col">
         <a href={`/cliente/cabanas/info?id=${id}`} className="block overflow-hidden relative">
             <div className="h-48 overflow-hidden">
-                <Image
+                <img
                 className="rounded-t-xl w-full h-full object-cover"
                 src={imagen || "/tour1.png"}
                 alt=""
-                width={350}
-                height={192}
                 />
             </div>
         </a>
@@ -1021,12 +1017,10 @@ export function CardCabanaAdmin({id, nombre, descripcion, capacidad, etiqueta, i
         <div className="bg-beige1 block w-[350px] h-80 border border-default border-borde1 rounded-xl cardTour relative flex flex-col">
         <a href={"/"+id} className="block overflow-hidden relative">
             <div className="h-48 overflow-hidden">
-                <Image
+                <img
                 className="rounded-t-xl w-full h-full object-cover"
                 src={imagen || "/tour1.png"}
                 alt=""
-                width={350}
-                height={192}
                 />
             </div>
         </a>
@@ -1115,12 +1109,10 @@ export function CardPromocion({id, nombre, descripcion, precioAhora, precioAntes
                 <span className='text-xs font-normal'> <br />Antes: <span className="line-through">${precioAntes}</span> </span>
             </div>
             <div className="h-48 overflow-hidden">
-                <Image
+                <img
                 className="rounded-t-xl w-full h-full object-cover"
                 src={imagen || "/tour1.png"}
                 alt=""
-                width={325}
-                height={192}
                 />
             </div>
         </a>
@@ -1233,12 +1225,10 @@ export function CardPromocionAdmin({id, nombre, descripcion, precioAhora, precio
                 <span className='text-xs font-normal'> <br />Antes: <span className="line-through">${precioAntes}</span> </span>
             </div>
             <div className="h-48 overflow-hidden">
-                <Image
+                <img
                 className="rounded-t-xl w-full h-full object-cover"
                 src={imagen || "/tour1.png"}
                 alt=""
-                width={325}
-                height={192}
                 />
             </div>
         </a>

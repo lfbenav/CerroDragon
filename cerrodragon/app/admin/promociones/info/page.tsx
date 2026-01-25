@@ -4,6 +4,29 @@ import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 
+const API_URL = "http://localhost:3000";
+
+interface PromocionAPI {
+    id: number;
+    tour_id: number;
+    title: string;
+    description: string;
+    discount_value: number;
+    is_active: boolean;
+    tour_title: string;
+}
+
+interface TourAPI {
+    id: number;
+    title: string;
+    description: string;
+    duration_hours: number;
+    duration_days: number;
+    max_persons: number;
+    person_price: number;
+    image_url: string | null;
+}
+
 interface PromocionData {
     id: number;
     nombre: string;
@@ -33,39 +56,58 @@ export default function InfoPromocion() {
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [pendingAction, setPendingAction] = useState<'activar' | 'desactivar' | null>(null);
 
-    // Mock data
-    const mockData: PromocionData = {
-        id: Number(id) || 1,
-        nombre: 'Sendero Dragón',
-        descripcion: 'Recorrido completo del sendero principal, se proporciona comida',
-        duracion: '3 horas',
-        capacidad: 10,
-        descuento: 20,
-        etiqueta: 'Moderado',
-        imagen: '/tour1.png',
-        activa: true,
-        paquete: {
-            nombre: 'Paquete 1',
-            descripcion: 'Incluye: Almuerzo, Guía y Poliza INS',
-            precioAntes: 70,
-            precioAhora: 50
-        }
-    };
-
     const fetchPromocionData = async () => {
+        if (!id) return;
+        
         try {
             setLoading(true);
             setError(null);
             
-            // TODO: Replace with actual API endpoint
-            // const response = await fetch(`/api/promociones/${id}`);
-            // if (!response.ok) throw new Error('Failed to fetch promotion data');
-            // const data = await response.json();
-            // setPromocionData(data);
+            // Fetch promotion
+            const promoRes = await fetch(`${API_URL}/promotions/${id}`);
+            if (!promoRes.ok) throw new Error('Error al cargar promoción');
+            const promoJson = await promoRes.json();
+            const promo: PromocionAPI = promoJson.data;
             
-            // Simulate API call delay
-            await new Promise(resolve => setTimeout(resolve, 500));
-            setPromocionData(mockData);
+            // Fetch tour details
+            const tourRes = await fetch(`${API_URL}/tours/${promo.tour_id}`);
+            let tour: TourAPI | null = null;
+            if (tourRes.ok) {
+                const tourJson = await tourRes.json();
+                tour = tourJson.data;
+            }
+            
+            const precioOriginal = tour?.person_price || 100;
+            const descuento = promo.discount_value;
+            const precioFinal = precioOriginal - descuento;
+            
+            setPromocionData({
+                id: promo.id,
+                nombre: tour?.title || promo.tour_title,
+                descripcion: promo.description || tour?.description || '',
+                duracion: tour 
+                    ? (tour.duration_days > 0 
+                        ? `${tour.duration_days} día${tour.duration_days > 1 ? 's' : ''}` 
+                        : `${tour.duration_hours} hora${tour.duration_hours > 1 ? 's' : ''}`)
+                    : '3 horas',
+                capacidad: tour?.max_persons || 10,
+                descuento: Math.round((descuento / precioOriginal) * 100),
+                etiqueta: 'Todos',
+                imagen: tour?.image_url 
+                    ? (tour.image_url.startsWith('http') 
+                        ? tour.image_url 
+                        : tour.image_url.startsWith('/') 
+                            ? `${API_URL}${tour.image_url}` 
+                            : tour.image_url)
+                    : '/tour1.png',
+                activa: promo.is_active,
+                paquete: {
+                    nombre: promo.title,
+                    descripcion: promo.description || `Promoción para ${promo.tour_title}`,
+                    precioAntes: precioOriginal,
+                    precioAhora: precioFinal > 0 ? precioFinal : precioOriginal * (1 - descuento/100)
+                }
+            });
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Error loading promotion data');
         } finally {
@@ -85,34 +127,27 @@ export default function InfoPromocion() {
             setIsUpdating(true);
             const newStatus = pendingAction === 'activar';
 
-            // TODO: Replace with actual API endpoint
-            // const response = await fetch(`/api/promociones/${id}/toggle-status`, {
-            //     method: 'PATCH',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //     },
-            //     body: JSON.stringify({
-            //         activa: newStatus
-            //     })
-            // });
-            // 
-            // if (!response.ok) {
-            //     throw new Error('Failed to update promotion status');
-            // }
+            const token = localStorage.getItem('access_token');
+            const response = await fetch(`${API_URL}/promotions/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    is_active: newStatus
+                })
+            });
 
-            // Simulate API call delay
-            await new Promise(resolve => setTimeout(resolve, 800));
+            if (!response.ok) {
+                throw new Error('Error al actualizar estado');
+            }
 
-            // Update local state optimistically
             setPromocionData(prev => prev ? { ...prev, activa: newStatus } : null);
-            
-            console.log(`Promoción ${newStatus ? 'activada' : 'desactivada'} exitosamente`);
             
         } catch (error) {
             console.error('Error updating promotion status:', error);
             setError('Error al actualizar el estado de la promoción. Inténtalo de nuevo.');
-            
-            // Clear error after 3 seconds
             setTimeout(() => setError(null), 3000);
         } finally {
             setIsUpdating(false);
@@ -275,12 +310,12 @@ export default function InfoPromocion() {
                                     <div className="absolute top-6 left-4 bg-rojo2 text-black text-sm font-bold px-2 py-1 rounded-md z-20 transform -rotate-12">
                                         PROMOCIÓN -{promocionData.descuento}%
                                     </div>
-                                    <Image
+                                    <img
                                         src={promocionData.imagen}
                                         alt={`Imagen del tour ${promocionData.nombre}`}
                                         width={400}
                                         height={300}
-                                        className="rounded-xl mt-2 mr-8"
+                                        className="rounded-xl mt-2 mr-8 object-cover"
                                     />
                                 </div>
                             </div>

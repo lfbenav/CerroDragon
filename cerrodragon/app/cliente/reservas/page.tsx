@@ -1,41 +1,79 @@
 "use client";
+import { useState, useEffect } from "react";
 import { SideBarClient, TopBar, TablaReservas, WhatsAppButton } from "@/app/components";
 
-// Datos de ejemplo para las reservas
-const reservasData = [
-    {
-        id: "RV-502",
-        clienteNombre: "Carlos Alvarado",
-        clienteEmail: "c.alvarado@gmail.com",
-        tour: "Tour al amanecer",
-        monto: 30000,
-        fecha: "15 de Diciembre de 2025",
-        personas: 4,
-        estado: "confirmada" as const,
-    },
-    {
-        id: "RV-503",
-        clienteNombre: "María González",
-        clienteEmail: "maria.g@hotmail.com",
-        tour: "Aventura en la montaña",
-        monto: 45000,
-        fecha: "20 de Diciembre de 2025",
-        personas: 2,
-        estado: "pendiente" as const,
-    },
-    {
-        id: "RV-504",
-        clienteNombre: "Pedro Martínez",
-        clienteEmail: "p.martinez@company.com",
-        tour: "Tour nocturno",
-        monto: 25000,
-        fecha: "18 de Diciembre de 2025",
-        personas: 3,
-        estado: "reembolsada" as const,
-    }
-];
+const API_URL = "http://localhost:3000";
+
+interface ReservaAPI {
+    id: number;
+    customer_id: number;
+    tour_id: number;
+    tour_date: string;
+    persons: number;
+    total_usd: number;
+    status: string;
+    tour_title: string;
+}
+
+interface ReservaDisplay {
+    id: string;
+    clienteNombre: string;
+    clienteEmail: string;
+    tour: string;
+    monto: number;
+    fecha: string;
+    personas: number;
+    estado: "confirmada" | "pendiente" | "reembolsada" | "cancelada";
+}
 
 export default function Reservas() {
+    const [reservas, setReservas] = useState<ReservaDisplay[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchReservas = async () => {
+            try {
+                const token = localStorage.getItem('access_token');
+                const res = await fetch(`${API_URL}/my-reservations`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (res.ok) {
+                    const json = await res.json();
+                    const userData = JSON.parse(localStorage.getItem('user') || '{}');
+                    
+                    const mapped: ReservaDisplay[] = json.data.map((r: ReservaAPI) => ({
+                        id: `RV-${r.id}`,
+                        clienteNombre: userData.full_name || 'Usuario',
+                        clienteEmail: userData.email || '',
+                        tour: r.tour_title,
+                        monto: r.total_usd,
+                        fecha: new Date(r.tour_date).toLocaleDateString('es-CR', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric'
+                        }),
+                        personas: r.persons,
+                        estado: r.status === 'CONFIRMED' ? 'confirmada' 
+                              : r.status === 'CANCELLED' ? 'cancelada'
+                              : r.status === 'REFUNDED' ? 'reembolsada'
+                              : 'pendiente'
+                    }));
+                    
+                    setReservas(mapped);
+                }
+            } catch (error) {
+                console.error('Error cargando reservas:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchReservas();
+    }, []);
+
     return (
         <div className="h-screen bg-gray-50 flex overflow-hidden">
             <SideBarClient />
@@ -56,7 +94,13 @@ export default function Reservas() {
                             <hr className="border-1 border-borde1 w-full" />
                         </div>
                         
-                        <TablaReservas reservas={reservasData} />
+                        {loading ? (
+                            <p className="text-verde3">Cargando reservas...</p>
+                        ) : reservas.length === 0 ? (
+                            <p className="text-verde3">No tienes reservas aún</p>
+                        ) : (
+                            <TablaReservas reservas={reservas} />
+                        )}
                     </div>
                     
                 </main>

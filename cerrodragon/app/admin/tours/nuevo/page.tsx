@@ -99,7 +99,7 @@ export default function NuevoTour() {
             /* =========================
             3. REDIRECCIONAR AL TOUR
             ========================== */
-            router.push(`/admin/tours/${tourJson.data.id}`);
+            router.push(`/admin/tours/info?id=${tourJson.data.id}`);
 
         } catch (error) {
             console.error(error);

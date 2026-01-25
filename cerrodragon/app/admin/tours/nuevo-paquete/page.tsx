@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { SideBarAdmin, TopBar } from "@/app/components";
 
+const API_URL = "http://localhost:3000";
+
 export default function NuevoPaquete() {
     const searchParams = useSearchParams();
     const tourId = searchParams.get('tourId');
@@ -29,24 +31,24 @@ export default function NuevoPaquete() {
         setError('');
 
         try {
-            // TODO: Implementar la lógica para guardar el nuevo paquete
-            // const response = await fetch('/api/paquetes', {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //     },
-            //     body: JSON.stringify({
-            //         tourId: tourId,
-            //         descripcion: descripcion.trim(),
-            //         precio: parseFloat(precio),
-            //     }),
-            // });
+            const token = localStorage.getItem('access_token');
+            const response = await fetch(`${API_URL}/tour-packages`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    tour_id: tourId,
+                    name: descripcion.trim(),
+                    price_usd: parseFloat(precio),
+                }),
+            });
 
-            // if (!response.ok) {
-            //     throw new Error('Error al crear el paquete');
-            // }
+            if (!response.ok) {
+                throw new Error('Error al crear el paquete');
+            }
 
-            // Navigate back to tour info screen
             router.push(`/admin/tours/info?id=${tourId}`);
         } catch (error) {
             setError('Error al guardar el paquete. Por favor, intente nuevamente.');

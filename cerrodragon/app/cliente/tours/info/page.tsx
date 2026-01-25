@@ -5,67 +5,118 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 
-// Datos de ejemplo de tours - Reemplazar con llamada a API
-const toursData = [
-    { id: 1, nombre: "Tour al Amanecer", descripcion: "Disfruta de un espectacular amanecer en Cerro Dragón con nuestro tour guiado.", precio: 85, capacidad: 10, duracion: "3 horas", etiqueta: "Todos", imagen: "/tour1.png" },
-    { id: 2, nombre: "Aventura Nocturna", descripcion: "Explora los senderos misteriosos del Cerro bajo la luz de las estrellas.", precio: 120, capacidad: 8, duracion: "5 horas", etiqueta: "Moderado", imagen: "/tour2.png" },
-    { id: 3, nombre: "Expedición Extrema", descripcion: "Desafía tus límites con esta expedición completa a las cumbres más altas.", precio: 250, capacidad: 6, duracion: "1 día", etiqueta: "Experto", imagen: "/tour3.png" },
-    { id: 4, nombre: "Caminata Familiar", descripcion: "Un tour relajado perfecto para toda la familia con paradas para descanso.", precio: 65, capacidad: 15, duracion: "2 horas", etiqueta: "Principiante", imagen: "/tour1.png" },
-    { id: 5, nombre: "Safari Fotográfico", descripcion: "Captura la belleza natural del Cerro con nuestro guía especializado en fotografía.", precio: 95, capacidad: 12, duracion: "4 horas", etiqueta: "Todos", imagen: "/tour2.png" },
-    { id: 6, nombre: "Ruta de las Cascadas", descripcion: "Descubre las cascadas ocultas en un recorrido lleno de aventura y naturaleza.", precio: 110, capacidad: 10, duracion: "6 horas", etiqueta: "Moderado", imagen: "/tour3.png" },
-    { id: 7, nombre: "Trekking de Resistencia", descripcion: "Una prueba de resistencia física en los senderos más desafiantes del Cerro.", precio: 180, capacidad: 8, duracion: "8 horas", etiqueta: "Experto", imagen: "/tour1.png" },
-    { id: 8, nombre: "Picnic en las Alturas", descripcion: "Disfruta de un almuerzo con vista panorámica en uno de los miradores más hermosos.", precio: 55, capacidad: 20, duracion: "3 horas", etiqueta: "Todos", imagen: "/tour2.png" },
-];
+const API_URL = "http://localhost:3000";
+
+interface TourAPI {
+    id: number;
+    title: string;
+    description: string;
+    duration_hours: number;
+    duration_days: number;
+    max_persons: number;
+    person_price: number;
+    image_url: string | null;
+    base_location: string | null;
+    is_active: boolean;
+    created_at: string;
+}
+
+interface PaqueteAPI {
+    id: number;
+    tour_id: number;
+    name: string;
+    price_usd: number;
+    is_active: boolean;
+}
 
 export default function TourInfoPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const id = searchParams.get('id');
-    const tourId = id ? parseInt(id) : 1;
+    const tourId = id || '';
     
-    const [nombreTour, setNombreTour] = useState('Sendero Dragón');
-    const [descripcionTour, setDescripcionTour] = useState('Recorrido completo del sendero principal, se proporciona comida ');
-    const [duracionTour, setDuracionTour] = useState('3 horas');
-    const [capacidadTour, setCapacidadTour] = useState(10);
-    const [precioTour, setPrecioTour] = useState(15000);
-    const [etiquetaTour, setEtiquetaTour] = useState('Moderado');
-    const [paquetes] = useState([
-        { nombre: 'Paquete 1', descripcion: 'Incluye: Almuerzo, Guía y Poliza INS', precio: 50 },
-        { nombre: 'Paquete 2', descripcion: 'Incluye: Almuerzo, autoguiado y sin poliza INS', precio: 30 }
-    ]);
+    const [nombreTour, setNombreTour] = useState('');
+    const [descripcionTour, setDescripcionTour] = useState('');
+    const [duracionTour, setDuracionTour] = useState('');
+    const [capacidadTour, setCapacidadTour] = useState(0);
+    const [precioTour, setPrecioTour] = useState(0);
+    const [etiquetaTour, setEtiquetaTour] = useState('Todos');
+    const [paquetes, setPaquetes] = useState<{nombre: string; descripcion: string; precio: number}[]>([]);
     const [imagenTour, setImagenTour] = useState('/tour1.png');
+    const [loading, setLoading] = useState(true);
 
-    // Cargar datos del tour según el ID
+    // Cargar datos del tour desde la API
     useEffect(() => {
-        const tour = toursData.find(t => t.id === tourId);
-        if (tour) {
-            setNombreTour(tour.nombre);
-            setDescripcionTour(tour.descripcion);
-            setPrecioTour(tour.precio);
-            setCapacidadTour(tour.capacidad);
-            setDuracionTour(tour.duracion);
-            setEtiquetaTour(tour.etiqueta);
-            setImagenTour(tour.imagen);
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+                
+                // Fetch tour data
+                const tourRes = await fetch(`${API_URL}/tours/${tourId}`);
+                if (!tourRes.ok) throw new Error('Error al cargar tour');
+                const tourJson = await tourRes.json();
+                const tour: TourAPI = tourJson.data;
+                
+                setNombreTour(tour.title);
+                setDescripcionTour(tour.description || '');
+                setPrecioTour(tour.person_price);
+                setCapacidadTour(tour.max_persons);
+                setDuracionTour(
+                    tour.duration_days > 0 
+                        ? `${tour.duration_days} día${tour.duration_days > 1 ? 's' : ''}` 
+                        : `${tour.duration_hours} hora${tour.duration_hours > 1 ? 's' : ''}`
+                );
+                
+                // Handle image URL - could be full URL, relative path, or null
+                let imgUrl = '/tour1.png';
+                if (tour.image_url) {
+                    if (tour.image_url.startsWith('http')) {
+                        imgUrl = tour.image_url;
+                    } else if (tour.image_url.startsWith('/')) {
+                        imgUrl = `${API_URL}${tour.image_url}`;
+                    } else {
+                        imgUrl = tour.image_url;
+                    }
+                }
+                setImagenTour(imgUrl);
+                
+                // Fetch packages for this tour
+                const pkgRes = await fetch(`${API_URL}/tour-packages?tour_id=${tourId}`);
+                if (pkgRes.ok) {
+                    const pkgJson = await pkgRes.json();
+                    const mappedPaquetes = pkgJson.data.map((pkg: PaqueteAPI) => ({
+                        nombre: pkg.name,
+                        descripcion: `Paquete de tour`,
+                        precio: pkg.price_usd
+                    }));
+                    setPaquetes(mappedPaquetes);
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        
+        if (tourId) {
+            fetchData();
         }
-        // TODO: Reemplazar con llamada a API cuando esté disponible
-        // const fetchTour = async () => {
-        //     try {
-        //         const response = await fetch(`/api/tours/${tourId}`);
-        //         if (!response.ok) throw new Error('Error al cargar el tour');
-        //         const data = await response.json();
-        //         setNombreTour(data.nombre);
-        //         setDescripcionTour(data.descripcion);
-        //         setPrecioTour(data.precio);
-        //         setCapacidadTour(data.capacidad);
-        //         setDuracionTour(data.duracion);
-        //         setEtiquetaTour(data.etiqueta);
-        //         setImagenTour(data.imagen);
-        //     } catch (error) {
-        //         console.error('Error:', error);
-        //     }
-        // };
-        // fetchTour();
     }, [tourId]);
+
+    if (loading) {
+        return (
+            <div className="h-screen bg-gray-50 flex overflow-hidden">
+                <SideBarClient />
+                <div className="flex-1 flex flex-col">
+                    <TopBar />
+                    <main className="flex-1 flex items-center justify-center ml-72 pt-20">
+                        <p className="text-verde3 text-lg">Cargando información del tour...</p>
+                    </main>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="h-screen bg-gray-50 flex overflow-hidden">
@@ -149,12 +200,12 @@ export default function TourInfoPage() {
                             </div>
                                 
                             <div className="flex-shrink-0">
-                                <Image
+                                <img
                                     src={imagenTour}
                                     alt={`Imagen del tour ${nombreTour}`}
                                     width={400}
                                     height={300}
-                                    className="rounded-xl mt-2 mr-8"
+                                    className="rounded-xl mt-2 mr-8 object-cover"
                                 />
                             </div>
                         </div>

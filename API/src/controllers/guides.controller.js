@@ -2,6 +2,41 @@ const pool = require("../config/db");
 const asyncHandler = require("../middlewares/asyncHandler.middleware");
 const AppError = require("../utils/AppError");
 
+// GET /guides - Get all guides
+exports.getAllGuides = asyncHandler(async (req, res) => {
+    const { rows } = await pool.query(`
+        SELECT g.id, g.user_id, g.full_name, g.phone, g.bio, g.image_url, g.is_active, g.created_at
+        FROM guides g
+        WHERE g.is_active = true
+        ORDER BY g.full_name ASC
+    `);
+
+    res.status(200).json({
+        success: true,
+        data: rows
+    });
+});
+
+// GET /guides/:id - Get single guide
+exports.getGuideById = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    const { rows } = await pool.query(`
+        SELECT g.id, g.user_id, g.full_name, g.phone, g.bio, g.image_url, g.is_active, g.created_at
+        FROM guides g
+        WHERE g.id = $1
+    `, [id]);
+
+    if (!rows.length) {
+        throw new AppError("Guía no encontrado", 404, "GUIDE_NOT_FOUND");
+    }
+
+    res.status(200).json({
+        success: true,
+        data: rows[0]
+    });
+});
+
 // GET /assign-guide - Get all guide assignments
 exports.getAllAssignments = asyncHandler(async (req, res) => {
     const { reservation_id } = req.query;

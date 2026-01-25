@@ -3,43 +3,66 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { SideBarAdmin, TopBar } from "@/app/components";
 
+const API_URL = "http://localhost:3000";
+
 export default function EditarTour() {
     const searchParams = useSearchParams();
     const tourId = searchParams.get('tourId');
-    const [nombre, setNombre] = useState('Sendero del Dragón');
-    const [descripcion, setDescripcion] = useState('Recorrido completo del sendero principal, se proporciona comida y un guía para la experiencia');
-    const [horas, setHoras] = useState('2');
-    const [dias, setDias] = useState('00');
-    const [personas, setPersonas] = useState('15');
-    const [precio, setPrecio] = useState('15000');
-    const [etiquetas, setEtiquetas] = useState<string[]>(['Experto', 'Moderado']);
+    const [nombre, setNombre] = useState('');
+    const [descripcion, setDescripcion] = useState('');
+    const [horas, setHoras] = useState('0');
+    const [dias, setDias] = useState('0');
+    const [personas, setPersonas] = useState('');
+    const [precio, setPrecio] = useState('');
+    const [etiquetas, setEtiquetas] = useState<string[]>([]);
     const [imagen, setImagen] = useState<File | null>(null);
     const [imagenActual, setImagenActual] = useState('/tour1.png');
     const [isLoading, setIsLoading] = useState(false);
+    const [loadingData, setLoadingData] = useState(true);
     const [error, setError] = useState('');
     const router = useRouter();
 
     const etiquetasDisponibles = ['Experto', 'Moderado', 'Fácil', 'Todos'];
 
     useEffect(() => {
-        // TODO: Cargar datos del tour según el tourId
-        // const fetchTour = async () => {
-        //     try {
-        //         const response = await fetch(`/api/tours/${tourId}`);
-        //         if (!response.ok) throw new Error('Error al cargar el tour');
-        //         const data = await response.json();
-        //         setNombre(data.nombre);
-        //         setDescripcion(data.descripcion);
-        //         setHoras(data.horas);
-        //         setDias(data.dias);
-        //         setPersonas(data.personas);
-        //         setEtiquetas(data.etiquetas);
-        //         setImagenActual(data.imagen);
-        //     } catch (error) {
-        //         console.error('Error:', error);
-        //     }
-        // };
-        // fetchTour();
+        const fetchTour = async () => {
+            if (!tourId) return;
+            
+            try {
+                setLoadingData(true);
+                const response = await fetch(`${API_URL}/tours/${tourId}`);
+                if (!response.ok) throw new Error('Error al cargar el tour');
+                const json = await response.json();
+                const tour = json.data;
+                
+                setNombre(tour.title || '');
+                setDescripcion(tour.description || '');
+                setHoras(String(tour.duration_hours || 0));
+                setDias(String(tour.duration_days || 0));
+                setPersonas(String(tour.max_persons || ''));
+                setPrecio(String(tour.person_price || ''));
+                
+                // Handle image URL
+                let imgUrl = '/tour1.png';
+                if (tour.image_url) {
+                    if (tour.image_url.startsWith('http')) {
+                        imgUrl = tour.image_url;
+                    } else if (tour.image_url.startsWith('/')) {
+                        imgUrl = `${API_URL}${tour.image_url}`;
+                    } else {
+                        imgUrl = tour.image_url;
+                    }
+                }
+                setImagenActual(imgUrl);
+            } catch (error) {
+                console.error('Error:', error);
+                setError('Error al cargar los datos del tour');
+            } finally {
+                setLoadingData(false);
+            }
+        };
+        
+        fetchTour();
     }, [tourId]);
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,10 +79,23 @@ export default function EditarTour() {
         }
     };
 
-    const handleEliminar = () => {
+    const handleEliminar = async () => {
         if (confirm('¿Está seguro de que desea eliminar este tour?')) {
-            // TODO: Implementar la lógica para eliminar el tour
-            router.push('/admin/tours');
+            try {
+                const token = localStorage.getItem('access_token');
+                const response = await fetch(`${API_URL}/tours/${tourId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) throw new Error('Error al eliminar');
+                router.push('/admin/tours');
+            } catch (error) {
+                console.error('Error:', error);
+                setError('Error al eliminar el tour');
+            }
         }
     };
 
@@ -75,26 +111,47 @@ export default function EditarTour() {
         setError('');
 
         try {
-            // TODO: Implementar la lógica para actualizar el tour
-            // const formData = new FormData();
-            // formData.append('nombre', nombre.trim());
-            // formData.append('descripcion', descripcion.trim());
-            // formData.append('horas', horas);
-            // formData.append('dias', dias);
-            // formData.append('personas', personas);
-            // formData.append('etiquetas', JSON.stringify(etiquetas));
-            // if (imagen) formData.append('imagen', imagen);
+            let imageUrl = imagenActual;
 
-            // const response = await fetch(`/api/tours/${tourId}`, {
-            //     method: 'PUT',
-            //     body: formData,
-            // });
+            // Upload new image if selected
+            if (imagen) {
+                const formData = new FormData();
+                formData.append('image', imagen);
 
-            // if (!response.ok) {
-            //     throw new Error('Error al actualizar el tour');
-            // }
+                const imgRes = await fetch(`${API_URL}/images/upload/tours`, {
+                    method: 'POST',
+                    body: formData,
+                });
 
-            // Navigate back to info screen
+                const imgJson = await imgRes.json();
+                if (imgRes.ok) {
+                    imageUrl = `${API_URL}${imgJson.file.path}`;
+                }
+            }
+
+            // Update tour
+            const token = localStorage.getItem('access_token');
+            const response = await fetch(`${API_URL}/tours/${tourId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    title: nombre.trim(),
+                    description: descripcion.trim() || null,
+                    duration_hours: Number(horas) || 0,
+                    duration_days: Number(dias) || 0,
+                    max_persons: Number(personas),
+                    person_price: Number(precio),
+                    image_url: imageUrl,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Error al actualizar el tour');
+            }
+
             router.push(`/admin/tours/info?id=${tourId}`);
         } catch (error) {
             setError('Error al actualizar el tour. Por favor, intente nuevamente.');

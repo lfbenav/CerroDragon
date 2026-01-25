@@ -79,7 +79,9 @@ export default function LoginPage() {
         throw new Error(data.message || "Error al iniciar sesión");
       }
 
-      // Guardar token temporalmente
+      // Limpiar datos anteriores y guardar nuevos
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("user");
       localStorage.setItem("access_token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
