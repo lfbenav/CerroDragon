@@ -453,22 +453,36 @@ CREATE TABLE meal_responses (
 -- FORMULARIO CHECKIN POR CÓDIGO (RF24)
 -- =========================
 
+CREATE SEQUENCE checkin_form_code_seq START 100;
+
 CREATE TABLE checkin_forms (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  reservation_id uuid NOT NULL REFERENCES reservations(id) ON DELETE CASCADE,
-  code text UNIQUE NOT NULL,          -- código que se comparte
+
+  reservation_id uuid NOT NULL
+    REFERENCES reservations(id) ON DELETE CASCADE,
+
+  code text UNIQUE NOT NULL
+    DEFAULT ('CK-' || nextval('checkin_form_code_seq')),
+
   is_active boolean NOT NULL DEFAULT true,
+
   opened_at timestamptz NOT NULL DEFAULT now(),
   closed_at timestamptz,
-  note text                          -- por si hay que poner que se hizo el checkin de x forma o no se
+
+  note text
 );
 
 CREATE TABLE checkin_entries (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  checkin_form_id uuid NOT NULL REFERENCES checkin_forms(id) ON DELETE CASCADE,
+
+  checkin_form_id uuid NOT NULL
+    REFERENCES checkin_forms(id) ON DELETE CASCADE,
+
   participant_name text NOT NULL,
   phone text,
+
   checked_in_at timestamptz NOT NULL DEFAULT now(),
+
   UNIQUE (checkin_form_id, participant_name)
 );
 

@@ -21,6 +21,7 @@ app.use("/my-reservations", require("./routes/myReservations.routes"));     // R
 app.use("/documents", require("./routes/documents.routes"));                // Documentos
 app.use("/users", require("./routes/users.routes"));                        // Usuarios
 app.use("/foods", require("./routes/foods.routes"));                        // Cosas como forms de comida
+app.use("/checkin", require("./routes/checkin.routes"));                        // Cosas como forms de comida
 app.use("/calendar", require("./routes/calendar.routes"));                  // Calendarios
 app.use("/accomodations", require("./routes/accomodations.routes"));        // cabañas
 app.use("/images", require("./routes/images.routes"));                      // imagenes
