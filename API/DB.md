@@ -459,7 +459,9 @@ CREATE TABLE weather_conditions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   title text NOT NULL,
   message text NOT NULL,
-  is_active boolean NOT NULL DEFAULT false,
+  date text,
+  level text,
+  is_active boolean NOT NULL DEFAULT true,
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 

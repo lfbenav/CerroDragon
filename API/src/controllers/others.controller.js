@@ -11,24 +11,33 @@ exports.test = asyncHandler(async (req, res) => {
 // Condiciones climáticas e incidencias
 // ====================================
 
-// Crear condición climática / incidencia
+// Crear alerta de clima / incidencia
 exports.createWeatherCondition = asyncHandler(async (req, res) => {
-    const { title, message } = req.body || {};
+  const { title, message, level, date } = req.body || {};
 
-    if (!title || !message) {
-        throw new AppError("title y message son requeridos", 400);
-    }
+  if (!title || !message) {
+    throw new AppError("title y message son requeridos", 400);
+  }
 
-    const { rows } = await pool.query(`
-        INSERT INTO weather_conditions (title, message)
-        VALUES ($1, $2)
-        RETURNING *
-    `, [title, message]);
+  const { rows } = await pool.query(`
+    INSERT INTO weather_conditions (title, message, date, level)
+    VALUES ($1, $2, $3, $4)
+    RETURNING *
+  `, [
+    title,
+    message,
+    date || null,
+    level || null,
+  ]);
 
-    res.status(201).json({
-        success: true,
-        data: rows[0]
-    });
+  res.status(201).json({
+    success: true,
+    data: {
+      ...rows[0],
+      level: level || "leve",
+      date: rows[0].fecha,
+    },
+  });
 });
 
 // Eliminar condición climática / incidencia
@@ -49,6 +58,34 @@ exports.deleteWeatherCondition = asyncHandler(async (req, res) => {
         message: "Condición climática eliminada"
     });
 });
+
+exports.updateWeatherCondition = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { title, message, level, date } = req.body || {};
+
+  if (!title || !message || !level) {
+    throw new AppError("title, message y level son requeridos", 400);
+  }
+
+  const { rowCount, rows } = await pool.query(`
+    UPDATE weather_conditions
+    SET
+      title = $1,
+      message = $2,
+      level = $3,
+      date = COALESCE($4, date),
+      updated_at = now()
+    WHERE id = $5
+    RETURNING *
+  `, [title, message, level, date, id]);
+
+  if (!rowCount) {
+    throw new AppError("Alerta no encontrada", 404);
+  }
+
+  res.json({ success: true, data: rows[0] });
+});
+
 
 // Activar o desactivar condición climática
 exports.toggleWeatherCondition = asyncHandler(async (req, res) => {

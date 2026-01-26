@@ -1,11 +1,25 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { SideBarAdmin, TopBar, CardIncidenciaAdmin } from "../../components";
+
+const API_URL = "http://localhost:3000";
+
+/* =========================
+   TYPES
+========================= */
 
 type IncTipo = "leve" | "moderado" | "grave" | "critico";
 
-type Incidencia = {
+type IncidenciaAPI = {
+  id: string;
+  title: string | null;
+  message: string | null;
+  level: IncTipo | null;
+  date: string | null;
+};
+
+type IncidenciaUI = {
   id: string;
   titulo: string;
   descripcion: string;
@@ -13,78 +27,133 @@ type Incidencia = {
   tipo: IncTipo;
 };
 
+/* =========================
+   PAGE
+========================= */
+
 export default function AdminIncidenciasClimaPage() {
-  const initial: Incidencia[] = useMemo(
-    () => [
-      {
-        id: "1",
-        titulo: "Fuertes vientos en la zona",
-        descripcion:
-          "Se esperan ráfagas de viento que podrían afectar la seguridad de los tours al aire libre. Recomendamos a los clientes estar atentos a las actualizaciones y seguir las indicaciones del personal.",
-        fecha: "25 de noviembre de 2025",
-        tipo: "leve",
-      },
-      {
-        id: "2",
-        titulo: "Lluvia torrencial prevista",
-        descripcion:
-          "Se pronostica lluvia intensa para las próximas 6 horas. Todos los tours programados para hoy han sido suspendidos por motivos de seguridad. Contacte con nuestro personal para reprogramar.",
-        fecha: "26 de noviembre de 2025",
-        tipo: "critico",
-      },
-      {
-        id: "3",
-        titulo: "Temperatura extrema",
-        descripcion:
-          "Las temperaturas alcanzarán los 38°C durante el mediodía. Se recomienda a los visitantes hidratarse constantemente y evitar la exposición prolongada al sol.",
-        fecha: "24 de noviembre de 2025",
-        tipo: "grave",
-      },
-      {
-        id: "4",
-        titulo: "Cierre temporal del sendero norte",
-        descripcion:
-          "Debido a trabajos de mantenimiento en el sendero norte, esta ruta permanecerá cerrada hasta nuevo aviso. Los tours han sido redirigidos al sendero sur sin costo adicional.",
-        fecha: "23 de noviembre de 2025",
-        tipo: "moderado",
-      },
-    ],
-    []
-  );
-
-  const [items, setItems] = useState<Incidencia[]>(initial);
+  const [items, setItems] = useState<IncidenciaUI[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleNew = () => {
-    const newId = `new-${Date.now()}`;
-    setItems((prev) => [
-      ...prev,
-      {
-        id: newId,
-        titulo: "Ingrese el título",
-        descripcion: "Ingrese la descripción de la alerta",
-        fecha: "Ingrese la fecha",
-        tipo: "leve",
-      },
-    ]);
-    setEditingId(newId);
+  /* =========================
+     FETCH
+  ========================== */
+
+  useEffect(() => {
+    const fetchIncidencias = async () => {
+      try {
+        setLoading(true);
+
+        const res = await fetch(`${API_URL}/others/weather`);
+        if (!res.ok) throw new Error("Error cargando incidencias");
+
+        const json = await res.json();
+
+        const mapped: IncidenciaUI[] = (json.data as IncidenciaAPI[]).map(
+          (i) => ({
+            id: i.id,
+            titulo: i.title ?? "",
+            descripcion: i.message ?? "",
+            tipo: i.level ?? "leve",
+            fecha: i.date ?? "",
+          })
+        );
+
+        setItems(mapped);
+      } catch (err) {
+        console.error("Error cargando incidencias:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchIncidencias();
+  }, []);
+
+  /* =========================
+     ACTIONS
+  ========================== */
+
+  const handleNew = async () => {
+    const todayText = new Date().toLocaleDateString("es-CR", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+
+    const res = await fetch(`${API_URL}/others/weather`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: "Nueva alerta",
+        message: "Descripción de la alerta",
+        level: "leve",
+        date: todayText, // 👈 fecha texto válida
+      }),
+    });
+
+    if (!res.ok) {
+      console.error("Error creando alerta");
+      return;
+    }
+
+    const json = await res.json();
+
+    const newItem: IncidenciaUI = {
+      id: json.data.id,
+      titulo: json.data.title ?? "",
+      descripcion: json.data.message ?? "",
+      tipo: json.data.level ?? "leve",
+      fecha: json.data.date ?? todayText,
+    };
+
+    setItems((prev) => [...prev, newItem]);
+    setEditingId(newItem.id);
   };
 
-  const handleDelete = (id: string) => {
-    setItems((prev) => prev.filter((x) => x.id !== id));
-    setEditingId((cur) => (cur === id ? null : cur));
-  };
-
-  const handleSave = (
+  const handleSave = async (
     id: string,
-    next: { titulo: string; descripcion: string; fecha: string; tipo: IncTipo }
+    next: { titulo: string; descripcion: string; tipo: IncTipo }
   ) => {
-    setItems((prev) => prev.map((x) => (x.id === id ? { ...x, ...next } : x)));
+    await fetch(`${API_URL}/others/weather/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: next.titulo,
+        message: next.descripcion,
+        level: next.tipo,
+      }),
+    });
+
+    setItems((prev) =>
+      prev.map((x) =>
+        x.id === id
+          ? {
+              ...x,
+              titulo: next.titulo,
+              descripcion: next.descripcion,
+              tipo: next.tipo,
+            }
+          : x
+      )
+    );
+
     setEditingId(null);
   };
 
-  const handleStartEdit = (id: string) => setEditingId(id);
-  const handleCancelEdit = () => setEditingId(null);
+  const handleDelete = async (id: string) => {
+    await fetch(`${API_URL}/others/weather/${id}`, {
+      method: "DELETE",
+    });
+
+    setItems((prev) => prev.filter((x) => x.id !== id));
+    setEditingId(null);
+  };
+
+  /* =========================
+     RENDER
+  ========================== */
 
   return (
     <div className="h-screen bg-gray-50 flex overflow-hidden">
@@ -93,8 +162,9 @@ export default function AdminIncidenciasClimaPage() {
       <div className="flex-1 flex flex-col">
         <TopBar />
 
-        <main className="flex-1 flex flex-col ml-72  pt-20 px-8 min-h-0">
+        <main className="flex-1 flex flex-col ml-72 pt-20 px-8 min-h-0">
           <div className="max-w-7xl mx-auto w-full flex flex-col h-full">
+            {/* Header */}
             <div className="flex-shrink-0">
               <div className="flex items-start justify-between gap-6">
                 <div>
@@ -102,9 +172,7 @@ export default function AdminIncidenciasClimaPage() {
                     Alertas de Clima e Incidencias
                   </h3>
                   <p className="text-verde3 mb-4 text-md">
-                    Edite las alertas o agregue nuevas alertas de clima e
-                    incidencias que puedan afectar las actividades en Cerro
-                    Dragón.
+                    Edite o agregue alertas que puedan afectar las actividades.
                   </p>
                 </div>
 
@@ -120,23 +188,25 @@ export default function AdminIncidenciasClimaPage() {
               <div className="border-b border-black/20" />
             </div>
 
+            {/* Content */}
             <div className="flex-1 overflow-y-auto min-h-0">
               <div className="grid grid-cols-1 p-6 gap-6">
-                {items.map((it) => (
-                  <CardIncidenciaAdmin
-                    key={it.id}
-                    id={it.id}
-                    titulo={it.titulo}
-                    descripcion={it.descripcion}
-                    fecha={it.fecha}
-                    tipo={it.tipo}
-                    isEditing={editingId === it.id}
-                    onStartEdit={() => handleStartEdit(it.id)}
-                    onCancelEdit={handleCancelEdit}
-                    onSave={(next) => handleSave(it.id, next)}
-                    onDelete={() => handleDelete(it.id)}
-                  />
-                ))}
+                {!loading &&
+                  items.map((it) => (
+                    <CardIncidenciaAdmin
+                      key={it.id}
+                      id={it.id}
+                      titulo={it.titulo}
+                      descripcion={it.descripcion}
+                      fecha={it.fecha}
+                      tipo={it.tipo}
+                      isEditing={editingId === it.id}
+                      onStartEdit={() => setEditingId(it.id)}
+                      onCancelEdit={() => setEditingId(null)}
+                      onSave={(next) => handleSave(it.id, next)}
+                      onDelete={() => handleDelete(it.id)}
+                    />
+                  ))}
               </div>
             </div>
           </div>
@@ -145,6 +215,10 @@ export default function AdminIncidenciasClimaPage() {
     </div>
   );
 }
+
+/* =========================
+   ICON
+========================= */
 
 function PlusIcon() {
   return (

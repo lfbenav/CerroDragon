@@ -1934,25 +1934,34 @@ export function CardIncidenciaAdmin({
   isEditing: boolean;
   onStartEdit: () => void;
   onCancelEdit: () => void;
-  onSave: (next: { titulo: string; descripcion: string; fecha: string; tipo: IncTipo }) => void;
+  onSave: (next: { titulo: string; descripcion: string; tipo: IncTipo }) => void;
   onDelete: () => void;
 }) {
-  const [t, setT] = useState(titulo);
-  const [d, setD] = useState(descripcion);
-  const [f, setF] = useState(fecha);
-  const [tp, setTp] = useState<IncTipo>(tipo);
+  /* =========================
+     LOCAL STATE (SAFE)
+  ========================== */
+
+  const [t, setT] = useState<string>(titulo || "");
+  const [d, setD] = useState<string>(descripcion || "");
+  const [tp, setTp] = useState<IncTipo>(tipo || "leve");
 
   const [confirmOpen, setConfirmOpen] = useState(false);
 
+  /* =========================
+     SYNC WHEN EXIT EDIT MODE
+  ========================== */
+
   useEffect(() => {
     if (!isEditing) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setT(titulo);
-      setD(descripcion);
-      setF(fecha);
-      setTp(tipo);
+      setT(titulo || "");
+      setD(descripcion || "");
+      setTp(tipo || "leve");
     }
-  }, [titulo, descripcion, fecha, tipo, isEditing]);
+  }, [titulo, descripcion, tipo, isEditing]);
+
+  /* =========================
+     STYLES
+  ========================== */
 
   const getAlertStyles = () => {
     switch (tp) {
@@ -1969,216 +1978,125 @@ export function CardIncidenciaAdmin({
     }
   };
 
-  const getAlertIcon = () => {
-    switch (tp) {
-      case "leve":
-        return (
-          <svg className="w-5 h-5 text-verde3" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fillRule="evenodd"
-              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-              clipRule="evenodd"
-            />
-          </svg>
-        );
-      case "moderado":
-        return (
-          <svg className="w-5 h-5 text-amarillo" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fillRule="evenodd"
-              d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-              clipRule="evenodd"
-            />
-          </svg>
-        );
-      case "grave":
-        return (
-          <svg className="w-5 h-5 text-rojoalerta" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fillRule="evenodd"
-              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-              clipRule="evenodd"
-            />
-          </svg>
-        );
-      case "critico":
-        return (
-          <svg className="w-5 h-5 text-rojovino" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fillRule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-              clipRule="evenodd"
-            />
-          </svg>
-        );
-    }
+  /* =========================
+     ACTIONS
+  ========================== */
+
+  const handleSave = () => {
+    onSave({
+      titulo: t.trim(),
+      descripcion: d.trim(),
+      tipo: tp,
+    });
   };
 
-  const getAlertText = () => {
-    switch (tp) {
-      case "leve":
-        return "Información";
-      case "moderado":
-        return "Precaución";
-      case "grave":
-        return "Alerta";
-      case "critico":
-        return "Crítico";
-    }
-  };
-
-  const handleEditOrSave = () => {
-    if (!isEditing) return onStartEdit();
-    onSave({ titulo: t.trim(), descripcion: d.trim(), fecha: f.trim(), tipo: tp });
-  };
-
-  const handleCancel = () => {
-    setT(titulo);
-    setD(descripcion);
-    setF(fecha);
-    setTp(tipo);
-    onCancelEdit();
-  };
-
-  const requestDelete = () => setConfirmOpen(true);
-  const cancelDelete = () => setConfirmOpen(false);
-  const confirmDelete = () => {
-    setConfirmOpen(false);
-    onDelete();
-  };
+  /* =========================
+     RENDER
+  ========================== */
 
   return (
-    <div className={`w-full h-auto border-2 rounded-xl p-4 flex flex-col shadow-sm ${getAlertStyles()}`}>
-      {/* Badge row + actions */}
-      <div className="flex items-center mb-2 mx-4">
-        {getAlertIcon()}
-        <span className="ml-2 text-sm font-bold text-black">{getAlertText()}</span>
-
-        {/* acciones admin (derecha) */}
-        <div className="ml-auto flex items-center gap-2">
-          <button
-            type="button"
-            onClick={handleEditOrSave}
-            className="w-8 h-8 inline-flex items-center justify-center rounded-full hover:bg-black/5 text-black"
-            aria-label={isEditing ? "Guardar" : "Editar"}
-            title={isEditing ? "Guardar" : "Editar"}
-          >
-            {isEditing ? <CheckIcon /> : <PencilIcon />}
-          </button>
-
+    <div
+      className={`border rounded-xl p-5 transition ${getAlertStyles()}`}
+    >
+      <div className="flex justify-between items-start gap-4">
+        <div className="flex-1">
           {isEditing ? (
-            <button
-              type="button"
-              onClick={handleCancel}
-              className="w-8 h-8 inline-flex items-center justify-center rounded-full hover:bg-black/5 text-black"
-              aria-label="Cancelar"
-              title="Cancelar"
-            >
-              <XIcon />
-            </button>
+            <>
+              <input
+                value={t}
+                onChange={(e) => setT(e.target.value)}
+                className="w-full mb-2 bg-white border border-borde1 rounded-lg px-3 py-2 text-black"
+                placeholder="Título de la alerta"
+              />
+
+              <textarea
+                value={d}
+                onChange={(e) => setD(e.target.value)}
+                className="w-full bg-white border border-borde1 rounded-lg px-3 py-2 text-black"
+                rows={3}
+                placeholder="Descripción de la alerta"
+              />
+
+              <div className="mt-3 flex gap-2">
+                <select
+                  value={tp}
+                  onChange={(e) => setTp(e.target.value as IncTipo)}
+                  className="bg-white border border-borde1 rounded-lg px-3 py-2 text-black"
+                >
+                  <option value="leve">Leve</option>
+                  <option value="moderado">Moderado</option>
+                  <option value="grave">Grave</option>
+                  <option value="critico">Crítico</option>
+                </select>
+              </div>
+            </>
           ) : (
-            <button
-              type="button"
-              onClick={requestDelete}
-              className="w-8 h-8 inline-flex items-center justify-center rounded-full hover:bg-black/5 text-black"
-              aria-label="Eliminar"
-              title="Eliminar"
-            >
-              <CircleXIcon />
-            </button>
+            <>
+              <h4 className="text-lg font-bold text-black mb-1">
+                {titulo}
+              </h4>
+              <p className="text-sm text-black mb-2">
+                {descripcion}
+              </p>
+              <p className="text-xs text-black/60">
+                {fecha}
+              </p>
+            </>
+          )}
+        </div>
+
+        <div className="flex gap-2">
+          {isEditing ? (
+            <>
+              <button
+                onClick={handleSave}
+                className="text-sm px-3 py-1 rounded-lg bg-verde2 text-white"
+              >
+                Guardar
+              </button>
+              <button
+                onClick={onCancelEdit}
+                className="text-sm px-3 py-1 rounded-lg border border-borde1 text-black"
+              >
+                Cancelar
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={onStartEdit}
+                className="text-sm px-3 py-1 rounded-lg border border-borde1 text-black"
+              >
+                Editar
+              </button>
+              <button
+                onClick={() => setConfirmOpen(true)}
+                className="text-sm px-3 py-1 rounded-lg text-rojovino"
+              >
+                Eliminar
+              </button>
+            </>
           )}
         </div>
       </div>
 
-      {/* Tipo selector solo cuando edita */}
-      {isEditing && (
-        <div className="mx-4 mb-2">
-          <label className="text-xs font-medium text-black">Tipo</label>
-            <select
-            value={tp}
-            onChange={(e) => setTp(e.target.value as IncTipo)}
-            className="ml-3 text-sm bg-beige2 text-black border border-borde2 rounded-md px-2 py-1 outline-none focus:ring-2 focus:ring-verde2"
-            style={{ color: "black" }}
-            >
-            <option value="leve">Información</option>
-            <option value="moderado">Precaución</option>
-            <option value="grave">Alerta</option>
-            <option value="critico">Crítico</option>
-          </select>
+      {/* Confirm delete */}
+      {confirmOpen && (
+        <div className="mt-4 flex gap-2">
+          <button
+            onClick={onDelete}
+            className="px-3 py-1 text-sm rounded-lg bg-rojovino text-white"
+          >
+            Confirmar
+          </button>
+          <button
+            onClick={() => setConfirmOpen(false)}
+            className="px-3 py-1 text-sm rounded-lg border border-borde1"
+          >
+            Cancelar
+          </button>
         </div>
       )}
-
-        {/* Title */}
-        {isEditing ? (
-        <>
-            <input
-            value={t}
-            onChange={(e) => setT(e.target.value)}
-            className="text-lg font-semibold text-black mb-1 mx-4 bg-transparent outline-none border-b border-black/30 pb-1"
-            placeholder="Título"
-            maxLength={60}
-            />
-            <div className="mx-4 mb-2 text-right text-xs text-verde3">
-            {t.length}/60
-            </div>
-        </>
-        ) : (
-        <h3 className="text-lg font-semibold text-black mb-2 mx-4">{titulo}</h3>
-        )}
-        <hr className="border-black mb-2 mx-4 border-1" />
-
-        {/* Description */}
-        {isEditing ? (
-        <>
-            <textarea
-            value={d}
-            onChange={(e) => setD(e.target.value)}
-            rows={3}
-            className="text-sm text-verde3 leading-relaxed mx-4 mb-1 bg-transparent outline-none resize-none"
-            placeholder="Descripción"
-            maxLength={250}
-            />
-            <div className="mx-4 mb-2 text-right text-xs text-verde3">
-            {d.length}/250
-            </div>
-        </>
-        ) : (
-        <p className="text-sm text-verde3 leading-relaxed mx-4 mb-2">
-            {descripcion}
-        </p>
-        )}
-
-        {/* Fecha */}
-        <div className="flex justify-end items-center gap-2">
-        {isEditing ? (
-            <>
-            <input
-                value={f}
-                onChange={(e) => setF(e.target.value)}
-                className="text-sm text-verde3 italic bg-transparent outline-none border-b border-black/20 pb-1"
-                placeholder="Fecha (ej: 25 de noviembre de 2025)"
-                maxLength={30}
-            />
-            <span className="text-xs text-verde3 italic mr-4">
-                {f.length}/30
-            </span>
-            </>
-        ) : (
-            <span className="text-sm text-verde3 italic mr-4">{fecha}</span>
-        )}
-        </div>
-
-      {/* Confirm delete */}
-      <ConfirmModal
-        open={confirmOpen}
-        title="Eliminar alerta"
-        message={`¿Está seguro de que desea eliminar la alerta "${titulo}"?\n\nEsta acción no se puede deshacer.`}
-        confirmText="Eliminar"
-        cancelText="Cancelar"
-        confirmVariant="danger"
-        onConfirm={confirmDelete}
-        onCancel={cancelDelete}
-      />
     </div>
   );
 }

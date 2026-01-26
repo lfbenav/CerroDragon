@@ -23,6 +23,9 @@ router.patch("/weather/:id/toggle", controller.toggleWeatherCondition);
 // Eliminar condición climática
 router.delete("/weather/:id", controller.deleteWeatherCondition);
 
+// Eliminar condición climática
+router.put("/weather/:id", controller.updateWeatherCondition);
+
 // =========
 // Auditoría
 // =========
