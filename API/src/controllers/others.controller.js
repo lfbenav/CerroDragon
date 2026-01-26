@@ -595,3 +595,93 @@ exports.createConsultation = asyncHandler(async (req, res) => {
     }
   });
 });
+
+/* =========================
+   FAQ
+========================= */
+
+// Obtener todas las FAQs (admin)
+exports.getAllFaqs = asyncHandler(async (req, res) => {
+  const { rows } = await pool.query(`
+    SELECT id, question, answer, is_active, created_at, updated_at
+    FROM faqs
+    ORDER BY created_at DESC
+  `);
+
+  res.json({ success: true, data: rows });
+});
+
+// Crear nueva FAQ
+exports.createFaq = asyncHandler(async (req, res) => {
+  const { question, answer } = req.body || {};
+
+  if (!question || !answer) {
+    throw new AppError("question y answer son requeridos", 400);
+  }
+
+  const { rows } = await pool.query(
+    `
+    INSERT INTO faqs (question, answer)
+    VALUES ($1, $2)
+    RETURNING *
+  `,
+    [question, answer]
+  );
+
+  res.status(201).json({ success: true, data: rows[0] });
+});
+
+// Actualizar FAQ
+exports.updateFaq = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { question, answer, is_active } = req.body || {};
+
+  const { rows } = await pool.query(
+    `
+    UPDATE faqs
+    SET
+      question = COALESCE($2, question),
+      answer   = COALESCE($3, answer),
+      is_active = COALESCE($4, is_active),
+      updated_at = now()
+    WHERE id = $1
+    RETURNING *
+  `,
+    [id, question, answer, is_active]
+  );
+
+  if (!rows.length) {
+    throw new AppError("FAQ no encontrada", 404);
+  }
+
+  res.json({ success: true, data: rows[0] });
+});
+
+// Eliminar FAQ
+exports.deleteFaq = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const { rowCount } = await pool.query(
+    `DELETE FROM faqs WHERE id = $1`,
+    [id]
+  );
+
+  if (!rowCount) {
+    throw new AppError("FAQ no encontrada", 404);
+  }
+
+  res.json({ success: true, message: "FAQ eliminada" });
+});
+
+
+// Obtener FAQs activas (cliente)
+exports.getActiveFaqs = asyncHandler(async (req, res) => {
+  const { rows } = await pool.query(`
+    SELECT id, question, answer
+    FROM faqs
+    WHERE is_active = true
+    ORDER BY created_at ASC
+  `);
+
+  res.json({ success: true, data: rows });
+});

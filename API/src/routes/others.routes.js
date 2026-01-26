@@ -102,5 +102,14 @@ router.patch('/consultations/:id/resolve', controller.resolveConsultation);
 // cliente
 router.post('/consultations', controller.createConsultation);
 
+// ===========
+// FAQ
+// ===========
+
+router.get("/faqs", controller.getAllFaqs);
+router.post("/faqs", controller.createFaq);
+router.put("/faqs/:id", controller.updateFaq);
+router.delete("/faqs/:id", controller.deleteFaq);
+router.get("/faqs/public", controller.getActiveFaqs);
 
 module.exports = router;

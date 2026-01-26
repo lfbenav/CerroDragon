@@ -30,7 +30,7 @@ luis_frontend{
     inventario admin                        Done
     perfil admin y cliente                  Done
     políticas admin y cliente               Done
-    preguntas admin y cliente               ToDo
+    preguntas admin y cliente               Done
     puntos de encuentro admin y cliente     ToDo
     testimonios admin y cliente             ToDo
 }

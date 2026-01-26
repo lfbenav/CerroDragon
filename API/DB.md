@@ -507,5 +507,18 @@ CREATE TABLE customer_consultations (
   resolved_at timestamptz
 );
 
+-- =========================
+-- PREGUNTAS FRECUENTES (FAQ)
+-- =========================
+
+CREATE TABLE faqs (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  question text NOT NULL,
+  answer text NOT NULL,
+  is_active boolean NOT NULL DEFAULT true,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
 
 -- Fin

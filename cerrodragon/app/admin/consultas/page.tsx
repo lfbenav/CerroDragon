@@ -7,6 +7,7 @@ import {
   TablaConsultas,
   Cuadro
 } from "@/app/components";
+import Link from "next/link";
 
 const API_URL = "http://localhost:3000";
 
@@ -152,12 +153,39 @@ export default function ConsultasAdmin() {
         <main className="flex-1 flex flex-col ml-72 pt-20 px-8 min-h-0">
           <div className="max-w-7xl mx-auto w-full flex flex-col h-full">
             <div className="flex-shrink-0">
-              <h1 className="text-3xl font-bold mb-1 text-black mt-4">
-                Gestión de Consultas
-              </h1>
-              <p className="mb-4 text-verde3">
-                Administre las consultas de los clientes y contacte vía WhatsApp
-              </p>
+              <div className="flex justify-between items-start gap-6">
+                {/* Título + descripción */}
+                <div>
+                  <h1 className="text-3xl font-bold mb-1 text-black mt-4">
+                    Gestión de Consultas
+                  </h1>
+                  <p className="mb-4 text-verde3">
+                    Administre las consultas de los clientes y contacte vía WhatsApp
+                  </p>
+                </div>
+
+                {/* FAQ */}
+                <Link href="/admin/preguntas" className="self-start">
+                  <button className="mt-6 text-white bg-verde3 hover:bg-verde2 font-medium rounded-xl text-md px-5 py-2.5 text-center flex items-center justify-center gap-2">
+                    <svg
+                      className="w-6 h-6 text-white"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M18.122 17.645a7.185 7.185 0 0 1-2.656 2.495 7.06 7.06 0 0 1-3.52.853 6.617 6.617 0 0 1-3.306-.718 6.73 6.73 0 0 1-2.54-2.266c-2.672-4.57.287-8.846.887-9.668A4.448 4.448 0 0 0 8.07 6.31 4.49 4.49 0 0 0 7.997 4c1.284.965 6.43 3.258 5.525 10.631 1.496-1.136 2.7-3.046 2.846-6.216 1.43 1.061 3.985 5.462 1.754 9.23Z"
+                      />
+                    </svg>
+                    Preguntas frecuentes
+                  </button>
+                </Link>
+              </div>
 
               <div className="flex gap-6 mb-6">
                 <Cuadro
