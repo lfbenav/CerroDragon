@@ -91,12 +91,12 @@ exports.registerClient = asyncHandler(async (req, res) => {
 
 // POST /auth/register/admin
 exports.registerAdmin = asyncHandler(async (req, res) => {
-    const { email, password } = req.body || {};
+    const { email, password, full_name, phone } = req.body || {};
 
-    // Validaciones de parámetros
-    if (!email || !password) {
+    // Validaciones
+    if (!email || !password || !full_name) {
         throw new AppError(
-            "email y password son requeridos",
+            "email, password y full_name son requeridos",
             400,
             "MISSING_FIELDS"
         );
@@ -109,9 +109,7 @@ exports.registerAdmin = asyncHandler(async (req, res) => {
 
         // Verificar email duplicado
         const exists = await client.query(`
-            SELECT 1
-            FROM users
-            WHERE email = $1
+            SELECT 1 FROM users WHERE email = $1
         `, [email]);
 
         if (exists.rows.length) {
@@ -124,18 +122,27 @@ exports.registerAdmin = asyncHandler(async (req, res) => {
         // Crear user
         const userRes = await client.query(`
             INSERT INTO users (email, password_hash, type)
-            VALUES ($1, $2, $3)
+            VALUES ($1, $2, 'admin')
             RETURNING id, email
-        `, [email, password_hash, 'admin']);
+        `, [email, password_hash]);
 
         const user = userRes.rows[0];
+
+        // Crear perfil de admin
+        await client.query(`
+            INSERT INTO admins (user_id, full_name, phone)
+            VALUES ($1, $2, $3)
+        `, [user.id, full_name, phone || null]);
 
         // Crear rol exclusivo del admin
         const roleRes = await client.query(`
             INSERT INTO roles (name, description)
             VALUES ($1, $2)
             RETURNING id
-        `, [`admin:${user.id}`, `Rol admin del usuario ${user.id}`]);
+        `, [
+            `admin:${user.id}`,
+            `Rol admin del usuario ${user.id}`
+        ]);
 
         const roleId = roleRes.rows[0].id;
 

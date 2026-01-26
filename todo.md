@@ -1,0 +1,28 @@
+Hace falta poner los auth y permisos, pero si no se pueden solo omitir porque hay que configurar cosas en el front pq quité algunos porque no funcionaban
+
+
+luis_frontend{
+    change-password                         Done
+    recover-password                        Done
+    register client                         Done
+    login                                   Done
+    listar tours admin y cliente            Done
+    crear tour admin                        Done
+    administradores admin                   Done
+    alojamientos admin y cliente            ToDo
+    auditoría admin                         ToDo
+    cabañas admin y cliente                 ToDo
+    calendario admin y cliente              ToDo
+    checkin admin y cliente                 ToDo
+    clientes admin y cliente                ToDo
+    clima admin y cliente                   ToDo
+    comidas admin y cliente                 ToDo
+    consultas admin y cliente               ToDo
+    guias admin y cliente                   ToDo
+    inventario admin                        ToDo
+    perfil admin y cliente                  ToDo
+    políticas admin y cliente               ToDo
+    preguntas admin y cliente               ToDo
+    puntos de encuentro admin y cliente     ToDo
+    testimonios admin y cliente             Done
+}

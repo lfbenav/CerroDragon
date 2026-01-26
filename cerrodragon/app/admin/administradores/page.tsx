@@ -2,7 +2,11 @@
 
 import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
-import { AdminPageShell, SearchBar, PaginationControls } from "../../components";
+import {
+  AdminPageShell,
+  SearchBar,
+  PaginationControls,
+} from "../../components";
 
 type AdminUserRow = {
   id: string;
@@ -10,28 +14,55 @@ type AdminUserRow = {
   correo: string;
 };
 
+type AdminAPI = {
+  user_id: string;
+  email: string;
+  full_name: string;
+  is_active: boolean;
+  created_at: string;
+};
+
+const API_URL = "http://localhost:3000";
 const PAGE_SIZE = 4;
 
 export default function AdminInternosPage() {
-  const rows: AdminUserRow[] = useMemo(
-    () => [
-      { id: "A-001", nombre: "Alex Naranjo", correo: "sr.alex@gmail.com" },
-      { id: "A-002", nombre: "Luis Benavides", correo: "wiserf@gmail.com" },
-      { id: "A-003", nombre: "Kristhel Cordero", correo: "kriis@gmail.com" },
-      { id: "A-004", nombre: "Admin", correo: "ad.min@gmail.com" },
-      { id: "A-005", nombre: "María Pérez", correo: "maria@gmail.com" },
-      { id: "A-006", nombre: "Juan Mora", correo: "juan@gmail.com" },
-    { id: "A-007", nombre: "Carlos García", correo: "carlos@gmail.com" },
-    { id: "A-008", nombre: "Sofia López", correo: "sofia@gmail.com" },
-    { id: "A-009", nombre: "Roberto Díaz", correo: "roberto@gmail.com" },
-    { id: "A-010", nombre: "Elena Rodríguez", correo: "elena@gmail.com" },
-    { id: "A-011", nombre: "Diego Sánchez", correo: "diego@gmail.com" },
-    ],[]
-  );
+  const [rows, setRows] = useState<AdminUserRow[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
 
+  /* =========================
+     FETCH ADMINS
+  ========================== */
+  useEffect(() => {
+    const fetchAdmins = async () => {
+      try {
+        const res = await fetch(`${API_URL}/users/admins`);
+        const json = await res.json();
+
+        if (res.ok) {
+          const mapped: AdminUserRow[] = json.data.map((a: AdminAPI) => ({
+            id: a.user_id,
+            nombre: a.full_name,
+            correo: a.email,
+          }));
+
+          setRows(mapped);
+        }
+      } catch (err) {
+        console.error("Error cargando administradores", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAdmins();
+  }, []);
+
+  /* =========================
+     FILTRO
+  ========================== */
   const filtered = useMemo(() => {
     const qq = q.toLowerCase();
     return rows.filter((r) => {
@@ -52,9 +83,6 @@ export default function AdminInternosPage() {
     return filtered.slice(start, start + PAGE_SIZE);
   }, [filtered, safePage]);
 
-  const canPrev = safePage > 1;
-  const canNext = safePage < totalPages;
-
   return (
     <AdminPageShell
       title="Gestión de Usuarios Internos"
@@ -72,8 +100,12 @@ export default function AdminInternosPage() {
       <div className="py-6 flex flex-col gap-4 w-full">
         {/* Stat box */}
         <div className="bg-beige1 border border-default border-borde1 rounded-xl px-4 py-3 w-[280px]">
-          <div className="text-xs text-verde3">Administradores Totales</div>
-          <div className="text-xl font-semibold text-black">{rows.length}</div>
+          <div className="text-xs text-verde3">
+            Administradores Totales
+          </div>
+          <div className="text-xl font-semibold text-black">
+            {rows.length}
+          </div>
         </div>
 
         {/* Search */}
@@ -87,36 +119,44 @@ export default function AdminInternosPage() {
           </div>
 
           <div className="divide-y divide-black/10">
-            {pageRows.map((r) => (
-              <Link
-                key={r.id}
-                href={`/admin/administradores/${encodeURIComponent(r.id)}`}
-                className="grid grid-cols-[120px_1fr] px-4 py-3 hover:bg-black/5"
-              >
-                <div className="text-sm text-black">{r.id}</div>
-                <div className="flex flex-col">
-                  <span className="text-sm font-semibold text-black">
-                    {r.nombre}
-                  </span>
-                  <span className="text-xs text-verde3">{r.correo}</span>
-                </div>
-              </Link>
-            ))}
-
-            {filtered.length === 0 && (
+            {loading ? (
+              <div className="px-4 py-6 text-sm text-verde3">
+                Cargando administradores...
+              </div>
+            ) : pageRows.length === 0 ? (
               <div className="px-4 py-6 text-sm text-black/60">
                 No se encontraron usuarios.
               </div>
+            ) : (
+              pageRows.map((r) => (
+                <Link
+                  key={r.id}
+                  href={`/admin/administradores/${encodeURIComponent(
+                    r.id
+                  )}`}
+                  className="grid grid-cols-[120px_1fr] px-4 py-3 hover:bg-black/5"
+                >
+                  <div className="text-sm text-black">{r.id}</div>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold text-black">
+                      {r.nombre}
+                    </span>
+                    <span className="text-xs text-verde3">
+                      {r.correo}
+                    </span>
+                  </div>
+                </Link>
+              ))
             )}
           </div>
 
           {/* Pagination */}
           <PaginationControls
-          page={safePage}
-          totalPages={totalPages}
-          onPageChange={setPage}
-          showCounter={true}
-        />
+            page={safePage}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            showCounter={true}
+          />
         </div>
       </div>
     </AdminPageShell>
@@ -125,7 +165,7 @@ export default function AdminInternosPage() {
 
 function PlusIcon() {
   return (
-    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
       <path
         d="M12 5v14M5 12h14"
         stroke="currentColor"
