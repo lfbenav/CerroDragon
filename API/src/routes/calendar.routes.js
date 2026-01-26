@@ -3,37 +3,26 @@ const controller = require("../controllers/calendar.controller");
 
 router.get("/test", controller.test);
 
-// Obtener todo el calendario (global + todos los tours)
-router.get("/",controller.getCalendar);
+// GET mensual: /calendar?year=2026&month=1
+router.get("/", controller.getCalendarMonth);
 
-// Obtener calendario de un tour específico
-router.get("/:tour_id", controller.getCalendarByTour);
-
-// Crear bloqueo (día global, día específico o weekday)
-router.post(
-    "/",
-    //auth,
-    //requirePermission("MANAGE_TOURS"),
-    controller.createCalendarEntry
-);
-
-// Actualizar bloqueo
+// Upsert de un día: PUT /calendar/day
 router.put(
-    "/:id",
-    //auth,
-    //requirePermission("MANAGE_TOURS"),
-    controller.updateCalendarEntry
+  "/day",
+  // auth,
+  // requirePermission("MANAGE_TOURS"),
+  controller.upsertCalendarDay
 );
 
-// Eliminar bloqueo
+// Delete de un día (opcional): DELETE /calendar/day?year=...&month=...&day=...
 router.delete(
-    "/:id",
-    //auth,
-    //requirePermission("MANAGE_TOURS"),
-    controller.deleteCalendarEntry
+  "/day",
+  // auth,
+  // requirePermission("MANAGE_TOURS"),
+  controller.deleteCalendarDay
 );
 
-// Colores del calendario (frontend)
+// Colores (frontend)
 router.get("/colors", controller.getCalendarColors);
 
 module.exports = router;

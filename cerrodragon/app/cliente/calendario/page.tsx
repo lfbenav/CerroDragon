@@ -1,27 +1,100 @@
 "use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
 import { CalendarGrid, SideBarClient, TopBar } from "@/app/components";
 
-// Datos de ejemplo para la ocupación del calendario esto con la Api hay que importarlo
-const ocupacionData = {
-  1: 'no-disponible',
-  4: 'muy-ocupado',
-  10: 'muy-ocupado',
-  13: 'medio-ocupado',
-  14: 'medio-ocupado',
-  15: 'poco-ocupado',
-  22: 'poco-ocupado',
-  31: 'muy-ocupado'
-} as const;
+const API_URL = "http://localhost:3000";
 
-// Configuración del calendario esto hay que importarlo con la Api
+type OcupacionType =
+  | "no-disponible"
+  | "muy-ocupado"
+  | "medio-ocupado"
+  | "poco-ocupado"
+  | "desocupado";
+
+type OcupacionData = Record<number, OcupacionType>;
+
+type CalendarMonthResponse = {
+  year: number;
+  month: number;
+  ocupacionData: Record<string, OcupacionType>;
+};
+
+type ApiResponse<T> = {
+  success: boolean;
+  data: T;
+  message?: string;
+};
+
+// Configuración del calendario (por ahora fijo; luego lo podés hacer dinámico)
 const calendarConfig = {
   mes: "ENERO",
   año: 2026,
+  monthNumber: 1, // backend (enero = 1)
   daysInMonth: 31,
-  firstDayOfWeek: 4 // 0=Domingo, 1=Lunes ...
-};
+  firstDayOfWeek: 4, // 0=Domingo, 1=Lunes ...
+} as const;
+
+function normalizeOcupacionData(input: Record<string, OcupacionType>): OcupacionData {
+  const out: OcupacionData = {};
+  for (const [k, v] of Object.entries(input)) {
+    const day = Number(k);
+    if (Number.isInteger(day)) out[day] = v;
+  }
+  return out;
+}
 
 export default function Calendario() {
+  const [ocupacionData, setOcupacionData] = useState<OcupacionData>({});
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // (Opcional) evita doble fetch en dev por StrictMode
+  const didFetchRef = useRef(false);
+
+  const year = calendarConfig.año;
+  const month = calendarConfig.monthNumber;
+
+  const fetchMonth = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch(`${API_URL}/calendar?year=${year}&month=${month}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        cache: "no-store",
+      });
+
+      if (!res.ok) {
+        throw new Error(`Error al cargar calendario (${res.status})`);
+      }
+
+      const json = (await res.json()) as ApiResponse<CalendarMonthResponse>;
+
+      if (!json.success) {
+        throw new Error(json.message || "Error al cargar calendario");
+      }
+
+      const normalized = normalizeOcupacionData(json.data.ocupacionData);
+      setOcupacionData(normalized);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Error al cargar calendario";
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  }, [year, month]);
+
+  useEffect(() => {
+    if (didFetchRef.current) return;
+    didFetchRef.current = true;
+
+    fetchMonth();
+  }, [fetchMonth]);
+
   return (
     <div className="h-screen bg-gray-50 flex overflow-hidden">
       <SideBarClient />
@@ -34,10 +107,24 @@ export default function Calendario() {
               <p className="mb-4 text-verde3">
                 Consulte qué tan saturadas se encuentran nuestras fechas este mes
               </p>
+
+              {loading && <p className="text-sm text-verde3">Cargando calendario...</p>}
+
+              {!loading && error && (
+                <div className="text-sm text-rojosuave flex items-center gap-3">
+                  <span>{error}</span>
+                  <button
+                    onClick={fetchMonth}
+                    className="px-3 py-1 rounded-md bg-gray-200 text-black hover:bg-gray-300 transition-colors"
+                  >
+                    Reintentar
+                  </button>
+                </div>
+              )}
             </div>
-            
+
             <div className="flex-1 flex justify-center items-start overflow-y-auto">
-              <CalendarGrid 
+              <CalendarGrid
                 ocupacionData={ocupacionData}
                 mes={calendarConfig.mes}
                 año={calendarConfig.año}

@@ -2,224 +2,150 @@ const pool = require("../config/db");
 const asyncHandler = require("../middlewares/asyncHandler.middleware");
 const AppError = require("../utils/AppError");
 
-// Solo para hacer pruebas rápidas de funcionamiento 
+const OCUPACION_VALUES = [
+  "desocupado",
+  "no-disponible",
+  "poco-ocupado",
+  "medio-ocupado",
+  "muy-ocupado",
+];
+
+function toInt(value) {
+  const n = Number(value);
+  return Number.isInteger(n) ? n : NaN;
+}
+
+function assertYearMonth(year, month) {
+  if (!Number.isInteger(year) || year < 2000 || year > 2100) {
+    throw new AppError("year inválido", 400, "INVALID_YEAR");
+  }
+  if (!Number.isInteger(month) || month < 1 || month > 12) {
+    throw new AppError("month inválido", 400, "INVALID_MONTH");
+  }
+}
+
+function assertDay(day) {
+  if (!Number.isInteger(day) || day < 1 || day > 31) {
+    throw new AppError("day inválido", 400, "INVALID_DAY");
+  }
+}
+
+function assertOcupacion(ocupacion) {
+  if (!ocupacion || !OCUPACION_VALUES.includes(ocupacion)) {
+    throw new AppError("ocupacion inválida", 400, "INVALID_OCUPACION");
+  }
+}
+
+// Solo para pruebas rápidas
 exports.test = asyncHandler(async (req, res) => {
-    res.send("API de Calendario funcionando");
+  res.send("API de Calendario (ocupación mensual) funcionando");
 });
 
-// GET /calendar
-exports.getCalendar = asyncHandler(async (req, res) => {
-    const globalDays = await pool.query(`
-        SELECT id, day, status, note
-        FROM global_calendar_unavailable_days
-        ORDER BY day
-    `);
+// GET /calendar?year=2026&month=1
+exports.getCalendarMonth = asyncHandler(async (req, res) => {
+  const year = toInt(req.query.year);
+  const month = toInt(req.query.month);
 
-    const weekdays = await pool.query(`
-        SELECT id, tour_id, weekday, status, note
-        FROM tour_calendar_unavailable_weekday
-    `);
+  assertYearMonth(year, month);
 
-    const days = await pool.query(`
-        SELECT id, tour_id, day, status, note
-        FROM tour_calendar_unavailable_day
-    `);
+  const { rows } = await pool.query(
+    `
+      SELECT day, ocupacion
+      FROM calendar_day_occupancy
+      WHERE year = $1 AND month = $2
+      ORDER BY day ASC
+    `,
+    [year, month]
+  );
 
-    res.status(200).json({
-        success: true,
-        global_days: globalDays.rows,
-        tour_weekdays: weekdays.rows,
-        tour_days: days.rows
-    });
+  // Formato exacto para tu mock: { "1": "no-disponible", ... }
+  const ocupacionData = {};
+  for (const r of rows) {
+    ocupacionData[String(r.day)] = r.ocupacion;
+  }
+
+  res.status(200).json({
+    success: true,
+    data: {
+      year,
+      month,
+      ocupacionData,
+    },
+  });
 });
 
-// GET /calendar/:tour_id
-exports.getCalendarByTour = asyncHandler(async (req, res) => {
-    const { tour_id } = req.params;
+// PUT /calendar/day
+// body: { year: 2026, month: 1, day: 14, ocupacion: "medio-ocupado" }
+exports.upsertCalendarDay = asyncHandler(async (req, res) => {
+  const { year, month, day, ocupacion } = req.body || {};
 
-    const tourExists = await pool.query(`
-        SELECT 1 FROM tours WHERE id = $1
-    `, [tour_id]);
+  const y = toInt(year);
+  const m = toInt(month);
+  const d = toInt(day);
 
-    if (!tourExists.rowCount) {
-        throw new AppError("Tour no existe", 404, "TOUR_NOT_FOUND");
-    }
+  assertYearMonth(y, m);
+  assertDay(d);
+  assertOcupacion(ocupacion);
 
-    const weekdays = await pool.query(`
-        SELECT id, weekday, status, note
-        FROM tour_calendar_unavailable_weekday
-        WHERE tour_id = $1
-    `, [tour_id]);
+  const { rows } = await pool.query(
+    `
+      INSERT INTO calendar_day_occupancy (year, month, day, ocupacion, updated_at)
+      VALUES ($1, $2, $3, $4, now())
+      ON CONFLICT (year, month, day)
+      DO UPDATE SET
+        ocupacion = EXCLUDED.ocupacion,
+        updated_at = now()
+      RETURNING id, year, month, day, ocupacion, updated_at
+    `,
+    [y, m, d, ocupacion]
+  );
 
-    const days = await pool.query(`
-        SELECT id, day, status, note
-        FROM tour_calendar_unavailable_day
-        WHERE tour_id = $1
-        ORDER BY day
-    `, [tour_id]);
-
-    const globalDays = await pool.query(`
-        SELECT day, status, note
-        FROM global_calendar_unavailable_days
-    `);
-
-    res.status(200).json({
-        success: true,
-        tour_id,
-        weekdays: weekdays.rows,
-        days: days.rows,
-        global_days: globalDays.rows
-    });
+  res.status(200).json({
+    success: true,
+    data: rows[0],
+    message: "Día actualizado",
+  });
 });
 
-// POST /calendar
-exports.createCalendarEntry = asyncHandler(async (req, res) => {
-    const {
-        type,        // 'GLOBAL_DAY' | 'TOUR_DAY' | 'TOUR_WEEKDAY'
-        tour_id,
-        day,
-        weekday,
-        status,
-        note
-    } = req.body || {};
+// DELETE /calendar/day?year=2026&month=1&day=14
+// (Opcional) si borrás el registro, el front lo toma como "desocupado"
+exports.deleteCalendarDay = asyncHandler(async (req, res) => {
+  const year = toInt(req.query.year);
+  const month = toInt(req.query.month);
+  const day = toInt(req.query.day);
 
-    if (!type || !status) {
-        throw new AppError("type y status son requeridos", 400, "MISSING_FIELDS");
-    }
+  assertYearMonth(year, month);
+  assertDay(day);
 
-    let query;
-    let values;
+  const result = await pool.query(
+    `
+      DELETE FROM calendar_day_occupancy
+      WHERE year = $1 AND month = $2 AND day = $3
+    `,
+    [year, month, day]
+  );
 
-    switch (type) {
-        case "GLOBAL_DAY":
-            if (!day) throw new AppError("day requerido", 400);
-            query = `
-                INSERT INTO global_calendar_unavailable_days (day, status, note)
-                VALUES ($1, $2, $3)
-                RETURNING *
-            `;
-            values = [day, status, note || null];
-            break;
+  if (!result.rowCount) {
+    throw new AppError("Día no encontrado", 404, "CALENDAR_DAY_NOT_FOUND");
+  }
 
-        case "TOUR_DAY":
-            if (!tour_id || !day) throw new AppError("tour_id y day requeridos", 400);
-            query = `
-                INSERT INTO tour_calendar_unavailable_day (tour_id, day, status, note)
-                VALUES ($1, $2, $3, $4)
-                RETURNING *
-            `;
-            values = [tour_id, day, status, note || null];
-            break;
-
-        case "TOUR_WEEKDAY":
-            if (!tour_id || weekday === undefined)
-                throw new AppError("tour_id y weekday requeridos", 400);
-            query = `
-                INSERT INTO tour_calendar_unavailable_weekday (tour_id, weekday, status, note)
-                VALUES ($1, $2, $3, $4)
-                RETURNING *
-            `;
-            values = [tour_id, weekday, status, note || null];
-            break;
-
-        default:
-            throw new AppError("Tipo inválido", 400, "INVALID_TYPE");
-    }
-
-    const { rows } = await pool.query(query, values);
-
-    res.status(201).json({
-        success: true,
-        entry: rows[0]
-    });
-});
-
-// PUT /calendar/:id
-exports.updateCalendarEntry = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    const { status, note } = req.body || {};
-
-    if (!status) {
-        throw new AppError("status requerido", 400);
-    }
-
-    const tables = [
-        "global_calendar_unavailable_days",
-        "tour_calendar_unavailable_day",
-        "tour_calendar_unavailable_weekday"
-    ];
-
-    let updated = null;
-
-    for (const table of tables) {
-        const { rows } = await pool.query(`
-            UPDATE ${table}
-            SET status = $1,
-                note = $2
-            WHERE id = $3
-            RETURNING *
-        `, [status, note || null, id]);
-
-        if (rows.length) {
-            updated = rows[0];
-            break;
-        }
-    }
-
-    if (!updated) {
-        throw new AppError("Entrada no encontrada", 404, "CALENDAR_NOT_FOUND");
-    }
-
-    res.status(200).json({
-        success: true,
-        entry: updated
-    });
-});
-
-// DELETE /calendar/:id
-exports.deleteCalendarEntry = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-
-    const tables = [
-        "global_calendar_unavailable_days",
-        "tour_calendar_unavailable_day",
-        "tour_calendar_unavailable_weekday"
-    ];
-
-    let deleted = false;
-
-    for (const table of tables) {
-        const resDelete = await pool.query(`
-            DELETE FROM ${table}
-            WHERE id = $1
-        `, [id]);
-
-        if (resDelete.rowCount) {
-            deleted = true;
-            break;
-        }
-    }
-
-    if (!deleted) {
-        throw new AppError("Entrada no encontrada", 404, "CALENDAR_NOT_FOUND");
-    }
-
-    res.status(200).json({
-        success: true,
-        message: "Entrada eliminada"
-    });
+  res.status(200).json({
+    success: true,
+    message: "Día eliminado",
+  });
 });
 
 // GET /calendar/colors
+// (si lo querés mantener para frontend, lo dejamos igual pero alineado a ocupación)
 exports.getCalendarColors = asyncHandler(async (req, res) => {
-    res.status(200).json({
-        success: true,
-        colors: {
-            AVAILABLE: "green",
-            LIMITED: "yellow",
-            FULL: "red",
-            HOLIDAY: "gray",
-            BLOCKED: "black"
-        }
-    });
+  res.status(200).json({
+    success: true,
+    colors: {
+      "desocupado": "transparent",
+      "no-disponible": "celeste",
+      "poco-ocupado": "verde4",
+      "medio-ocupado": "amarillo",
+      "muy-ocupado": "rojosuave",
+    },
+  });
 });

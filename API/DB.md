@@ -240,6 +240,39 @@ CREATE TABLE global_calendar_unavailable_days (
 -- También, hay una tabla para definir días que para TODOS los tours no va a estar disponible.
 
 -- =========================
+-- CALENDARIO REAL (el otro se puede borrar)
+-- =========================
+
+CREATE TABLE calendar_day_occupancy (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  year INT NOT NULL
+    CHECK (year >= 2000 AND year <= 2100),
+
+  month INT NOT NULL
+    CHECK (month BETWEEN 1 AND 12),
+
+  day INT NOT NULL
+    CHECK (day BETWEEN 1 AND 31),
+
+  ocupacion TEXT NOT NULL
+    CHECK (ocupacion IN (
+      'desocupado',
+      'no-disponible',
+      'poco-ocupado',
+      'medio-ocupado',
+      'muy-ocupado'
+    )),
+
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+  UNIQUE (year, month, day)
+);
+
+-- Se implementó de otra forma en el front así que nos adaptamos :/
+
+-- =========================
 -- RESERVAS DE TOURS/PROMOS (RF8/RF9/RF10/RF18)
 -- =========================
 
