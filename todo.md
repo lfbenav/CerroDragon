@@ -20,8 +20,8 @@ luis_frontend{
     alojamientos admin y cliente (reservas) Done
     auditoría admin                         Done
     cabañas admin y cliente                 Done
-    calendario admin y cliente              ToDo
-    checkin admin y cliente                 WorkingOnIt
+    calendario admin y cliente              WorkingOnIt
+    checkin admin y cliente                 ToDo
     clientes admin                          Done
     clima admin y cliente                   Done
     comidas admin y cliente                 ToDo
