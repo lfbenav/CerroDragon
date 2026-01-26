@@ -419,18 +419,23 @@ CREATE TABLE policies (
 -- FORMULARIO COMIDAS POR CÓDIGO (RF17)
 -- =========================
 
+CREATE SEQUENCE meal_form_code_seq START 100;
+
 CREATE TABLE meal_forms (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  reservation_id uuid REFERENCES reservations(id) ON DELETE SET NULL, -- se asocia a una reserva?
-  code text UNIQUE NOT NULL,                 -- código tipo Kahoot
-  responsible_name text NOT NULL,            -- encargado de la reservación
+
+  reservation_id uuid REFERENCES reservations(id) ON DELETE SET NULL,
+
+  code text UNIQUE NOT NULL
+    DEFAULT ('XV-' || nextval('meal_form_code_seq')),
+
+  responsible_name text NOT NULL,
   is_active boolean NOT NULL DEFAULT true,
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE TABLE meal_options (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  meal_form_id uuid NOT NULL REFERENCES meal_forms(id) ON DELETE CASCADE,
   option_name text NOT NULL,
   is_active boolean NOT NULL DEFAULT true
 );

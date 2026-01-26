@@ -24,7 +24,7 @@ luis_frontend{
     checkin admin y cliente                 ToDo
     clientes admin                          Done
     clima admin y cliente                   Done
-    comidas admin y cliente                 ToDo
+    comidas admin y cliente                 Done
     consultas admin y cliente               Done
     guias admin y cliente                   Done
     inventario admin                        Done
