@@ -9,14 +9,24 @@ const API_URL = "http://localhost:3000";
    TYPES
 ===================== */
 
-type EstadoReserva = "confirmada" | "cancelada";
+type EstadoReserva =
+  | "pendiente"
+  | "confirmada"
+  | "cancelada"
+  | "solicitado"
+  | "reembolsada";
 
 interface ReservaAPI {
   id: string;
   start_date: string;
   end_date: string;
   persons: number;
-  status: "PENDING" | "CONFIRMED" | "CANCELLED";
+  status:
+    | "PENDING"
+    | "CONFIRMED"
+    | "CANCELLED"
+    | "REFUND_REQUESTED"
+    | "REFUNDED";
   accommodation_name: string;
   customer_name: string;
   customer_email: string;
@@ -90,7 +100,16 @@ export default function EditarReservas() {
           fechaInicio: new Date(r.start_date).toLocaleDateString("es-CR"),
           fechaFinal: new Date(r.end_date).toLocaleDateString("es-CR"),
           personas: r.persons,
-          estado: r.status === "CONFIRMED" ? "confirmada" : "cancelada",
+          estado:
+            r.status === "CONFIRMED"
+              ? "confirmada"
+              : r.status === "PENDING"
+              ? "pendiente"
+              : r.status === "CANCELLED"
+              ? "cancelada"
+              : r.status === "REFUND_REQUESTED"
+              ? "solicitado"
+              : "reembolsada",
         };
 
         setReserva(mapped);
@@ -118,10 +137,11 @@ export default function EditarReservas() {
 
       const token = localStorage.getItem("access_token");
 
-      const endpoint =
-        estado === "confirmada"
-          ? "confirm"
-          : "cancel";
+      let endpoint = "";
+      if (estado === "confirmada" && reserva.estado === "solicitado") endpoint = "reject-refund";
+      else if (estado === "cancelada") endpoint = "cancel";
+      else if (estado === "reembolsada") endpoint = "approve-refund";
+      else if (estado === "confirmada") endpoint = "confirm";
 
       const res = await fetch(
         `${API_URL}/accomodations/reservations/${reserva.id}/${endpoint}`,
@@ -218,14 +238,38 @@ export default function EditarReservas() {
               </label>
               <select
                 value={estado}
-                onChange={(e) =>
-                  setEstado(e.target.value as EstadoReserva)
-                }
+                onChange={(e) => setEstado(e.target.value as EstadoReserva)}
                 className="block w-full px-3 py-2.5 bg-beigeclaro border border-verde3 text-verde1 rounded-lg"
-                disabled={saving}
+                disabled={saving || estado === "reembolsada" || estado === "cancelada"}
               >
-                <option value="confirmada">Confirmada</option>
-                <option value="cancelada">Cancelada</option>
+                {estado === "pendiente" && (
+                  <>
+                    <option value="pendiente">Pendiente</option>
+                    <option value="confirmada">Confirmar</option>
+                    <option value="cancelada">Cancelar</option>
+                  </>
+                )}
+
+                {estado === "confirmada" && (
+                  <>
+                    <option value="confirmada">Confirmada</option>
+                    <option value="cancelada">Cancelar</option>
+                  </>
+                )}
+
+                {estado === "solicitado" && (
+                  <>
+                    <option value="solicitado">Reembolso solicitado</option>
+                    <option value="reembolsada">Aprobar reembolso</option>
+                    <option value="confirmada">Rechazar reembolso</option>
+                  </>
+                )}
+
+                {(estado === "reembolsada" || estado === "cancelada") && (
+                  <option value={estado}>
+                    {estado === "reembolsada" ? "Reembolsada" : "Cancelada"}
+                  </option>
+                )}
               </select>
             </div>
 

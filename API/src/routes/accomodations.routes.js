@@ -39,6 +39,10 @@ router.post("/reservations/:reservation_id/confirm", auth, controller.confirmRes
 // Cancelar una reservación
 router.post("/reservations/:reservation_id/cancel", auth, controller.cancelReservation);
 
+router.post("/reservations/:reservation_id/approve-refund", auth, controller.approveRefund);
+
+router.post("/reservations/:reservation_id/reject-refund", auth, controller.rejectRefund);
+
 router.post("/reservations/:id/request-refund", auth, controller.requestRefund);
 
 // Obtener las reservaciones de una cabaña

@@ -249,6 +249,79 @@ exports.cancelReservation = asyncHandler(async (req, res) => {
     res.json({ success: true, message: "Reservación cancelada" });
 });
 
+// Para un admin aprobar un reembolso
+exports.approveRefund = asyncHandler(async (req, res) => {
+    const { reservation_id } = req.params;
+
+    const client = await pool.connect();
+    try {
+        await client.query("BEGIN");
+
+        const { rowCount } = await client.query(`
+            UPDATE accommodation_reservations
+            SET status = 'REFUNDED',
+                cancelled_at = now()
+            WHERE id = $1
+              AND status = 'REFUND_REQUESTED'
+        `, [reservation_id]);
+
+        if (!rowCount) {
+            throw new AppError(
+                "Reservación no encontrada o no tiene reembolso solicitado",
+                400
+            );
+        }
+
+        await client.query("COMMIT");
+
+        res.json({
+            success: true,
+            message: "Reembolso aprobado"
+        });
+    } catch (e) {
+        await client.query("ROLLBACK");
+        throw e;
+    } finally {
+        client.release();
+    }
+});
+
+// Para un admin rechazar un reembolso
+exports.rejectRefund = asyncHandler(async (req, res) => {
+    const { reservation_id } = req.params;
+
+    const client = await pool.connect();
+    try {
+        await client.query("BEGIN");
+
+        const { rowCount } = await client.query(`
+            UPDATE accommodation_reservations
+            SET status = 'CONFIRMED'
+            WHERE id = $1
+              AND status = 'REFUND_REQUESTED'
+        `, [reservation_id]);
+
+        if (!rowCount) {
+            throw new AppError(
+                "Reservación no encontrada o no tiene reembolso solicitado",
+                400
+            );
+        }
+
+        await client.query("COMMIT");
+
+        res.json({
+            success: true,
+            message: "Reembolso rechazado"
+        });
+    } catch (e) {
+        await client.query("ROLLBACK");
+        throw e;
+    } finally {
+        client.release();
+    }
+});
+
 // Ver disponibilidad de una cabaña por rango de fechas
 exports.getAvailability = asyncHandler(async (req, res) => {
     const { id } = req.params;

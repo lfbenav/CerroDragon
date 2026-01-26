@@ -163,7 +163,7 @@ export default function ReservarAlojamiento() {
       const json: { message?: string } = await res.json();
       if (!res.ok) throw new Error(json.message);
 
-      router.push("/cliente/reservas");
+      router.push("/cliente/alojamientos");
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message || "Error al reservar");

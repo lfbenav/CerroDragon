@@ -355,3 +355,169 @@ exports.getApprovedTestimonials = asyncHandler(async (req, res) => {
         data: rows
     });
 });
+
+// ===========
+// Inventario
+// ===========
+
+/**
+ * Obtener todos los ítems de inventario
+ */
+exports.getInventoryItems = asyncHandler(async (req, res) => {
+  const { rows } = await pool.query(`
+    SELECT *
+    FROM inventory_items
+    ORDER BY name ASC
+  `);
+
+  res.json({
+    success: true,
+    data: rows,
+  });
+});
+
+/**
+ * Obtener un ítem por ID
+ */
+exports.getInventoryItemById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const { rows } = await pool.query(`
+    SELECT *
+    FROM inventory_items
+    WHERE id = $1
+  `, [id]);
+
+  if (!rows.length) {
+    throw new AppError("Ítem de inventario no encontrado", 404);
+  }
+
+  res.json({
+    success: true,
+    data: rows[0],
+  });
+});
+
+/**
+ * Crear ítem de inventario
+ */
+exports.createInventoryItem = asyncHandler(async (req, res) => {
+  const { name, unit, quantity } = req.body;
+
+  if (!name || !unit) {
+    throw new AppError("name y unit son obligatorios", 400);
+  }
+
+  const { rows } = await pool.query(`
+    INSERT INTO inventory_items (name, unit, quantity)
+    VALUES ($1, $2, COALESCE($3, 0))
+    RETURNING *
+  `, [name.trim().toLowerCase(), unit.trim(), quantity]);
+
+  res.status(201).json({
+    success: true,
+    data: rows[0],
+  });
+});
+
+/**
+ * Actualizar ítem de inventario
+ */
+exports.updateInventoryItem = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { name, unit, quantity } = req.body;
+
+  const { rows } = await pool.query(`
+    UPDATE inventory_items
+    SET
+      name = COALESCE($1, name),
+      unit = COALESCE($2, unit),
+      quantity = COALESCE($3, quantity),
+      updated_at = now()
+    WHERE id = $4
+    RETURNING *
+  `, [
+    name ? name.trim().toLowerCase() : null,
+    unit || null,
+    quantity,
+    id,
+  ]);
+
+  if (!rows.length) {
+    throw new AppError("Ítem de inventario no encontrado", 404);
+  }
+
+  res.json({
+    success: true,
+    data: rows[0],
+  });
+});
+
+/**
+ * Ajustar stock (sumar o restar)
+ * body: { amount: number }
+ */
+exports.adjustInventoryQuantity = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { amount } = req.body;
+
+  if (typeof amount !== "number") {
+    throw new AppError("amount debe ser un número", 400);
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    const { rows } = await client.query(`
+      UPDATE inventory_items
+      SET
+        quantity = quantity + $1,
+        updated_at = now()
+      WHERE id = $2
+      RETURNING *
+    `, [amount, id]);
+
+    if (!rows.length) {
+      throw new AppError("Ítem de inventario no encontrado", 404);
+    }
+
+    if (rows[0].quantity < 0) {
+      throw new AppError("La cantidad no puede quedar en negativo", 400);
+    }
+
+    await client.query("COMMIT");
+
+    res.json({
+      success: true,
+      data: rows[0],
+    });
+  } catch (e) {
+    await client.query("ROLLBACK");
+    throw e;
+  } finally {
+    client.release();
+  }
+});
+
+/**
+ * Eliminar ítem de inventario
+ */
+exports.deleteInventoryItem = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const { rows } = await pool.query(`
+    DELETE FROM inventory_items
+    WHERE id = $1
+    RETURNING *
+  `, [id]);
+
+  if (!rows.length) {
+    throw new AppError("Ítem de inventario no encontrado", 404);
+  }
+
+  res.json({
+    success: true,
+    message: "Ítem eliminado correctamente",
+  });
+});

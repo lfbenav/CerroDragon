@@ -81,4 +81,15 @@ router.get("/testimonials/approved", controller.getApprovedTestimonials);
 // Aprobar / rechazar testimonio
 router.patch("/testimonials/:id/review", controller.reviewTestimonial);
 
+// ===========
+// Inventario
+// ===========
+router.get("/inventory", controller.getInventoryItems);
+router.get("/inventory/:id", controller.getInventoryItemById);
+router.post("/inventory", controller.createInventoryItem);
+router.put("/inventory/:id", controller.updateInventoryItem);
+router.patch("/inventory/:id/adjust", controller.adjustInventoryQuantity);
+router.delete("/inventory/:id", controller.deleteInventoryItem);
+
+
 module.exports = router;

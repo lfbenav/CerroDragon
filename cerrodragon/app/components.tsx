@@ -182,7 +182,13 @@ interface AlojamientoProps {
     fechaLlegada: string;
     fechaFinal: string;
     personas: number;
-    estado: 'confirmada' | 'pendiente' | 'cancelada' | 'reembolsada' | 'solicitado';
+    estado:
+        | "confirmada"
+        | "pendiente"
+        | "cancelada"
+        | "reembolsada"
+        | "solicitado";
+
 }
 
 interface Props {
@@ -4453,32 +4459,42 @@ export function TablaMisAlojamientos({
 }
 
 export function TablaAlojamientosAdmin({ reservas }: { reservas: AlojamientoProps[] }) {
-    const getEstadoBadge = (estado: ReservaProps['estado']) => {
+    const getEstadoBadge = (estado: AlojamientoProps["estado"]) => {
         switch (estado) {
-            case 'confirmada':
-                return (
-                    <span className="inline-flex items-center px-3 py-1 text-verde3 text-sm font-bold rounded bg-verdetrans">
-                        Confirmada
-                    </span>
-                );
-            case 'pendiente':
-                return (
-                    <span className="inline-flex items-center px-3 py-1 text-amarillo text-sm font-bold rounded bg-amarillotrans">
-                        Pendiente
-                    </span>
-                );
-            case 'cancelada':
-                return (
-                    <span className="inline-flex items-center px-3 py-1 text-rojovino text-sm font-bold rounded bg-rojotrans">
-                        Cancelada
-                    </span>
-                );
-            case 'reembolsada':
-                return (
-                    <span className="inline-flex items-center px-3 py-1 text-azul1 text-sm font-bold rounded bg-azultrans">
-                        Reembolsada
-                    </span>
-                );
+            case "confirmada":
+            return (
+                <span className="inline-flex items-center px-3 py-1 text-verde3 text-sm font-bold rounded bg-verdetrans">
+                Confirmada
+                </span>
+            );
+
+            case "pendiente":
+            return (
+                <span className="inline-flex items-center px-3 py-1 text-amarillo text-sm font-bold rounded bg-amarillotrans">
+                Pendiente
+                </span>
+            );
+
+            case "cancelada":
+            return (
+                <span className="inline-flex items-center px-3 py-1 text-rojovino text-sm font-bold rounded bg-rojotrans">
+                Cancelada
+                </span>
+            );
+
+            case "reembolsada":
+            return (
+                <span className="inline-flex items-center px-3 py-1 text-azul1 text-sm font-bold rounded bg-azultrans">
+                Reembolsada
+                </span>
+            );
+
+            case "solicitado":
+            return (
+                <span className="inline-flex items-center px-3 py-1 text-orange-700 text-sm font-bold rounded bg-orange-100">
+                Reembolso solicitado
+                </span>
+            );
         }
     };
 

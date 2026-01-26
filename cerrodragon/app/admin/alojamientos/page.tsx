@@ -17,13 +17,18 @@ const API_URL = "http://localhost:3000";
 interface ReservaAPI {
   id: string;
   customer_name: string;
-  customer_email: string; // ✅ NUEVO
+  customer_email: string;
   accommodation_name: string;
   reserved_at: string;
   start_date: string;
   end_date: string;
   persons: number;
-  status: "PENDING" | "CONFIRMED" | "CANCELLED";
+  status:
+    | "PENDING"
+    | "CONFIRMED"
+    | "CANCELLED"
+    | "REFUND_REQUESTED"
+    | "REFUNDED";
 }
 
 interface Reserva {
@@ -35,7 +40,12 @@ interface Reserva {
   fechaLlegada: string;
   fechaFinal: string;
   personas: number;
-  estado: "confirmada" | "pendiente" | "reembolsada";
+  estado:
+  | "confirmada"
+  | "pendiente"
+  | "cancelada"
+  | "reembolsada"
+  | "solicitado";
 }
 
 /* =====================
@@ -87,10 +97,14 @@ export default function AlojamientosAdmin() {
             fechaFinal: new Date(r.end_date).toLocaleDateString("es-CR"),
             personas: r.persons,
             estado:
-            r.status === "CONFIRMED"
+              r.status === "CONFIRMED"
                 ? "confirmada"
                 : r.status === "PENDING"
                 ? "pendiente"
+                : r.status === "CANCELLED"
+                ? "cancelada"
+                : r.status === "REFUND_REQUESTED"
+                ? "solicitado"
                 : "reembolsada",
         })
     );
@@ -113,6 +127,14 @@ export default function AlojamientosAdmin() {
 
   const reservasPendientes = reservas.filter(
     (r) => r.estado === "pendiente"
+  ).length;
+
+  const reservasCanceladas = reservas.filter(
+    (r) => r.estado === "cancelada"
+  ).length;
+
+  const reservasSolicitadas = reservas.filter(
+    (r) => r.estado === "solicitado"
   ).length;
 
   const reservasReembolsadas = reservas.filter(
@@ -157,7 +179,9 @@ export default function AlojamientosAdmin() {
               <Cuadro texto="Reservas Totales" cantidad={reservas.length} />
               <Cuadro texto="Confirmadas" cantidad={reservasConfirmadas} />
               <Cuadro texto="Pendientes" cantidad={reservasPendientes} />
-              <Cuadro texto="Canceladas" cantidad={reservasReembolsadas} />
+              <Cuadro texto="Solicitudes de Reembolso" cantidad={reservasSolicitadas} />
+              <Cuadro texto="Reembolsadas" cantidad={reservasReembolsadas} />
+              <Cuadro texto="Canceladas" cantidad={reservasCanceladas} />
             </div>
 
             {/* Search */}
