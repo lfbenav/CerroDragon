@@ -123,11 +123,10 @@ exports.remove = asyncHandler(async (req, res) => {
 // Para un cliente reservar una cabaña
 exports.reserve = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { start_date, end_date, persons } = req.body || {};
-    const userId = req.user.userId;
+    const { start_date, end_date, persons, userId } = req.body || {};
 
-    if (!start_date || !end_date || !persons) {
-        throw new AppError("start_date, end_date y persons requeridos", 400);
+    if (!start_date || !end_date || !persons || !userId) {
+        throw new AppError("start_date, end_date, persons y userId requeridos", 400);
     }
 
     const { rows: customerRows } = await pool.query(`
@@ -166,10 +165,12 @@ exports.getAllReservations = asyncHandler(async (req, res) => {
         SELECT 
             ar.*,
             a.name AS accommodation_name,
-            c.full_name AS customer_name
+            c.full_name AS customer_name,
+            u.email AS customer_email
         FROM accommodation_reservations ar
         JOIN accommodations a ON a.id = ar.accommodation_id
         JOIN customers c ON c.id = ar.customer_id
+        JOIN users u ON u.id = c.user_id
         ORDER BY ar.start_date DESC
     `);
 
@@ -275,7 +276,11 @@ exports.getAvailability = asyncHandler(async (req, res) => {
 
 // Ver mis reservaciones de cabañas
 exports.getMyReservations = asyncHandler(async (req, res) => {
-    const userId = req.user.userId;
+    const userId = req.query.userId;
+
+    if (!userId) {
+        throw new AppError("userId requerido", 400);
+    }
 
     const { rows } = await pool.query(`
         SELECT ar.*, a.name AS accommodation_name
@@ -354,4 +359,25 @@ exports.updateReservation = asyncHandler(async (req, res) => {
     `, [start_date, end_date, persons, reservation_id]);
 
     res.json({ success: true, data: update.rows[0] });
+});
+
+// POST /accomodations/reservations/:id/request-refund
+exports.requestRefund = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    const { rowCount } = await pool.query(`
+        UPDATE accommodation_reservations
+        SET status = 'REFUND_REQUESTED'
+        WHERE id = $1
+          AND status = 'CONFIRMED'
+    `, [id]);
+
+    if (!rowCount) {
+        throw new AppError("No se puede solicitar reembolso", 400);
+    }
+
+    res.json({
+        success: true,
+        message: "Reembolso solicitado correctamente"
+    });
 });

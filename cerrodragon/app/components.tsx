@@ -182,8 +182,15 @@ interface AlojamientoProps {
     fechaLlegada: string;
     fechaFinal: string;
     personas: number;
-    estado: 'confirmada' | 'pendiente' | 'cancelada' | 'reembolsada';
+    estado: 'confirmada' | 'pendiente' | 'cancelada' | 'reembolsada' | 'solicitado';
 }
+
+interface Props {
+  reservas: AlojamientoProps[];
+  onDescargarComprobante: (reserva: AlojamientoProps) => void;
+  onReembolso: (reserva: AlojamientoProps) => void;
+}
+
 
 
 /* ========================= CALENDARIO PROPS ========================= */
@@ -1016,7 +1023,7 @@ export function CardCabana({id, nombre, descripcion, capacidad, etiqueta, imagen
 export function CardCabanaAdmin({id, nombre, descripcion, capacidad, etiqueta, imagen}: CardCabanaProps) {
     return (
         <div className="bg-beige1 block w-[350px] h-80 border border-default border-borde1 rounded-xl cardTour relative flex flex-col">
-        <a href={"/"+id} className="block overflow-hidden relative">
+        <a href={"/admin/cabanas/"+id} className="block overflow-hidden relative">
             <div className="h-48 overflow-hidden">
                 <img
                 className="rounded-t-xl w-full h-full object-cover"
@@ -4314,126 +4321,135 @@ export function TablaCupones({ cupones, onEliminar }: {
     );
 }
 
-export function TablaMisAlojamientos({ reservas }: { reservas: AlojamientoProps[] }) {
-    const getEstadoBadge = (estado: ReservaProps['estado']) => {
-        switch (estado) {
-            case 'confirmada':
-                return (
-                    <span className="inline-flex items-center px-3 py-1 text-verde3 text-sm font-bold rounded bg-verdetrans">
-                        Confirmada
-                    </span>
-                );
-            case 'pendiente':
-                return (
-                    <span className="inline-flex items-center px-3 py-1 text-amarillo text-sm font-bold rounded bg-amarillotrans">
-                        Pendiente
-                    </span>
-                );
-            case 'cancelada':
-                return (
-                    <span className="inline-flex items-center px-3 py-1 text-rojovino text-sm font-bold rounded bg-rojotrans">
-                        Cancelada
-                    </span>
-                );
-            case 'reembolsada':
-                return (
-                    <span className="inline-flex items-center px-3 py-1 text-azul1 text-sm font-bold rounded bg-azultrans">
-                        Reembolsada
-                    </span>
-                );
-        }
-    };
+export function TablaMisAlojamientos({
+  reservas,
+  onDescargarComprobante,
+  onReembolso,
+}: Props) {
+  const getEstadoBadge = (estado: AlojamientoProps["estado"]) => {
+    switch (estado) {
+      case "confirmada":
+        return (
+          <span className="inline-flex items-center px-3 py-1 text-verde3 text-sm font-bold rounded bg-verdetrans">
+            Confirmada
+          </span>
+        );
+      case "pendiente":
+        return (
+          <span className="inline-flex items-center px-3 py-1 text-amarillo text-sm font-bold rounded bg-amarillotrans">
+            Pendiente
+          </span>
+        );
+      case "cancelada":
+        return (
+          <span className="inline-flex items-center px-3 py-1 text-rojovino text-sm font-bold rounded bg-rojotrans">
+            Cancelada
+          </span>
+        );
+      case "reembolsada":
+        return (
+          <span className="inline-flex items-center px-3 py-1 text-azul1 text-sm font-bold rounded bg-azultrans">
+            Reembolsada
+          </span>
+        );
+      case "solicitado":
+        return (
+            <span className="inline-flex items-center px-3 py-1 text-orange-700 text-sm font-bold rounded bg-orange-100">
+            Reembolso solicitado
+            </span>
+        );
+    }
+  };
 
-    return (
-        <div className="flex-1 overflow-y-auto min-h-0">
-            <div className="bg-beige1 rounded-lg shadow-sm border border-borde1 mt-6">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left">
-                        <thead className="bg-tabla-header text-center text-black text-sm font-bold tracking-wider">
-                            <tr>
-                                <th className='px-1 py-3'>ID</th>
-                                <th className='px-2 py-3'>Cliente</th>
-                                <th className='px-1 py-3'>Personas</th>
-                                <th className='px-1 py-3'>Fecha de Reserva</th>
-                                <th className='px-1 py-3'>Fecha de Llegada</th>
-                                <th className='px-1 py-3'>Fecha Final</th>
-                                <th className='px-2 py-3'>Cabaña</th>
-                                <th className='px-1 py-3'>Estado</th>
-                                <th className='px-1 py-3'>Solicitar reembolso</th>
-                                <th className='px-2 py-3'>Comprobante</th>
+  return (
+    <div className="flex-1 overflow-y-auto min-h-0">
+      <div className="bg-beige1 rounded-lg shadow-sm border border-borde1 mt-6">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-tabla-header text-center text-black text-sm font-bold tracking-wider">
+              <tr>
+                <th className="px-1 py-3">ID</th>
+                {/* <th className="px-2 py-3">Cliente</th> */}
+                <th className="px-1 py-3">Personas</th>
+                <th className="px-1 py-3">Fecha de Reserva</th>
+                <th className="px-1 py-3">Fecha de Llegada</th>
+                <th className="px-1 py-3">Fecha Final</th>
+                <th className="px-2 py-3">Cabaña</th>
+                <th className="px-1 py-3">Estado</th>
+                <th className="px-1 py-3">Solicitar reembolso</th>
+                <th className="px-2 py-3">Comprobante</th>
+              </tr>
+            </thead>
 
-                            </tr>
-                        </thead>
-                        <tbody className="bg-beige1 divide-y divide-borde1">
-                            {reservas.map((reserva) => (
-                                <tr key={reserva.id} className='bg-tabla-row text-center hover:bg-tabla-header'>
-                                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-black">{reserva.id}</td>
-                                    <td className="px-4 py-4 whitespace-nowrap">
-                                        <div className="text-sm font-bold text-verde1">{reserva.clienteNombre}</div>
-                                        <div className="text-sm text-verde3">{reserva.clienteEmail}</div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-lg text-rojosuave font-bold">{reserva.personas}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-black">{reserva.fechaReserva}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-black">{reserva.fechaLlegada}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-black">{reserva.fechaFinal}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-black">{reserva.cabana}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap">{getEstadoBadge(reserva.estado)}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm flex  justify-center items-center">
-                                        {reserva.estado != 'reembolsada' ? (
-                                            <button className="text-rojovino bg-rojotrans font-bold hover:text-rojo1 flex items-center rounded-md justify-center px-3 py-1 gap-2 hover:[&>svg]:text-rojo1 hover:cursor-pointer">
-                                                <svg
-                                                className="w-6 h-6 text-rojovino dark:text-rojovino"
-                                                aria-hidden="true"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                width={24}
-                                                height={24}
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        stroke="currentColor"
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="m16 10 3-3m0 0-3-3m3 3H5v3m3 4-3 3m0 0 3 3m-3-3h14v-3"
-                                                    />
-                                                </svg>
-                                                Solicitar
-                                            </button>
-                                        ) : (
-                                            <button disabled className="text-gray-400 bg-gray-200 font-bold flex items-center rounded-md justify-center px-3 py-1 gap-2 cursor-not-allowed">
-                                                <svg
-                                                    className="w-6 h-6 text-gray-400"
-                                                    aria-hidden="true"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    width={24}
-                                                    height={24}
-                                                    fill="none"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        stroke="currentColor"
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M5 13l4 4L19 7"
-                                                    />
-                                                </svg>
-                                                Reembolsado
-                                            </button>
-                                        )}
-                                    </td>
-                                    <td className="px-6 py-4 text-black hover:underline hover:cursor-pointer">
-                                        Descargar
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            <tbody className="bg-beige1 divide-y divide-borde1">
+              {reservas.map((reserva) => (
+                <tr
+                  key={reserva.id}
+                  className="bg-tabla-row text-center hover:bg-tabla-header"
+                >
+                  <td className="px-4 py-4 font-medium text-black">
+                    {reserva.id}
+                  </td>
+
+                  {/* <td className="px-4 py-4">
+                    <div className="text-sm font-bold text-verde1">
+                      {reserva.clienteNombre}
+                    </div>
+                    <div className="text-sm text-verde3">
+                      {reserva.clienteEmail}
+                    </div>
+                  </td> */}
+
+                  <td className="px-6 py-4 text-lg text-rojosuave font-bold">
+                    {reserva.personas}
+                  </td>
+
+                  <td className="px-6 py-4 text-black">{reserva.fechaReserva}</td>
+                  <td className="px-6 py-4 text-black">{reserva.fechaLlegada}</td>
+                  <td className="px-6 py-4 text-black">{reserva.fechaFinal}</td>
+                  <td className="px-6 py-4 text-black">{reserva.cabana}</td>
+
+                  <td className="px-6 py-4">
+                    {getEstadoBadge(reserva.estado)}
+                  </td>
+
+                  <td className="px-6 py-4">
+                    {reserva.estado === "confirmada" ? (
+                        <button
+                        onClick={() => onReembolso(reserva)}
+                        className="text-rojovino bg-rojotrans font-bold rounded-md px-3 py-1 hover:text-rojo1 hover:cursor-pointer"
+                        >
+                        Solicitar
+                        </button>
+                    ) : reserva.estado === "solicitado" ? (
+                        <span className="inline-block text-orange-700 bg-orange-100 font-bold rounded-md px-3 py-1">
+                        Solicitado
+                        </span>
+                    ) : (
+                        <span className="inline-block text-gray-400 bg-gray-200 font-bold rounded-md px-3 py-1 cursor-not-allowed">
+                        No disponible
+                        </span>
+                    )}
+                    </td>
+
+                  {/* 🔥 AQUÍ ESTABA EL PROBLEMA */}
+                  <td className="px-6 py-4">
+                    <button
+                      type="button"
+                      onClick={() => onDescargarComprobante(reserva)}
+                      className="text-verde3 font-bold hover:underline"
+                    >
+                      Descargar
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-    );
+      </div>
+    </div>
+  );
 }
 
 export function TablaAlojamientosAdmin({ reservas }: { reservas: AlojamientoProps[] }) {

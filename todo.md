@@ -17,9 +17,9 @@ luis_frontend{
     listar tours admin y cliente            Done
     crear tour admin                        Done
     administradores admin                   Done
-    alojamientos admin y cliente            ToDo
-    auditoría admin                         ToDo
-    cabañas admin y cliente                 ToDo
+    alojamientos admin y cliente (reservas) Done
+    auditoría admin                         Done
+    cabañas admin y cliente                 Done
     calendario admin y cliente              ToDo
     checkin admin y cliente                 ToDo
     clientes admin                          Done
@@ -29,8 +29,8 @@ luis_frontend{
     guias admin y cliente                   ToDo
     inventario admin                        ToDo
     perfil admin y cliente                  Done
-    políticas admin y cliente               ToDo
+    políticas admin y cliente               Done
     preguntas admin y cliente               ToDo
     puntos de encuentro admin y cliente     ToDo
-    testimonios admin y cliente             Done
+    testimonios admin y cliente             ToDo
 }

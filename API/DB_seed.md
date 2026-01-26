@@ -1,6 +1,3 @@
-Este fue creado por ChatGPT, podría no funcionar como debería. El de crear la base de datos si fue hecho a mano en su mayoría en caso de que se lo pregunte.
-
-```sql
 BEGIN;
 
 -- =========================
@@ -165,4 +162,3 @@ VALUES
 COMMIT;
 
 -- Fin
-```
