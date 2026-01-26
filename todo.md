@@ -32,5 +32,5 @@ luis_frontend{
     políticas admin y cliente               Done
     preguntas admin y cliente               Done
     puntos de encuentro admin y cliente     ToDo
-    testimonios admin y cliente             ToDo
+    testimonios admin y cliente             Done
 }

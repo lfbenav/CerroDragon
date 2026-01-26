@@ -1,7 +1,30 @@
 "use client";
+
 import { CardTestimonio, SideBarClient, TopBar } from "@/app/components";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+
+const API_URL = "http://localhost:3000";
+
+/* =======================
+   Tipos BACKEND
+======================= */
+
+type TestimonialStatus = "APPROVED" | "REJECTED" | "PENDING";
+
+interface TestimonialApi {
+    id: number;
+    customer_id: string | null;
+    content: string;
+    rating: number | null;
+    status: TestimonialStatus;
+    created_at: string;
+    reviewed_at: string | null;
+}
+
+/* =======================
+   Tipo para la UI
+======================= */
 
 interface Testimonio {
     id: number;
@@ -9,114 +32,75 @@ interface Testimonio {
     comentario: string;
     fecha: string;
     likes: number;
-    estado: 'aprobado';
 }
+
+/* =======================
+   Utils
+======================= */
+
+const formatFecha = (isoDate: string): string => {
+    const date = new Date(isoDate);
+    return date.toLocaleDateString("es-CR", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+    });
+};
 
 export default function Testimonios() {
     const [testimonios, setTestimonios] = useState<Testimonio[]>([]);
     const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState<boolean>(false);
 
-    // Datos mock - Reemplazar con datos reales de la API
-    const mockTestimonios: Testimonio[] = [
-        {
-            id: 1,
-            nombre: "Alex Naranjo Naranjo",
-            comentario: "Lleve ropa cómoda porque si se camina bastante, se disfruta mucho la experiencia!",
-            fecha: "12 de Marzo de 2024",
-            likes: 34,
-            estado: 'aprobado'
-        },
-        {
-            id: 2,
-            nombre: "Camila Miranda Canales",
-            comentario: "¡Increíble!",
-            fecha: "24 de diciembre de 2025",
-            likes: 20,
-            estado: 'aprobado'
-        },
-        {
-            id: 3,
-            nombre: "Pedro Torres Gonzales",
-            comentario: "¡Fue una experiencia absolutamente maravillosa que superó todas nuestras expectativas! El lugar tiene una magia especial y el tour está tan bien organizado que te permite disfrutar cada segundo sin preocupaciones. Lo más fascinante, sin duda, fue contemplar el amanecer; ver cómo los primeros rayos de luz transformaban el paisaje fue un espectáculo inolvidable. Compartir un momento de tanta paz y belleza con mis seres queridos fue un regalo para el alma. Recomiendo este destino de forma entusiasta a cualquiera que busque desconectar y vivir una aventura auténtica. ¡Es una vivencia que atesoraremos por siempre y que definitivamente planeamos repetir muy pronto!",
-            fecha: "24 de noviembre de 2025",
-            likes: 10,
-            estado: 'aprobado'
-        },
-        {
-            id: 4,
-            nombre: "Mariana Ruiz Lopez",
-            comentario: "Amé cada momento del tour. La guía fue muy amable y conocedora.",
-            fecha: "15 de Junio de 2025",
-            likes: 2,
-            estado: 'aprobado'
-        },
-        {
-            id: 5,
-            nombre: "Sofia Morales Castro",
-            comentario: "Perfecto.",
-            fecha: "3 de Enero de 2025",
-            likes: 18,
-            estado: 'aprobado'
-        },
-        {
-            id: 6,
-            nombre: "Roberto Silva Mendez",
-            comentario: "Increíble experiencia de aventura. Los paisajes son únicos y la organización impecable. Vale cada peso invertido. Definitivamente una de las mejores experiencias que he tenido en mucho tiempo.",
-            fecha: "28 de Agosto de 2024",
-            likes: 45,
-            estado: 'aprobado'
-        },
-        {
-            id: 7,
-            nombre: "Ana Lucia Vargas",
-            comentario: "Me encantó la conexión con la naturaleza. Un lugar mágico para desconectarse del estrés diario y recargar energías. La vista desde la cima es simplemente espectacular y el amanecer fue algo fuera de este mundo.",
-            fecha: "10 de Octubre de 2024",
-            likes: 27,
-            estado: 'aprobado'
-        },
-        {
-            id: 8,
-            nombre: "Diego Fernandez Rojas",
-            comentario: "Excelente atención.",
-            fecha: "5 de Febrero de 2025",
-            likes: 38,
-            estado: 'aprobado'
-        },
-        {
-            id: 9,
-            nombre: "Valentina Cruz Herrera",
-            comentario: "Una aventura que cambió mi perspectiva. El equipo es súper amigable y el lugar tiene una energía especial que te renueva por completo. Cada paso del sendero vale la pena y la experiencia completa es simplemente memorable. Sin duda volveré con toda mi familia para compartir esta magia con ellos.",
-            fecha: "22 de Septiembre de 2024",
-            likes: 31,
-            estado: 'aprobado'
-        }
-    ];
+    /* =======================
+       Fetch real desde API
+    ======================= */
 
-    // TODO: Función para obtener testimonios desde la API
-    const fetchTestimonios = async () => {
+    const fetchTestimonios = async (): Promise<void> => {
         try {
+            setLoading(true);
             setError(null);
-            
-            // TODO: Llamada a la API para obtener los testimonios aprobados
-            // const response = await fetch('/api/testimonios?estado=aprobado');
-            // if (!response.ok) throw new Error('Error fetching testimonios');
-            // const data = await response.json();
-            // setTestimonios(data);
-            
-            // Por ahora usamos datos mockeados
-            await new Promise(resolve => setTimeout(resolve, 1000)); // Simular delay de API
-            setTestimonios(mockTestimonios);
-            
+
+            const response = await fetch(
+                `${API_URL}/others/testimonials/approved`
+            );
+
+            if (!response.ok) {
+                throw new Error("Error al obtener testimonios");
+            }
+
+            const json: {
+                success: boolean;
+                data: TestimonialApi[];
+            } = await response.json();
+
+            if (!json.success) {
+                throw new Error("Respuesta inválida del servidor");
+            }
+
+            // 🔑 Mapeo backend → UI
+            const mapped: Testimonio[] = json.data.map((t) => ({
+                id: t.id,
+                nombre: "Cliente Anónimo", // Backend no expone nombre (correcto)
+                comentario: t.content,
+                fecha: formatFecha(t.created_at),
+                likes: t.rating ?? 0, // placeholder hasta que exista likes real
+            }));
+
+            setTestimonios(mapped);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Error cargando testimonios');
-            console.error('Error fetching testimonios:', err);
+            setError(
+                err instanceof Error
+                    ? err.message
+                    : "Error cargando testimonios"
+            );
         } finally {
+            setLoading(false);
         }
     };
 
     useEffect(() => {
         fetchTestimonios();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
@@ -124,16 +108,19 @@ export default function Testimonios() {
             <SideBarClient />
             <div className="flex-1 flex flex-col">
                 <TopBar />
-                <main className="flex-1 flex flex-col ml-72  pt-20 px-8 min-h-0">
+                <main className="flex-1 flex flex-col ml-72 pt-20 px-8 min-h-0">
                     <div className="max-w-7xl mx-auto w-full flex flex-col h-full">
                         <div className="flex-shrink-0 flex justify-between items-center">
-                            <div className="">
-                                <h1 className="text-3xl font-bold mb-1 text-black mt-4">Testimonios</h1>
+                            <div>
+                                <h1 className="text-3xl font-bold mb-1 text-black mt-4">
+                                    Testimonios
+                                </h1>
                                 <p className="mb-4 text-verde3">
                                     Qué opina la gente sobre nosotros!
                                 </p>
                                 <hr className="border-1 border-borde1 my-4 w-full" />
                             </div>
+
                             <div className="flex justify-end mb-4">
                                 <Link href="/cliente/testimonios/nuevo">
                                     <button className="bg-verde3 text-white px-4 py-2 rounded-lg hover:bg-verde2 transition justify-between items-center flex">
@@ -157,12 +144,12 @@ export default function Testimonios() {
                                 </Link>
                             </div>
                         </div>
-                        
-                        {/* Error state */}
+
+                        {/* Error */}
                         {error && (
                             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                                 <p>Error: {error}</p>
-                                <button 
+                                <button
                                     onClick={fetchTestimonios}
                                     className="mt-2 bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
                                 >
@@ -170,13 +157,22 @@ export default function Testimonios() {
                                 </button>
                             </div>
                         )}
-                        
-                        {/* Scrollable testimonios */}
+
+                        {/* Loading */}
+                        {loading && (
+                            <p className="text-gray-500 py-4">
+                                Cargando testimonios...
+                            </p>
+                        )}
+
+                        {/* Listado */}
                         <div className="flex-1 overflow-y-auto min-h-0">
-                            <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-3 xl:columns-3 gap-6 p-6">
-                                {testimonios.length === 0 ? (
-                                    <div className="col-span-full text-center py-8">
-                                        <p className="text-gray-500 text-lg">No hay testimonios disponibles</p>
+                            <div className="columns-1 sm:columns-2 md:columns-3 gap-6 p-6">
+                                {!loading && testimonios.length === 0 ? (
+                                    <div className="text-center py-8">
+                                        <p className="text-gray-500 text-lg">
+                                            No hay testimonios disponibles
+                                        </p>
                                     </div>
                                 ) : (
                                     testimonios.map((testimonio) => (

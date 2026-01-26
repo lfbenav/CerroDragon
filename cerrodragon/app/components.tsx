@@ -1396,7 +1396,7 @@ export function CardTestimonio({nombre, comentario, fecha, likes}: CardTestimoni
                     <span className="text-sm text-verde3">{fecha}</span>
                 </div>
                 
-                <div className="flex items-center">
+                {/* <div className="flex items-center">
                     <svg
                         className="w-5 h-5 text-verde3 mr-1"
                         aria-hidden="true"
@@ -1413,7 +1413,7 @@ export function CardTestimonio({nombre, comentario, fecha, likes}: CardTestimoni
                         />
                     </svg>
                     <span className="text-sm text-verde3 font-medium">{likes}</span>
-                </div>
+                </div> */}
             </div>
         </div>
     );
