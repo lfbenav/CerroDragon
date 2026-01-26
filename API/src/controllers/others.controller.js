@@ -143,11 +143,12 @@ exports.getAuditLogs = asyncHandler(async (req, res) => {
 // Puntos de encuentro
 // ===================
 
-// Obtener todos los puntos de encuentro
+// Obtener solo puntos de encuentro activos
 exports.getMeetingPoints = asyncHandler(async (req, res) => {
     const { rows } = await pool.query(`
         SELECT *
         FROM meeting_points
+        WHERE is_active = true
         ORDER BY name
     `);
 
@@ -199,20 +200,26 @@ exports.updateMeetingPoint = asyncHandler(async (req, res) => {
     res.json({ success: true, data: rows[0] });
 });
 
-// Eliminar punto de encuentro
+// Desactivar punto de encuentro (soft delete)
 exports.deleteMeetingPoint = asyncHandler(async (req, res) => {
     const { id } = req.params;
 
-    const { rowCount } = await pool.query(`
-        DELETE FROM meeting_points
+    const { rowCount, rows } = await pool.query(`
+        UPDATE meeting_points
+        SET is_active = false
         WHERE id = $1
+        RETURNING *
     `, [id]);
 
     if (!rowCount) {
         throw new AppError("Punto de encuentro no encontrado", 404);
     }
 
-    res.json({ success: true, message: "Punto de encuentro eliminado" });
+    res.json({
+        success: true,
+        message: "Punto de encuentro desactivado",
+        data: rows[0]
+    });
 });
 
 

@@ -1358,30 +1358,49 @@ export function CardPromocionAdmin({id, nombre, descripcion, precioAhora, precio
     );
 }
 
-export function CardPunto({nombre, ubicacion, direccion, imagen}: CardPuntoProps) {
-    return (
-        <div className="bg-beige1 w-60 block border border-default border-borde1 rounded-xl relative flex flex-col">
-            <div className="flex justify-center items-center m-4 h-32">
-                <Image
-                    className="rounded-lg w-32 h-32 object-cover"
-                    src={imagen || "/punto1.png"}
-                    alt="Punto de encuentro"
-                    width={80}
-                    height={64}
-                />
-            </div>
-            <div className="flex-1 px-4 pb-4 flex flex-col justify-between items-center text-center">
-                <h3 className="text-lg font-medium text-black">{nombre}</h3>
-                <div className="mb-2 w-full">
-                    <a href={`https://maps.google.com/?q=${encodeURIComponent(ubicacion)}`} target="_blank" rel="noopener noreferrer" className="text-sm text-verde3 hover:text-verde2 underline break-words">
-                        {ubicacion}
-                    </a>
-                </div>
-                <p className="text-sm text-verde3">{direccion}</p>
-            </div>
-        </div>
-    );
+interface CardPuntoProps {
+  nombre: string;
+  ubicacion: string;
+  direccion: string;
+  imagen?: string;
 }
+
+export function CardPunto({
+  nombre,
+  ubicacion,
+  direccion,
+  imagen,
+}: CardPuntoProps) {
+  return (
+    <div className="bg-beige1 w-60 block border border-default border-borde1 rounded-xl relative flex flex-col">
+      <div className="flex justify-center items-center m-4 h-32">
+        <img
+          className="rounded-lg w-32 h-32 object-cover"
+          src={imagen || "/punto1.png"}
+          alt="Punto de encuentro"
+        />
+      </div>
+
+      <div className="flex-1 px-4 pb-4 flex flex-col justify-between items-center text-center">
+        <h3 className="text-lg font-medium text-black">{nombre}</h3>
+
+        <div className="mb-2 w-full">
+          <a
+            href={`https://maps.google.com/?q=${encodeURIComponent(ubicacion)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-verde3 hover:text-verde2 underline break-words"
+          >
+            {ubicacion}
+          </a>
+        </div>
+
+        <p className="text-sm text-verde3">{direccion}</p>
+      </div>
+    </div>
+  );
+}
+
 
 export function CardTestimonio({nombre, comentario, fecha, likes}: CardTestimonioProps) {
     return (
@@ -1823,50 +1842,74 @@ export function CardFAQAdmin({
   );
 }
 
-export function CardPuntoAdmin({nombre, ubicacion, direccion, imagen}: CardPuntoProps) {
-    return (
-        <div className="bg-beige1 w-70 block border border-default border-borde1 rounded-xl relative flex flex-col">
-            <div className="flex justify-center items-center m-4 h-32">
-                <Image
-                    className="rounded-lg w-32 h-32 object-cover"
-                    src={imagen || "/punto1.png"}
-                    alt="Punto de encuentro"
-                    width={80}
-                    height={64}
-                />
-            </div>
-            <div className="flex-1 px-4 pb-4 flex flex-col justify-between items-center text-center">
-                <h3 className="text-lg font-medium text-black">{nombre}</h3>
-                <div className="mb-2 w-full">
-                    <a href={`https://maps.google.com/?q=${encodeURIComponent(ubicacion)}`} target="_blank" rel="noopener noreferrer" 
-                        className="text-sm text-verde3 hover:text-verde2 underline break-words">
-                        {ubicacion}
-                    </a>
-                </div>
-                <p className="text-sm text-verde3">{direccion}</p>
-            </div>
-            <hr className="border-1 border-borde1 mt-2 mx-4 mb-4 " />
-            <div className="flex justify-end items-center">
-                <button className="px-4 pb-4 rounded-b-xl hover:scale-105 transition-transform">
-                    <svg
-                        className="w-6 h-6 text-verde1 dark:text-verde1"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        width={24}
-                        height={24}
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            fillRule="evenodd"
-                            d="M8.586 2.586A2 2 0 0 1 10 2h4a2 2 0 0 1 2 2v2h3a1 1 0 1 1 0 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a1 1 0 0 1 0-2h3V4a2 2 0 0 1 .586-1.414ZM10 6h4V4h-4v2Zm1 4a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Zm4 0a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Z"
-                            clipRule="evenodd"
-                        />
-                    </svg>
-                </button>
-            </div>
+interface CardPuntoProps {
+  id: number;
+  nombre: string;
+  ubicacion: string;
+  direccion: string;
+  imagen?: string;
+  onDelete: (id: number) => void;
+}
+
+export function CardPuntoAdmin({
+  id,
+  nombre,
+  ubicacion,
+  direccion,
+  imagen,
+  onDelete,
+}: CardPuntoProps) {
+  return (
+    <div className="bg-beige1 w-70 block border border-default border-borde1 rounded-xl relative flex flex-col">
+      <div className="flex justify-center items-center m-4 h-32">
+        <img
+          className="rounded-lg w-32 h-32 object-cover"
+          src={imagen || "/punto1.png"}
+          alt="Punto de encuentro"
+        />
+      </div>
+
+      <div className="flex-1 px-4 pb-4 flex flex-col justify-between items-center text-center">
+        <h3 className="text-lg font-medium text-black">{nombre}</h3>
+
+        <div className="mb-2 w-full">
+          <a
+            href={`https://maps.google.com/?q=${encodeURIComponent(ubicacion)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-verde3 hover:text-verde2 underline break-words"
+          >
+            {ubicacion}
+          </a>
         </div>
-    );
+
+        <p className="text-sm text-verde3">{direccion}</p>
+      </div>
+
+      <hr className="border-1 border-borde1 mt-2 mx-4 mb-4" />
+
+      <div className="flex justify-end items-center">
+        <button
+          onClick={() => onDelete(id)}
+          className="px-4 pb-4 rounded-b-xl hover:scale-105 transition-transform"
+          title="Eliminar punto"
+        >
+          <svg
+            className="w-6 h-6 text-verde1"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              fillRule="evenodd"
+              d="M8.586 2.586A2 2 0 0 1 10 2h4a2 2 0 0 1 2 2v2h3a1 1 0 1 1 0 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a1 1 0 0 1 0-2h3V4a2 2 0 0 1 .586-1.414ZM10 6h4V4h-4v2Zm1 4a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Zm4 0a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Z"
+              clipRule="evenodd"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
 }
 
 type IncTipo = "leve" | "moderado" | "grave" | "critico";
