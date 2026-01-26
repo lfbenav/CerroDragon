@@ -13,6 +13,7 @@ router.post("/", auth, controller.create);
 router.get("/:id", auth, controller.getById);
 router.put("/:id", auth, requirePermission("MANAGE_RESERVATIONS"), controller.update);
 router.delete("/:id", auth, requirePermission("MANAGE_RESERVATIONS"), controller.delete);
+router.get("/fromUser/:userId", auth, controller.getUserReservations);
 
 // Reservation Status (Admin)
 router.put("/:id/status", auth, requirePermission("MANAGE_RESERVATIONS"), controller.updateStatus);

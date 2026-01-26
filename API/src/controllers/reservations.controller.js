@@ -348,6 +348,76 @@ exports.getMyReservations = asyncHandler(async (req, res) => {
     });
 });
 
+// GET /userReservations
+exports.getUserReservations = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+
+  // 1) Buscar el customer asociado al user
+  const customerRes = await pool.query(
+    `SELECT id FROM customers WHERE user_id = $1`,
+    [userId]
+  );
+
+  if (!customerRes.rows.length) {
+    return res.status(200).json({
+      success: true,
+      data: [],
+    });
+  }
+
+  const customerId = customerRes.rows[0].id;
+
+  // 2) Traer reservas del customer con info relacionada
+  const { rows } = await pool.query(
+    `
+    SELECT
+      r.id,
+      r.customer_id,
+      r.tour_id,
+      r.promotion_id,
+      r.tour_package_id,
+      r.meeting_point_id,
+
+      r.tour_date,
+      r.reserved_at,
+      r.persons,
+      r.can_arrive_4x4,
+
+      r.subtotal_usd,
+      r.discount_usd,
+      r.meeting_extra_usd,
+      r.total_usd,
+
+      r.status,
+      r.confirmed_at,
+      r.cancelled_at,
+
+      t.title       AS tour_title,
+      t.description AS tour_description,
+      t.image_url   AS tour_image_url,
+
+      tp.name       AS package_name,
+      tp.price_usd  AS package_price_usd,
+
+      mp.name       AS meeting_point_name,
+      mp.link       AS meeting_point_link
+    FROM reservations r
+    LEFT JOIN tours t ON t.id = r.tour_id
+    LEFT JOIN tour_packages tp ON tp.id = r.tour_package_id
+    LEFT JOIN meeting_points mp ON mp.id = r.meeting_point_id
+    WHERE r.customer_id = $1
+    ORDER BY r.reserved_at DESC
+    `,
+    [customerId]
+  );
+
+  return res.status(200).json({
+    success: true,
+    data: rows,
+  });
+});
+
+
 // POST /reservations/:id/request-refund - Customer requests refund
 exports.requestRefund = asyncHandler(async (req, res) => {
     const { id } = req.params;

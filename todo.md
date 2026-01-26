@@ -1,6 +1,14 @@
 Hace falta poner los auth y permisos, pero si no se pueden solo omitir porque hay que configurar cosas en el front pq quité algunos porque no funcionaban
 
 
+alex_frontend{
+    tours cliente y admin
+    reservas cliente y admin
+    promociones cliente y admin
+    reembolsos cliente y admin
+    cupones cliente y admin
+}
+
 luis_frontend{
     change-password                         Done
     recover-password                        Done
@@ -14,7 +22,7 @@ luis_frontend{
     cabañas admin y cliente                 ToDo
     calendario admin y cliente              ToDo
     checkin admin y cliente                 ToDo
-    clientes admin y cliente                ToDo
+    clientes admin                          Done
     clima admin y cliente                   ToDo
     comidas admin y cliente                 ToDo
     consultas admin y cliente               ToDo

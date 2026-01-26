@@ -20,6 +20,7 @@ router.delete("/permissions/remove", controller.removePermissionFromRole);
 router.get("/:id/client", controller.getClientByUserId);
 router.get("/:id/guide", controller.getGuideByUserId);
 router.get("/:id/admin", controller.getAdminByUserId);
+router.get("/:id/clientId", controller.getClientIdByUserId);
 
 // Updates
 router.put("/:id/client", controller.updateClient);

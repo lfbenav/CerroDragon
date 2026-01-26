@@ -599,3 +599,22 @@ exports.getRoleIdByUser = asyncHandler(async (req, res) => {
         role_id: rows[0].role_id
     });
 });
+
+// Obtener id de cliente por el user id (por el colocho que se hizo con las reservas)
+exports.getClientIdByUserId = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    const { rows } = await pool.query(`
+        SELECT
+            c.id
+        FROM users u
+        JOIN customers c ON c.user_id = u.id
+        WHERE u.id = $1 AND u.type = 'client'
+    `, [id]);
+
+    if (!rows.length) {
+        throw new AppError("Cliente no encontrado", 404, "CLIENT_NOT_FOUND");
+    }
+
+    res.json({ success: true, data: rows[0] });
+});
