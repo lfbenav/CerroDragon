@@ -2659,45 +2659,42 @@ export function AdminCalendarGrid({
 /* ========================= TOP BAR ========================= */
 
 export function TopBar() {
-//   let email: string | null = null;
+  const [profileHref, setProfileHref] = useState("/login");
 
-//   if (typeof window !== "undefined") {
-//     try {
-//         const userRaw = localStorage.getItem("user");
-//         if (userRaw) {
-//             const user = JSON.parse(userRaw);
-//             email = user.email ?? null;
-//         }
-//     } catch {}
-//   }
+  useEffect(() => {
+    try {
+      const userRaw = localStorage.getItem("user");
+      if (!userRaw) return;
+
+      const user = JSON.parse(userRaw);
+
+      if (user.type === "admin") {
+        setProfileHref("/admin/perfil");        //! No sé qué es ese warning la verdad, solo así funciona
+      } else if (user.type === "client") {
+        setProfileHref("/cliente/perfil");
+      }
+    } catch {
+      // noop
+    }
+  }, []);
 
   return (
     <nav className="bg-beige1 fixed top-0 left-64 right-0 z-20 border-b border-gray-200">
       <div className="flex items-center justify-end px-6 py-4 gap-3">
-        {/* Email */}
-        {/* {email && (
-          <span className="text-sm text-gray-700 hidden sm:block">
-            {email}
-          </span>
-        )} */}
-
-        {/* Avatar */}
-        <Link href="/profile">
-            <button
-                type="button"
-                className="flex text-sm rounded-full focus:ring-4 focus:ring-gray-300"
-                id="user-menu-button"
-                aria-expanded="false"
-            >
-                <span className="sr-only">User menu</span>
-                <Image
-                className="w-8 h-8 rounded-full"
-                src="/cerro.png"
-                alt="user photo"
-                width={32}
-                height={32}
-                />
-            </button>
+        <Link href={profileHref}>
+          <button
+            type="button"
+            className="flex text-sm rounded-full focus:ring-4 focus:ring-gray-300"
+          >
+            <span className="sr-only">User menu</span>
+            <Image
+              className="w-8 h-8 rounded-full"
+              src="/cerro.png"
+              alt="user photo"
+              width={32}
+              height={32}
+            />
+          </button>
         </Link>
       </div>
     </nav>

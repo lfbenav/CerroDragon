@@ -20,7 +20,7 @@ luis_frontend{
     consultas admin y cliente               ToDo
     guias admin y cliente                   ToDo
     inventario admin                        ToDo
-    perfil admin y cliente                  ToDo
+    perfil admin y cliente                  Done
     políticas admin y cliente               ToDo
     preguntas admin y cliente               ToDo
     puntos de encuentro admin y cliente     ToDo
