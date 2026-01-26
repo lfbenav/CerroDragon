@@ -25,9 +25,9 @@ luis_frontend{
     clientes admin                          Done
     clima admin y cliente                   ToDo
     comidas admin y cliente                 ToDo
-    consultas admin y cliente               ToDo
+    consultas admin y cliente               Done
     guias admin y cliente                   ToDo
-    inventario admin                        ToDo
+    inventario admin                        Done
     perfil admin y cliente                  Done
     políticas admin y cliente               Done
     preguntas admin y cliente               ToDo

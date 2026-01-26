@@ -91,5 +91,16 @@ router.put("/inventory/:id", controller.updateInventoryItem);
 router.patch("/inventory/:id/adjust", controller.adjustInventoryQuantity);
 router.delete("/inventory/:id", controller.deleteInventoryItem);
 
+// ===========
+// Consultas
+// ===========
+
+// admin
+router.get('/consultations', controller.getAllConsultations);
+router.patch('/consultations/:id/resolve', controller.resolveConsultation);
+
+// cliente
+router.post('/consultations', controller.createConsultation);
+
 
 module.exports = router;

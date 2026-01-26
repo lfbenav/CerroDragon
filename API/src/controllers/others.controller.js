@@ -521,3 +521,77 @@ exports.deleteInventoryItem = asyncHandler(async (req, res) => {
     message: "Ítem eliminado correctamente",
   });
 });
+
+
+// ===========
+// Consultas
+// ===========
+
+// GET /consultations
+exports.getAllConsultations = asyncHandler(async (req, res) => {
+  const { rows } = await pool.query(`
+    SELECT
+      id,
+      customer_name,
+      phone,
+      message,
+      status,
+      created_at
+    FROM customer_consultations
+    ORDER BY created_at DESC
+  `);
+
+  res.json({
+    success: true,
+    data: rows
+  });
+});
+
+// PATCH /consultations/:id/resolve
+exports.resolveConsultation = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const { rowCount } = await pool.query(`
+    UPDATE customer_consultations
+    SET status = 'RESOLVED',
+        resolved_at = now()
+    WHERE id = $1
+      AND status = 'PENDING'
+  `, [id]);
+
+  if (!rowCount) {
+    throw new AppError("Consulta no encontrada o ya resuelta", 404);
+  }
+
+  res.json({
+    success: true,
+    message: "Consulta marcada como resuelta"
+  });
+});
+
+// POST /consultations
+exports.createConsultation = asyncHandler(async (req, res) => {
+  const { customer_name, phone, message } = req.body;
+
+  if (!customer_name || !phone || !message) {
+    throw new AppError("Nombre, teléfono y consulta son requeridos", 400);
+  }
+
+  const { rows } = await pool.query(`
+    INSERT INTO customer_consultations (
+      customer_name,
+      phone,
+      message
+    )
+    VALUES ($1, $2, $3)
+    RETURNING id
+  `, [customer_name, phone, message]);
+
+  res.status(201).json({
+    success: true,
+    message: "Consulta enviada correctamente",
+    data: {
+      id: rows[0].id
+    }
+  });
+});

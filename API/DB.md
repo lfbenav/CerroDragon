@@ -489,4 +489,23 @@ CREATE TABLE admin_logs (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
+-- =========================
+-- CONSULTAS DE CLIENTES
+-- =========================
+
+CREATE TABLE customer_consultations (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  customer_name text NOT NULL,
+  phone text NOT NULL,
+  message text NOT NULL,
+
+  status text NOT NULL DEFAULT 'PENDING'
+    CHECK (status IN ('PENDING', 'RESOLVED')),
+
+  created_at timestamptz NOT NULL DEFAULT now(),
+  resolved_at timestamptz
+);
+
+
 -- Fin
