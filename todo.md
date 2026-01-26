@@ -21,9 +21,9 @@ luis_frontend{
     auditoría admin                         Done
     cabañas admin y cliente                 Done
     calendario admin y cliente              ToDo
-    checkin admin y cliente                 ToDo
+    checkin admin y cliente                 WorkingOnIt
     clientes admin                          Done
-    clima admin y cliente                   ToDo
+    clima admin y cliente                   Done
     comidas admin y cliente                 ToDo
     consultas admin y cliente               Done
     guias admin y cliente                   Done
