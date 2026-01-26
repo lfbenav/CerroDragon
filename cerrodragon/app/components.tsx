@@ -881,24 +881,34 @@ export function CardTourAdmin({id, nombre, descripcion, precio, capacidad, durac
     );
 }
 
-export function CardGuide({nombre, activo, imagen}: {nombre: string, activo: string, imagen?: string}) {
+export function CardGuide({
+    nombre,
+    activo,
+    imagen,
+}: {
+    nombre: string;
+    activo: string;
+    imagen?: string;
+}) {
     return (
         <div className="bg-beige1 block w-60 h-80 border border-default border-borde1 rounded-xl relative flex flex-col shadow-md">
             <div className="h-48 overflow-hidden m-4 rounded-lg">
-                <Image
+                <img
                     className="rounded-lg w-full h-full object-cover"
                     src={imagen || "/guia1.png"}
                     alt="Guía turístico"
-                    width={208}
-                    height={160}
                 />
             </div>
+
             <div className="flex-1 px-4 pb-4 flex flex-col justify-between items-center text-center">
-                <h3 className="text-lg font-medium text-black">{nombre}</h3>
-                {activo === 'Activo' ? (
+                <h3 className="text-lg font-medium text-black">
+                    {nombre}
+                </h3>
+
+                {activo === "Activo" ? (
                     <span className="inline-flex items-center px-4 py-1 text-verde3 text-sm font-bold rounded bg-verdetrans w-fit">
                         Activo
-                    </span>                
+                    </span>
                 ) : (
                     <span className="inline-flex items-center px-4 py-1 text-rojovino text-sm font-bold rounded bg-rojotrans w-fit">
                         Inactivo
@@ -907,38 +917,49 @@ export function CardGuide({nombre, activo, imagen}: {nombre: string, activo: str
             </div>
         </div>
     );
-
 }
 
-export function CardGuideAdmin({id, nombre, activo, imagen}: {id:number, nombre: string, activo: string, imagen?: string}) {
+
+export function CardGuideAdmin({
+    id,
+    nombre,
+    activo,
+    imagen,
+}: {
+    id: string | number;
+    nombre: string;
+    activo: "Activo" | "Inactivo";
+    imagen?: string;
+}) {
     return (
-        <Link href={"/admin/guias/info?id="+id}>
-        <div className="bg-beige1 block w-60 h-80 border border-default border-borde1 rounded-xl relative flex flex-col shadow-md hover:scale-105 hover:shadow-lg transition-all">
-            <div className="h-48 overflow-hidden m-4 rounded-lg">
-                <Image
-                    className="rounded-lg w-full h-full object-cover"
-                    src={imagen || "/guia1.png"}
-                    alt="Guía turístico"
-                    width={208}
-                    height={160}
-                />
+        <Link href={`/admin/guias/info?id=${id}`}>
+            <div className="bg-beige1 block w-60 h-80 border border-default border-borde1 rounded-xl relative flex flex-col shadow-md hover:scale-105 hover:shadow-lg transition-all">
+                <div className="h-48 overflow-hidden m-4 rounded-lg">
+                    <img
+                        className="rounded-lg w-full h-full object-cover"
+                        src={imagen || "/guia1.png"}
+                        alt="Guía turístico"
+                    />
+                </div>
+
+                <div className="flex-1 px-4 pb-4 flex flex-col justify-between items-center text-center">
+                    <h3 className="text-lg font-medium text-black">
+                        {nombre}
+                    </h3>
+
+                    {activo === "Activo" ? (
+                        <span className="inline-flex items-center px-4 py-1 text-verde3 text-sm font-bold rounded bg-verdetrans w-fit">
+                            Activo
+                        </span>
+                    ) : (
+                        <span className="inline-flex items-center px-4 py-1 text-rojovino text-sm font-bold rounded bg-rojotrans w-fit">
+                            Inactivo
+                        </span>
+                    )}
+                </div>
             </div>
-            <div className="flex-1 px-4 pb-4 flex flex-col justify-between items-center text-center">
-                <h3 className="text-lg font-medium text-black">{nombre}</h3>
-                {activo === 'Activo' ? (
-                    <span className="inline-flex items-center px-4 py-1 text-verde3 text-sm font-bold rounded bg-verdetrans w-fit">
-                        Activo
-                    </span>                
-                ) : (
-                    <span className="inline-flex items-center px-4 py-1 text-rojovino text-sm font-bold rounded bg-rojotrans w-fit">
-                        Inactivo
-                    </span>
-                )}
-            </div>
-        </div>
         </Link>
     );
-
 }
 
 export function CardCabana({id, nombre, descripcion, capacidad, etiqueta, imagen}: CardCabanaProps) {

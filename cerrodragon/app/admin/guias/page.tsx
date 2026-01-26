@@ -1,53 +1,88 @@
 "use client";
+
 import { useState, useEffect } from "react";
-import { CardGuideAdmin, Cuadro, SearchBarwFilters, SideBarAdmin, TopBar } from "@/app/components";
+import {
+    CardGuideAdmin,
+    Cuadro,
+    SearchBarwFilters,
+    SideBarAdmin,
+    TopBar,
+} from "@/app/components";
 import Link from "next/link";
 
+const API_URL = "http://localhost:3000";
+
+/* =====================
+   TYPES
+===================== */
+
+interface GuideAPI {
+    user_id: string;
+    full_name: string;
+    image_url: string | null;
+    guide_active: boolean;
+}
+
 interface Guide {
-    id: number;
+    id: string;
     nombre: string;
     activo: "Activo" | "Inactivo";
     imagen: string;
 }
 
+/* =====================
+   PAGE
+===================== */
+
 export default function GestionGuias() {
     const [guides, setGuides] = useState<Guide[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
     const filtros = ["todos", "Activos", "Inactivos"];
     const [filtroSeleccionado, setFiltroSeleccionado] = useState("todos");
 
-    // Mock data
-    const mockGuides: Guide[] = [
-        { id: 1, nombre: "Alex Naranjo", activo: "Activo", imagen: "/guia1.png" },
-        { id: 2, nombre: "Luis Perez", activo: "Inactivo", imagen: "/guia2.png" },
-        { id: 3, nombre: "Maria Gomez", activo: "Activo", imagen: "/guia3.png" },
-        { id: 4, nombre: "Carlos Ruiz", activo: "Activo", imagen: "/guia4.png" },
-        { id: 5, nombre: "Ana Rodriguez", activo: "Inactivo", imagen: "/guia1.png" },
-        { id: 6, nombre: "Pedro Martinez", activo: "Activo", imagen: "/guia2.png" },
-        { id: 7, nombre: "Sofia Lopez", activo: "Inactivo", imagen: "/guia3.png" }
-    ];
-
-    const handleFiltroChange = (filtro: string) => {
-        setFiltroSeleccionado(filtro);
-    };
+    /* =====================
+       FETCH GUIDES
+    ===================== */
 
     const fetchGuides = async () => {
         try {
             setLoading(true);
             setError(null);
-            
-            // TODO: Cambiear esto por una llamada real a la API
-            // const response = await fetch('/api/guides');
-            // if (!response.ok) throw new Error('Failed to fetch guides');
-            // const data = await response.json();
-            // setGuides(data);
 
-            // Usando datos simulados por ahora
-            await new Promise(resolve => setTimeout(resolve, 500)); // Simular delay de API
-            setGuides(mockGuides);
+            const token = localStorage.getItem("access_token");
+
+            const res = await fetch(`${API_URL}/users/guides`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (!res.ok) {
+                throw new Error("Error cargando guías");
+            }
+
+            const json: {
+                success: boolean;
+                data: GuideAPI[];
+            } = await res.json();
+
+            const mapped: Guide[] = json.data.map((g) => ({
+                id: g.user_id,
+                nombre: g.full_name,
+                activo: g.guide_active ? "Activo" : "Inactivo",
+                imagen: g.image_url ?? "/guia1.png",
+            }));
+
+            setGuides(mapped);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Error loading guides');
+            console.error(err);
+            setError(
+                err instanceof Error
+                    ? err.message
+                    : "Error cargando guías"
+            );
         } finally {
             setLoading(false);
         }
@@ -55,26 +90,33 @@ export default function GestionGuias() {
 
     useEffect(() => {
         fetchGuides();
-        // Esto lo pongo porque funciona medio raro esta page con el useEffect
-        // Opcional: Polling automático cada 30 segundos
-        // const interval = setInterval(fetchGuides, 30000);
-        // return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const filteredGuides = guides.filter(guide => {
+    /* =====================
+       FILTER
+    ===================== */
+
+    const filteredGuides = guides.filter((guide) => {
         if (filtroSeleccionado === "todos") return true;
-        if (filtroSeleccionado === "Activos") return guide.activo === "Activo";
-        if (filtroSeleccionado === "Inactivos") return guide.activo === "Inactivo";
+        if (filtroSeleccionado === "Activos")
+            return guide.activo === "Activo";
+        if (filtroSeleccionado === "Inactivos")
+            return guide.activo === "Inactivo";
         return true;
     });
+
+    /* =====================
+       RENDER
+    ===================== */
 
     return (
         <div className="h-screen bg-gray-50 flex overflow-hidden">
             <SideBarAdmin />
+
             <div className="flex-1 flex flex-col">
                 <TopBar />
-                <main className="flex-1 flex flex-col ml-72  pt-20 px-8 min-h-0">
+
+                <main className="flex-1 flex flex-col ml-72 pt-20 px-8 min-h-0">
                     <div className="max-w-7xl mx-auto w-full flex flex-col h-full">
                         {/* Fixed header section */}
                         <div className="flex-shrink-0 justify-between items-center flex">
@@ -107,32 +149,55 @@ export default function GestionGuias() {
                                 </Link>
                             </div>
                         </div>
+
+                        {/* Stats */}
                         <div className="justify-start items-center flex gap-12 mb-4">
-                            <Cuadro texto="Guías Activos" cantidad={guides.filter(g => g.activo === "Activo").length} />
-                            <Cuadro texto="Guías Inactivos" cantidad={guides.filter(g => g.activo === "Inactivo").length} />
+                            <Cuadro
+                                texto="Guías Activos"
+                                cantidad={
+                                    guides.filter(
+                                        (g) => g.activo === "Activo"
+                                    ).length
+                                }
+                            />
+                            <Cuadro
+                                texto="Guías Inactivos"
+                                cantidad={
+                                    guides.filter(
+                                        (g) => g.activo === "Inactivo"
+                                    ).length
+                                }
+                            />
                         </div>
-                        <SearchBarwFilters 
-                            texto="Buscar guías..." 
-                            filters={filtros} 
+
+                        {/* Filters only (sin búsqueda por texto) */}
+                        <SearchBarwFilters
+                            texto="Buscar guías..."               // ← sin búsqueda
+                            filters={filtros}
                             selectedFilter={filtroSeleccionado}
-                            onFilterChange={handleFiltroChange}
+                            onFilterChange={setFiltroSeleccionado}
                         />
-                        {/* Scrollable guides */}
+
+                        {/* Grid */}
                         <div className="flex-1 overflow-y-auto min-h-0">
                             {loading ? (
                                 <div className="flex justify-center items-center h-64">
-                                    <div className="text-verde3 text-lg">Cargando guías...</div>
+                                    <div className="text-verde3 text-lg">
+                                        Cargando guías...
+                                    </div>
                                 </div>
                             ) : error ? (
                                 <div className="flex justify-center items-center h-64">
-                                    <div className="text-red-500 text-lg">{error}</div>
+                                    <div className="text-red-500 text-lg">
+                                        {error}
+                                    </div>
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-6 p-6">
                                     {filteredGuides.map((guide) => (
                                         <CardGuideAdmin
-                                            id={guide.id}
                                             key={guide.id}
+                                            id={guide.id}
                                             nombre={guide.nombre}
                                             activo={guide.activo}
                                             imagen={guide.imagen}
