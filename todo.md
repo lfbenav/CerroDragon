@@ -34,3 +34,11 @@ luis_frontend{
     puntos de encuentro admin y cliente     Done
     testimonios admin y cliente             Done
 }
+
+- volarse cupones
+- CAMBIAR BOTON EN CABAÑAS/RESERVAS
+- hacer el insert de alex en la seed
+- revisar las incidencias que no salen en cliente view
+- meter scroll en craer admin 
+- hacer el home 100% estático excepto por el boton login
+- cargar dinámicamente los tours del home
