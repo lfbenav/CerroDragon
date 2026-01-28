@@ -1,13 +1,125 @@
 "use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
-import { HomeBar, CardTour } from "./components";
+import { HomeBar, CardTourHome } from "./components";
 import Link from "next/link";
 
+const API_URL = "http://localhost:3000";
+
+/* =========================
+   TYPES
+========================= */
+
+type TourAPI = {
+  id: number;
+  title: string;
+  description: string;
+  duration_hours: number | null;
+  duration_days: number | null;
+  max_persons: number;
+  person_price: number;
+  image_url: string | null;
+};
+
+type TourUI = {
+  id: number;
+  nombre: string;
+  descripcion: string;
+  precio: number;
+  imagen: string;
+  capacidad: number;
+  duracion: string;
+  etiqueta: string;
+};
+
+/* =========================
+   PAGE
+========================= */
 
 export default function Home() {
+  const [tours, setTours] = useState<TourUI[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  /* =========================
+     FETCH TOURS ACTIVOS
+  ========================== */
+
+  useEffect(() => {
+    const fetchTours = async () => {
+      try {
+        setLoading(true);
+
+        const res = await fetch(`${API_URL}/tours/allActive`);
+        if (!res.ok) throw new Error("Error cargando tours");
+
+        const json = await res.json();
+
+        const toursWithTags: TourUI[] = await Promise.all(
+          (json.data as TourAPI[]).map(async (tour) => {
+            // Etiqueta por defecto
+            let etiqueta = "Todos";
+
+            try {
+              const tagsRes = await fetch(
+                `${API_URL}/tours/${tour.id}/tags`
+              );
+              if (tagsRes.ok) {
+                const tagsJson = await tagsRes.json();
+                if (tagsJson.data && tagsJson.data.length > 0) {
+                  etiqueta = tagsJson.data[0].name;
+                }
+              }
+            } catch {
+              // mantener "Todos"
+            }
+
+            // Duración
+            const duracion = tour.duration_days
+              ? `${tour.duration_days} día(s)`
+              : `${tour.duration_hours} horas`;
+
+            // Imagen
+            let imgUrl = "/tour1.png";
+            if (tour.image_url) {
+              if (tour.image_url.startsWith("http")) {
+                imgUrl = tour.image_url;
+              } else if (tour.image_url.startsWith("/")) {
+                imgUrl = `${API_URL}${tour.image_url}`;
+              } else {
+                imgUrl = tour.image_url;
+              }
+            }
+
+            return {
+              id: tour.id,
+              nombre: tour.title,
+              descripcion: tour.description,
+              precio: tour.person_price,
+              imagen: imgUrl,
+              capacidad: tour.max_persons,
+              duracion,
+              etiqueta,
+            };
+          })
+        );
+
+        setTours(toursWithTags);
+      } catch (err) {
+        console.error("Error cargando tours:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTours();
+  }, []);
+
   return (
     <div className="">
       <HomeBar />
+
+      {/* HERO */}
       <div className="relative h-screen w-full">
         <Image
           src="/imagen.png"
@@ -17,126 +129,102 @@ export default function Home() {
           priority
         />
 
-        {/*Encima de la imagen */}
         <div className="absolute inset-0 flex flex-col justify-center items-center text-white z-10">
           <h1 className="text-6xl font-bold font-serif text-center mb-8 max-w-5xl">
-            Descubre la Magia de <span className="text-amarillo">Cerro Dragón</span>
+            Descubre la Magia de{" "}
+            <span className="text-amarillo">Cerro Dragón</span>
           </h1>
-          <p className="text-xl text-white font-thin font-serif mb-8 text-center max-w-2xl ">
-            Vive la experiencia. Tours guiados, cabañas acogedoras y paisajes imponentes
+          <p className="text-xl text-white font-thin font-serif mb-8 text-center max-w-2xl">
+            Vive la experiencia. Tours guiados, cabañas acogedoras y paisajes
+            imponentes
           </p>
           <div className="flex gap-4">
-            <Link href="/cliente/tours">
-              <button className="inline-flex items-center bg-amarillo text-black hover:bg-yellow-700 px-8 py-3 rounded-lg font-semibold transition-colors"            >
+            <Link href="/login">
+              <button className="inline-flex items-center bg-amarillo text-black hover:bg-yellow-700 px-8 py-3 rounded-lg font-semibold transition-colors">
                 Ver Tours
                 <svg
                   className="w-4 h-4 ml-2"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
                   viewBox="0 0 24 24"
+                  fill="none"
                   strokeWidth={2}
                   stroke="currentColor"
-                      >
+                >
                   <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
                   />
                 </svg>
               </button>
             </Link>
-            <Link href="/cliente/cabanas">
+
+            <Link href="/login">
               <button className="border-2 border-white hover:bg-white hover:text-black px-8 py-3 rounded-lg font-semibold transition-colors">
                 Ver Cabañas
               </button>
             </Link>
           </div>
         </div>
-        
-        {/*Scroll icono */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10">
-          <svg
-            className="w-6 h-6 text-white animate-bounce cursor-pointer"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M19 14l-7 7m0 0l-7-7m7 7V3"
-            />
-          </svg>
-        </div>
-        
+
         <div className="absolute inset-0 bg-black opacity-30"></div>
       </div>
 
-      {/* Lo blanco */}
+      {/* TOURS */}
       <div className="min-h-screen bg-white p-8 mt-32">
         <div className="max-w-7xl mx-auto text-center mb-12">
-          <span className=" bg-verdeinvisible text-verde2 text-sm font-bold font-sans px-4 py-1 rounded-full">
+          <span className="bg-verdeinvisible text-verde2 text-sm font-bold font-sans px-4 py-1 rounded-full">
             Nuevos Tours
           </span>
-          <h2 className="text-3xl font-semibold text-gray-800 mb-6 mt-4 text-center font-serif">
+
+          <h2 className="text-3xl font-semibold text-gray-800 mb-6 mt-4 font-serif">
             Experiencias inolvidables
           </h2>
-          <p className="text-verde3 text-center font-normal font-sans text-md">
-            Descubre la belleza local en Cerro Dragón con nuestros guías expertos. ¡Reserva con nosotros!  
+
+          <p className="text-verde3 font-sans text-md">
+            Descubre la belleza local en Cerro Dragón con nuestros guías expertos.
+            ¡Reserva con nosotros!
           </p>
+
           <div className="mt-6 flex justify-center gap-8 overflow-x-auto pb-4 pt-4">
-            <CardTour 
-            id={1}
-            nombre="Tour al Amanecer" 
-            descripcion="Disfruta de un espectacular amanecer en Cerro Dragón con nuestro tour guiado." 
-            precio={85} 
-            imagen="/tour1.png" 
-            capacidad={10} 
-            duracion="3 horas" 
-            etiqueta="Todos" 
-            />
-            <CardTour 
-            id={2}
-            nombre="Aventura Nocturna" 
-            descripcion="Explora los senderos misteriosos del Cerro bajo la luz de las estrellas." 
-            precio={120} 
-            imagen="/tour2.png" 
-            capacidad={8} 
-            duracion="5 horas" 
-            etiqueta="Moderado" 
-            />
-            <CardTour 
-            id={3}
-            nombre="Expedición Extrema" 
-            descripcion="Desafía tus límites con esta expedición completa a las cumbres más altas." 
-            precio={250} 
-            imagen="/tour3.png" 
-            capacidad={6} 
-            duracion="1 día" 
-            etiqueta="Experto" 
-            />
+            {loading ? (
+              <p className="text-verde3">Cargando tours...</p>
+            ) : tours.length === 0 ? (
+              <p className="text-verde3">No hay tours disponibles</p>
+            ) : (
+              tours.slice(0, 3).map((tour) => (
+                <CardTourHome
+                  key={tour.id}
+                  id={tour.id}
+                  nombre={tour.nombre}
+                  descripcion={tour.descripcion}
+                  precio={tour.precio}
+                  imagen={tour.imagen}
+                  capacidad={tour.capacidad}
+                  duracion={tour.duracion}
+                  etiqueta={tour.etiqueta}
+                />
+              ))
+            )}
           </div>
-          <button className="inline-flex items-center mt-6 bg-verde3 text-white px-6 py-3 rounded-lg font-normal hover:bg-verde1 transition-colors">
-            Ver Todos los Tours
-            <svg
-              className="w-4 h-4 ml-2"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2}
-              stroke="currentColor"
-                  >
-              <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
-              />
-            </svg>
-          </button>
+
+          <Link href="/login">
+            <button className="inline-flex items-center mt-6 bg-verde3 text-white px-6 py-3 rounded-lg font-normal hover:bg-verde1 transition-colors">
+              Ver Todos los Tours
+              <svg
+                className="w-4 h-4 ml-2"
+                viewBox="0 0 24 24"
+                fill="none"
+                strokeWidth={2}
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                />
+              </svg>
+            </button>
+          </Link>
         </div>
       </div>
 
@@ -150,13 +238,10 @@ export default function Home() {
             </p>
           </div>
           <div className="w-full md:w-1/4 mb-4">
-            <h3 className="text-lg font-semibold w-full mb-4">Legal</h3>
-            <Link href="#" className="block mb-2 text-sm hover:underline">Políticas</Link>
-            <Link href="#" className="block mb-2 text-sm hover:underline">Términos y Condiciones</Link>
           </div>
           <div className="w-full md:w-1/4 mb-4">
             <h3 className="text-lg font-semibold w-full mb-4">Contactenos</h3>
-            <Link href="#" className="flex items-center mb-2 text-sm hover:underline">
+            <Link href="http://wa.me/50684603211" className="flex items-center mb-2 text-sm hover:underline">
               <svg 
                 className="w-4 h-4 mr-2" 
                 fill="currentColor" 
@@ -167,7 +252,7 @@ export default function Home() {
               </svg>
               WhatsApp
             </Link>
-            <Link href="#" className="flex items-center mb-2 text-sm hover:underline">
+            <Link href="https://www.facebook.com/cerrodragontours" className="flex items-center mb-2 text-sm hover:underline">
               <svg 
                 className="w-4 h-4 mr-2" 
                 fill="currentColor" 
@@ -177,7 +262,7 @@ export default function Home() {
               </svg>
               Facebook
             </Link>
-            <Link href="#" className="flex items-center mb-2 text-sm hover:underline">
+            <Link href="https://www.instagram.com/cerrodragontours/" className="flex items-center mb-2 text-sm hover:underline">
               <svg 
                 className="w-4 h-4 mr-2" 
                 fill="currentColor" 

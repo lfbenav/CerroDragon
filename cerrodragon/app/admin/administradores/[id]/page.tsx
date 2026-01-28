@@ -187,13 +187,13 @@ export default function VerInternoPage() {
             Volver
           </button>
 
-          <button
+          {/* <button
             onClick={requestDelete}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-red-500 text-white text-sm font-medium hover:opacity-95"
           >
             <TrashIcon />
             Eliminar
-          </button>
+          </button> */}
         </div>
       }
     >

@@ -44,7 +44,7 @@ export default function Clima() {
       try {
         setLoading(true);
 
-        const res = await fetch(`${API_URL}/others/weather/active`);
+        const res = await fetch(`${API_URL}/others/weather`);
         if (!res.ok) throw new Error("Error cargando alertas");
 
         const json = await res.json();

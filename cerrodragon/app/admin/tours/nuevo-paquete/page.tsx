@@ -101,7 +101,7 @@ export default function NuevoPaquete() {
                                         htmlFor="precio"
                                         className="block mb-2.5 text-md font-medium text-black"
                                     >
-                                        Precio: $
+                                        Precio: ₡
                                     </label>
                                     <input
                                         type="number"

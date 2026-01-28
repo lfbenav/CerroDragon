@@ -151,8 +151,8 @@ exports.reserve = asyncHandler(async (req, res) => {
 
     const { rows } = await pool.query(`
         INSERT INTO accommodation_reservations
-        (accommodation_id, customer_id, start_date, end_date, persons)
-        VALUES ($1, $2, $3, $4, $5)
+        (accommodation_id, customer_id, start_date, end_date, persons, status)
+        VALUES ($1, $2, $3, $4, $5, 'PENDING')
         RETURNING *
     `, [id, customerRows[0].id, start_date, end_date, persons]);
 

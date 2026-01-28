@@ -35,10 +35,16 @@ luis_frontend{
     testimonios admin y cliente             Done
 }
 
-- volarse cupones
-- CAMBIAR BOTON EN CABAÑAS/RESERVAS
-- hacer el insert de alex en la seed
-- revisar las incidencias que no salen en cliente view
-- meter scroll en craer admin 
-- hacer el home 100% estático excepto por el boton login
-- cargar dinámicamente los tours del home
+- volarse cupones                                           Revisar en cliente
+- CAMBIAR BOTON EN CABAÑAS/RESERVAS                         Done
+- hacer el insert de alex en la seed                        Done
+- revisar las incidencias que no salen en cliente view      Done
+- meter scroll en craer admin                               Pongamos el navegador en 90% y nos fuimos        
+- hacer el home 100% estático excepto por el boton login    Done
+- cargar dinámicamente los tours del home                   Done
+
+Permisos:
+  (gen_random_uuid(), 'MANAGE_TOURS', 'Gestionar tours y cabañas'),
+  (gen_random_uuid(), 'MANAGE_RESERVATIONS', 'Gestionar reservas'),
+  (gen_random_uuid(), 'MANAGE_ADMINS', 'Gestionar administradores'),
+  (gen_random_uuid(), 'MANAGE_INVENTORY', 'Inventario');

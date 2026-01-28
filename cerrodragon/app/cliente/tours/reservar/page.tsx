@@ -273,7 +273,7 @@ export default function ReservarTourPage() {
                                                 <option value="">Sin paquete (precio base)</option>
                                                 {paquetes.map((pkg) => (
                                                     <option key={pkg.id} value={pkg.id}>
-                                                        {pkg.name} - ${pkg.price_usd}
+                                                        {pkg.name} - ₡{pkg.price_usd}
                                                     </option>
                                                 ))}
                                             </select>

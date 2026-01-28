@@ -11,80 +11,20 @@ INSERT INTO roles (id, name, description) VALUES
 -- PERMISSIONS
 -- =========================
 INSERT INTO permissions (id, code, description) VALUES
-  (gen_random_uuid(), 'VIEW_TOURS', 'Ver tours'),
+  (gen_random_uuid(), 'MANAGE_TOURS', 'Gestionar tours y cabañas'),
   (gen_random_uuid(), 'MANAGE_RESERVATIONS', 'Gestionar reservas'),
-  (gen_random_uuid(), 'CHAT_ACCESS', 'Acceso a mensajería'),
+  (gen_random_uuid(), 'MANAGE_ADMINS', 'Gestionar administradores'),
   (gen_random_uuid(), 'MANAGE_INVENTORY', 'Inventario');
-
--- =========================
--- ROLE PERMISSIONS
--- =========================
-
--- client: ver tours + chat
-INSERT INTO role_permissions (role_id, permission_id)
-SELECT r.id, p.id
-FROM roles r
-JOIN permissions p ON p.code IN ('VIEW_TOURS', 'CHAT_ACCESS')
-WHERE r.name = 'client';
-
--- guide: reservas + chat
-INSERT INTO role_permissions (role_id, permission_id)
-SELECT r.id, p.id
-FROM roles r
-JOIN permissions p ON p.code IN ('MANAGE_RESERVATIONS', 'CHAT_ACCESS')
-WHERE r.name = 'guide';
-
--- =========================
--- TOURS
--- =========================
-INSERT INTO tours (
-  id,
-  title,
-  description,
-  duration_hours,
-  duration_days,
-  max_persons,
-  person_price,
-  image_url,
-  base_location,
-  is_active
-) VALUES
-(
-  gen_random_uuid(),
-  'Tour Catarata',
-  'Caminata guiada a una catarata natural',
-  4,
-  1,
-  10,
-  25000,
-  'http://localhost:3000/images/miau/1769134462806-484245176.png',
-  'La Fortuna',
-  true
-),
-(
-  gen_random_uuid(),
-  'Tour Mirador',
-  'Vista panorámica al amanecer desde el mirador',
-  3,
-  1,
-  8,
-  18000,
-  'http://localhost:3000/images/miau/1769134462806-484245176.png',
-  'Monteverde',
-  true
-);
 
 -- =========================
 -- TAGS
 -- =========================
-INSERT INTO tags (id, name) VALUES
-  (gen_random_uuid(), 'Naturaleza'),
-  (gen_random_uuid(), 'Aventura');
-
-INSERT INTO tour_tags (tour_id, tag_id)
-SELECT t.id, tg.id
-FROM tours t
-CROSS JOIN tags tg;
+INSERT INTO tags (name) VALUES 
+('Experto'),
+('Moderado'),
+('Fácil'),
+('Todos')
+ON CONFLICT DO NOTHING;
 
 -- =========================
 -- TOUR PACKAGES
@@ -106,38 +46,6 @@ SELECT tp.id, 'Seguro INS'
 FROM tour_packages tp
 WHERE tp.name = 'Premium';
 
--- =========================
--- MEETING POINTS
--- =========================
-INSERT INTO meeting_points (
-  id,
-  name,
-  description,
-  link,
-  image_url,
-  is_active
-) VALUES
-(
-  gen_random_uuid(),
-  'Entrada Principal',
-  'Entrada principal al parque',
-  'https://maps.google.com',
-  'http://localhost:3000/images/miau/1769134462806-484245176.png',
-  true
-),
-(
-  gen_random_uuid(),
-  'Hotel',
-  'Recogida en hotel cercano',
-  'https://maps.google.com',
-  'http://localhost:3000/images/miau/1769134462806-484245176.png',
-  true
-);
-
-INSERT INTO tour_meeting_points (tour_id, meeting_point_id)
-SELECT t.id, mp.id
-FROM tours t
-JOIN meeting_points mp ON mp.name = 'Entrada Principal';
 
 -- =========================
 -- INVENTORY
@@ -145,7 +53,7 @@ JOIN meeting_points mp ON mp.name = 'Entrada Principal';
 INSERT INTO inventory_items (name, unit, quantity)
 VALUES
   ('Agua', 'botellas', 120),
-  ('Snacks', 'paquetes', 50),
+  ('Tortillas', 'paquetes', 50),
   ('Botiquín', 'unidades', 3);
 
 -- =========================

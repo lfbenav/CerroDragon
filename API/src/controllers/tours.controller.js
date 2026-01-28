@@ -72,8 +72,12 @@ exports.getById = asyncHandler(async (req, res) => {
 exports.create = asyncHandler(async (req, res) => {
     const { title, description, duration_hours, duration_days, max_persons, person_price, image_url, base_location } = req.body;
 
-    if (!title || !duration_hours || !duration_days || !max_persons || !person_price) {
-        throw new AppError("title, duration_hours, duration_days, max_persons y person_price son requeridos", 400, "MISSING_FIELDS");
+    if (!title || duration_hours == null || duration_days == null || max_persons == null || person_price == null) {
+        throw new AppError(
+            "title, duration_hours, duration_days, max_persons y person_price son requeridos",
+            400,
+            "MISSING_FIELDS"
+        );
     }
 
     const { rows } = await pool.query(`

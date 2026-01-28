@@ -87,13 +87,18 @@ export default function CrearInternoPage() {
     setConfirmOpen(false);
     setIsCreating(true);
 
+    const token = localStorage.getItem("access_token");
+
     try {
       /* =========================
-         CREATE ADMIN
+        CREATE ADMIN
       ========================== */
       const res = await fetch(`${API_URL}/auth/register/admin`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           email: correo,
           password: contrasena,
@@ -102,18 +107,32 @@ export default function CrearInternoPage() {
         }),
       });
 
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || "Error creando administrador");
+      }
+
       const json = await res.json();
       const userId = json.user.id;
 
       /* =========================
-         GET ROLE ID
+        GET ROLE ID
       ========================== */
-      const roleRes = await fetch(`${API_URL}/users/${userId}/role`);
+      const roleRes = await fetch(`${API_URL}/users/${userId}/role`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!roleRes.ok) {
+        throw new Error("Error obteniendo rol");
+      }
+
       const roleJson = await roleRes.json();
       const roleId = roleJson.role_id;
 
       /* =========================
-         REMOVE UNCHECKED PERMS
+        REMOVE UNCHECKED PERMS
       ========================== */
       const toRemove = permissions.filter(
         (p) => !permisos[p.code]
@@ -123,7 +142,10 @@ export default function CrearInternoPage() {
         toRemove.map((p) =>
           fetch(`${API_URL}/users/permissions/remove`, {
             method: "DELETE",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
             body: JSON.stringify({
               role_id: roleId,
               permission_id: p.id,
@@ -133,10 +155,15 @@ export default function CrearInternoPage() {
       );
 
       router.push("/admin/administradores");
+    } catch (e) {
+      console.error(e);
+      const message = "No tiene permisos para esta acción";
+      alert(message);
     } finally {
       setIsCreating(false);
     }
   };
+
 
   return (
     <AdminPageShell

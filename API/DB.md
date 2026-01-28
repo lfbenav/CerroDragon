@@ -575,4 +575,125 @@ CREATE TABLE faqs (
 );
 
 
+-- =========================================================0 
+
+CREATE OR REPLACE FUNCTION audit_log_trigger()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_entity text := TG_TABLE_NAME;
+  v_action text := TG_OP;
+  v_message text;
+  v_entity_id uuid;
+BEGIN
+  -- Determinar ID según operación
+  IF (TG_OP = 'DELETE') THEN
+    v_entity_id := OLD.id;
+  ELSE
+    v_entity_id := NEW.id;
+  END IF;
+
+  -- Mensajes personalizados por tabla
+  CASE v_entity
+    WHEN 'tours' THEN
+      v_message := CASE v_action
+        WHEN 'INSERT' THEN 'Tour creado'
+        WHEN 'UPDATE' THEN 'Tour actualizado'
+        WHEN 'DELETE' THEN 'Tour eliminado'
+      END;
+
+    WHEN 'users' THEN
+      v_message := CASE v_action
+        WHEN 'INSERT' THEN 'Usuario creado'
+        WHEN 'UPDATE' THEN 'Usuario actualizado'
+        WHEN 'DELETE' THEN 'Usuario eliminado'
+      END;
+
+    WHEN 'customers' THEN
+      v_message := CASE v_action
+        WHEN 'INSERT' THEN 'Cliente creado'
+        WHEN 'UPDATE' THEN 'Cliente actualizado'
+        WHEN 'DELETE' THEN 'Cliente eliminado'
+      END;
+
+    WHEN 'admins' THEN
+      v_message := CASE v_action
+        WHEN 'INSERT' THEN 'Administrador creado'
+        WHEN 'UPDATE' THEN 'Administrador actualizado'
+        WHEN 'DELETE' THEN 'Administrador eliminado'
+      END;
+
+    WHEN 'reservations' THEN
+      v_message := CASE v_action
+        WHEN 'INSERT' THEN 'Reserva creada'
+        WHEN 'UPDATE' THEN 'Reserva actualizada'
+        WHEN 'DELETE' THEN 'Reserva eliminada'
+      END;
+
+    WHEN 'accommodations' THEN
+      v_message := CASE v_action
+        WHEN 'INSERT' THEN 'Alojamiento creado'
+        WHEN 'UPDATE' THEN 'Alojamiento actualizado'
+        WHEN 'DELETE' THEN 'Alojamiento eliminado'
+      END;
+
+    ELSE
+      v_message := 'Registro modificado';
+  END CASE;
+
+  -- Insertar log
+  INSERT INTO admin_logs (
+    actor_user_id,
+    action,
+    entity_type,
+    entity_id,
+    details
+  )
+  VALUES (
+    NULL,              -- usuario (null por ahora)
+    v_action,
+    v_entity,
+    v_entity_id,
+    v_message
+  );
+
+  IF (TG_OP = 'DELETE') THEN
+    RETURN OLD;
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER trg_audit_tours
+AFTER INSERT OR UPDATE OR DELETE ON tours
+FOR EACH ROW
+EXECUTE FUNCTION audit_log_trigger();
+
+CREATE TRIGGER trg_audit_customers
+AFTER INSERT OR UPDATE OR DELETE ON customers
+FOR EACH ROW
+EXECUTE FUNCTION audit_log_trigger();
+
+CREATE TRIGGER trg_audit_admins
+AFTER INSERT OR UPDATE OR DELETE ON admins
+FOR EACH ROW
+EXECUTE FUNCTION audit_log_trigger();
+
+CREATE TRIGGER trg_audit_reservations
+AFTER INSERT OR UPDATE OR DELETE ON reservations
+FOR EACH ROW
+EXECUTE FUNCTION audit_log_trigger();
+
+CREATE TRIGGER trg_audit_accommodations
+AFTER INSERT OR UPDATE OR DELETE ON accommodations
+FOR EACH ROW
+EXECUTE FUNCTION audit_log_trigger();
+
+
+
+
+
+
+
 -- Fin

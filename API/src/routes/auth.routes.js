@@ -1,11 +1,14 @@
 const router = require("express").Router();
 const controller = require("../controllers/auth.controller");
 
+const auth = require("../middlewares/auth.middleware");
+const { requirePermission } = require("../middlewares/permission.middleware");
+
 router.get("/test", controller.test);
 
 // Registro
 router.post("/register/client", controller.registerClient);
-router.post("/register/admin", controller.registerAdmin);
+router.post("/register/admin", auth, requirePermission("MANAGE_ADMINS"), controller.registerAdmin);
 router.post("/register/guide", controller.registerGuide);
 
 // Auth

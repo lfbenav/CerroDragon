@@ -98,7 +98,7 @@ export default function Cabannas() {
               </div>
 
               <div className="flex justify-end mb-4">
-                <Link href="/admin/reservas">
+                <Link href="/admin/alojamientos">
                   <button className="bg-verde3 text-white px-4 py-2 mr-4 rounded-lg hover:bg-verde2 transition flex items-center">
                     <svg
                       className="w-4 h-4 ml-2 mr-2"

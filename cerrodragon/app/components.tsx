@@ -523,7 +523,7 @@ export function SideBarAdmin() {
                 <span className="flex-1 whitespace-nowrap">Promociones</span>
                 </a>
             </li>
-            <li>
+            {/* <li>
                 <a
                 href="/admin/cupones"
                 className="flex items-center px-2 py-1.5 text-white rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group"
@@ -531,7 +531,7 @@ export function SideBarAdmin() {
                 <div className="w-5 h-5 mr-3"></div>
                 <span className="flex-1 whitespace-nowrap">Cupones</span>
                 </a>
-            </li>
+            </li> */}
             <li>
                 <a
                 href="/admin/politicas"
@@ -669,7 +669,7 @@ export function CardTour({id, nombre, descripcion, precio, capacidad, duracion, 
     <div className="bg-beige1 block w-[350px] h-92 border border-default border-borde1 rounded-xl cardTour relative flex flex-col">
         <a href={`/cliente/tours/info?id=${id}`} className="block overflow-hidden relative">
             <div className="absolute top-4 left-4 bg-amarillo text-black text-sm font-semibold px-3 py-1 rounded-md z-20">
-                ${precio}
+                ₡{precio}
             </div>
             <div className="h-36 overflow-hidden">
                 <img
@@ -776,13 +776,103 @@ export function CardTour({id, nombre, descripcion, precio, capacidad, duracion, 
     );
 }
 
+
+export function CardTourHome({id, nombre, descripcion, precio, capacidad, duracion, etiqueta, imagen}: CardTourProps) {
+    return (
+    <div className="bg-beige1 block w-[350px] h-92 border border-default border-borde1 rounded-xl cardTour relative flex flex-col">
+        <a className="block overflow-hidden relative">
+            <div className="absolute top-4 left-4 bg-amarillo text-black text-sm font-semibold px-3 py-1 rounded-md z-20">
+                ₡{precio}
+            </div>
+            <div className="h-36 overflow-hidden">
+                <img
+                    src={imagen || "/tour1.png"}
+                    alt={nombre}
+                    className="rounded-t-xl w-full h-full object-cover"
+                />
+            </div>
+        </a>
+        <div className="text-left py-2 px-6 flex-1 flex flex-col">
+            <h5 className="mt-3 mb-2 text-xl font-light tracking-tight text-heading text-black min-h-[2.5rem]">
+                {nombre}
+            </h5>
+            <p className="mb-2 text-sm text-body text-verde3 flex-1 min-h-[3rem]">
+                {descripcion}
+            </p>
+            <div className="flex justify-between items-center mb-2">
+                <div className="flex items-center">
+                    <svg 
+                        className="w-4 h-4 mr-1 text-verde3" 
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width={24}
+                        height={24}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                    >
+                        <path 
+                            stroke="currentColor" 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round" 
+                            strokeWidth={2} 
+                            d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" 
+                        />
+                    </svg>
+                    <span className="text-verde3 text-sm">{duracion}</span>
+                </div>
+                <div className="flex items-center">
+                    <svg 
+                        className="w-4 h-4 mr-1 text-verde3" 
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width={24}
+                        height={24}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                    >
+                        <path 
+                            stroke="currentColor" 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round" 
+                            strokeWidth={2} 
+                            d="M16 19h4a1 1 0 0 0 1-1v-1a3 3 0 0 0-3-3h-2m-2.236-4a3 3 0 1 0 0-4M3 18v-1a3 3 0 0 1 3-3h4a3 3 0 0 1 3 3v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Zm8-10a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" 
+                        />
+                    </svg>
+                    <span className="text-verde3 text-sm">{capacidad} personas </span>
+                </div>
+            </div>
+            <hr className="mt-4 mb-1 border-borde1" />
+            <div className="flex justify-between items-center">
+                {etiqueta === 'Moderado' ? (
+                    <span className="inline-flex items-center px-6 py-0.5 text-amarillo text-sm font-bold rounded bg-amarillotrans">
+                        Moderado
+                    </span>
+                ) : etiqueta === 'Experto' ? (
+                    <span className="inline-flex items-center px-6 py-0.5 text-rojovino text-sm font-bold rounded bg-rojotrans">
+                        Experto
+                    </span>
+                ) : etiqueta === 'Fácil' ? (
+                    <span className="inline-flex items-center px-6 py-0.5 text-verde3 text-sm font-bold rounded bg-verdetrans">
+                        Fácil
+                    </span>
+                ) : (
+                    <span className="inline-flex items-center px-6 py-0.5 text-azul1 text-sm font-bold rounded bg-azultrans">
+                        Todos
+                    </span>
+                )}
+            </div>
+        </div>
+    </div>
+    );
+}
+
 export function CardTourAdmin({id, nombre, descripcion, precio, capacidad, duracion, etiqueta, imagen}: CardTourProps) {
     return (
     <div className="bg-beige1 block w-[350px] h-92 border border-default border-borde1 rounded-xl cardTour relative flex flex-col">
         <a href={`/admin/tours/info?id=${id}`} className="block overflow-hidden relative">
             {precio && precio > 0 && (
                 <div className="absolute top-4 left-4 bg-amarillo text-black text-sm font-semibold px-3 py-1 rounded-md z-20">
-                    ${precio}
+                    ₡{precio}
                 </div>
             )}
             <div className="h-36 overflow-hidden">
@@ -1149,8 +1239,8 @@ export function CardPromocion({id, nombre, descripcion, precioAhora, precioAntes
                 PROMOCIÓN -{descuento}%
             </div>
             <div className="absolute top-4 right-4 bg-amarillo text-black text-sm font-semibold px-3 py-1 rounded-md z-20">
-                Ahora ${precioAhora} 
-                <span className='text-xs font-normal'> <br />Antes: <span className="line-through">${precioAntes}</span> </span>
+                Ahora ₡{precioAhora} 
+                <span className='text-xs font-normal'> <br />Antes: <span className="line-through">₡{precioAntes}</span> </span>
             </div>
             <div className="h-48 overflow-hidden">
                 <img
@@ -1265,8 +1355,8 @@ export function CardPromocionAdmin({id, nombre, descripcion, precioAhora, precio
                 PROMOCIÓN -{descuento}%
             </div>
             <div className="absolute top-4 right-4 bg-amarillo text-black text-sm font-semibold px-3 py-1 rounded-md z-20">
-                Ahora ${precioAhora} 
-                <span className='text-xs font-normal'> <br />Antes: <span className="line-through">${precioAntes}</span> </span>
+                Ahora ₡{precioAhora} 
+                <span className='text-xs font-normal'> <br />Antes: <span className="line-through">₡{precioAntes}</span> </span>
             </div>
             <div className="h-48 overflow-hidden">
                 <img
@@ -1654,7 +1744,7 @@ export function CardPaquete({nombre, descripcion, precio}: CardPaqueteProps) {
     return (
         <div className="bg-beige1 w-50 h-auto border border-borde1 rounded-xl p-3 flex flex-col shadow-md justify-center items-center text-center relative min-h-[180px]">
             <div className="absolute top-3 left-3 bg-amarillo text-black text-sm font-semibold px-2 py-1 rounded-md z-20">
-                ${precio}
+                ₡{precio}
             </div>
             <div className="flex justify-center mb-3 mt-2">
             <Image 
@@ -1676,7 +1766,7 @@ export function CardPaquetePromo({nombre, descripcion, precioAntes, precioAhora}
     return (
         <div className="bg-beige1 w-50 h-auto border border-borde1 rounded-xl p-3 flex flex-col shadow-md justify-center items-center text-center relative min-h-[180px]">
             <div className="absolute top-3 left-3 bg-amarillo text-black text-sm font-semibold px-2 py-1 rounded-md z-20">
-                ${precioAhora} <span className='text-xs font-normal'> <br />Antes: <span className="line-through">${precioAntes}</span> </span>
+                ₡{precioAhora} <span className='text-xs font-normal'> <br />Antes: <span className="line-through">₡{precioAntes}</span> </span>
             </div>
             <div className="flex justify-center mb-3 mt-2">
                 <Image 
@@ -2686,7 +2776,7 @@ export function HomeBar() {
     <nav className="bg-menta fg-menta fixed w-full z-20 top-0 start-0 border-b border-default">
         <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4 bg-menta">
             <a
-            href="https://flowbite.com/"
+            href="#"
             className="flex items-center space-x-3 rtl:space-x-reverse"
             >
             <Image
@@ -2730,7 +2820,7 @@ export function HomeBar() {
             id="navbar-sticky"
             >
             <ul className="flex flex-col p-4 md:p-0 mt-4 font-medium border border-default rounded-base bg-neutral-secondary-soft md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 md:bg-neutral-primary">
-                <li>
+                {/* <li>
                 <Link
                     href="/"
                     className="block py-2 px-3 text-verde2 bg-brand rounded-sm text-bold md:p-0"
@@ -2778,7 +2868,7 @@ export function HomeBar() {
                 >
                     Contacto
                 </a>
-                </li>
+                </li> */}
             </ul>
             </div>
         </div>

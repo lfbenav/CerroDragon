@@ -267,7 +267,7 @@ export default function NuevaPromocionPage() {
                                         <div className="text-sm text-black">
                                             <span className="font-medium">Precio Actual:</span>{" "}
                                             <span className="ml-2">
-                                                $ {hasSelection ? currentPrice : 0}
+                                                ₡ {hasSelection ? currentPrice : 0}
                                             </span>
                                         </div>
 
@@ -340,7 +340,7 @@ export default function NuevaPromocionPage() {
                                 hasSelection
                                     ? `¿Desea crear esta promoción?\n\nItem: ${
                                             selectedTour?.nombre ?? selectedPaquete?.nombre
-                                        }\nPrecio actual: $ ${currentPrice}\nPrecio promo: $ ${promoNum}\nDescuento: % ${discountPct}`
+                                        }\nPrecio actual: ₡ ${currentPrice}\nPrecio promo: ₡ ${promoNum}\nDescuento: % ${discountPct}`
                                     : "¿Desea crear esta promoción?"
                             }
                             confirmText="Crear"
