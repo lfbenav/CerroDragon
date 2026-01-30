@@ -197,7 +197,7 @@ export default function InfoPromocion() {
     }
     
     return (
-        <div className="h-screen bg-gray-50 flex overflow-hidden">
+        <div className="h-screen bg-gray-50 flex overflow-auto">
             <SideBarAdmin />
             <div className="flex-1 flex flex-col">
                 <TopBar />
